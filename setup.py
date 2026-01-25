@@ -5,10 +5,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="fishertools",
-    version="0.1.0",
+    version="0.2.0",
     author="f1sherFM",
     author_email="kirillka229top@gmail.com",
-    description="FisherTools - библиотека для быстрой и удобной разработки на Python",
+    description="Fishertools - инструменты, которые делают Python удобнее и безопаснее для новичков",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/f1sherFM/My_1st_library_python",

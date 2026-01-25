@@ -23,15 +23,17 @@ class ErrorPattern:
     
     def __post_init__(self):
         """Validate the pattern after initialization."""
+        from .exceptions import PatternError
+        
         # Allow empty keywords for patterns that match any exception of a type (like KeyError)
         if not self.error_keywords and not (len(self.error_keywords) == 1 and self.error_keywords[0] == ""):
-            raise ValueError("error_keywords cannot be empty unless it contains a single empty string")
+            raise PatternError("error_keywords cannot be empty unless it contains a single empty string")
         if not self.explanation.strip():
-            raise ValueError("explanation cannot be empty")
+            raise PatternError("explanation cannot be empty")
         if not self.tip.strip():
-            raise ValueError("tip cannot be empty")
+            raise PatternError("tip cannot be empty")
         if not self.example.strip():
-            raise ValueError("example cannot be empty")
+            raise PatternError("example cannot be empty")
     
     def matches(self, exception: Exception) -> bool:
         """
@@ -76,10 +78,15 @@ class ErrorPattern:
         Returns:
             ErrorPattern instance
         """
-        # Convert string back to type
-        error_type_name = data.pop('error_type')
-        error_type = getattr(__builtins__, error_type_name, Exception)
-        return cls(error_type=error_type, **data)
+        from .exceptions import PatternError
+        
+        try:
+            # Convert string back to type
+            error_type_name = data.pop('error_type')
+            error_type = getattr(__builtins__, error_type_name, Exception)
+            return cls(error_type=error_type, **data)
+        except Exception as e:
+            raise PatternError(f"Не удалось создать ErrorPattern из словаря: {e}", original_error=e)
 
 
 @dataclass
@@ -98,15 +105,17 @@ class ErrorExplanation:
     
     def __post_init__(self):
         """Validate the explanation after initialization."""
+        from .exceptions import ExplanationError
+        
         # Allow empty or whitespace-only original_error since exceptions can have empty messages
         if self.original_error is None:
-            raise ValueError("original_error cannot be None")
+            raise ExplanationError("original_error cannot be None")
         if not self.simple_explanation.strip():
-            raise ValueError("simple_explanation cannot be empty")
+            raise ExplanationError("simple_explanation cannot be empty")
         if not self.fix_tip.strip():
-            raise ValueError("fix_tip cannot be empty")
+            raise ExplanationError("fix_tip cannot be empty")
         if not self.code_example.strip():
-            raise ValueError("code_example cannot be empty")
+            raise ExplanationError("code_example cannot be empty")
     
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -124,7 +133,12 @@ class ErrorExplanation:
         Returns:
             JSON representation of the explanation
         """
-        return json.dumps(self.to_dict(), ensure_ascii=False, indent=2)
+        try:
+            return json.dumps(self.to_dict(), ensure_ascii=False, indent=2)
+        except Exception as e:
+            from .exceptions import FormattingError
+            raise FormattingError(f"Не удалось преобразовать объяснение в JSON: {e}", 
+                                formatter_type="json", original_error=e)
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ErrorExplanation':
@@ -137,7 +151,11 @@ class ErrorExplanation:
         Returns:
             ErrorExplanation instance
         """
-        return cls(**data)
+        try:
+            return cls(**data)
+        except Exception as e:
+            from .exceptions import ExplanationError
+            raise ExplanationError(f"Не удалось создать ErrorExplanation из словаря: {e}", original_error=e)
 
 
 @dataclass
@@ -156,12 +174,18 @@ class ExplainerConfig:
     
     def __post_init__(self):
         """Validate the configuration after initialization."""
+        from .exceptions import ConfigurationError
+        
         if self.language not in ['ru', 'en']:
-            raise ValueError("language must be 'ru' or 'en'")
+            raise ConfigurationError("language must be 'ru' or 'en'", 
+                                   config_field="language", config_value=self.language)
         if self.format_type not in ['console', 'json', 'plain']:
-            raise ValueError("format_type must be 'console', 'json', or 'plain'")
+            raise ConfigurationError("format_type must be 'console', 'json', or 'plain'", 
+                                   config_field="format_type", config_value=self.format_type)
         if self.max_explanation_length <= 0:
-            raise ValueError("max_explanation_length must be positive")
+            raise ConfigurationError("max_explanation_length must be positive", 
+                                   config_field="max_explanation_length", 
+                                   config_value=str(self.max_explanation_length))
     
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -179,7 +203,12 @@ class ExplainerConfig:
         Returns:
             JSON representation of the configuration
         """
-        return json.dumps(self.to_dict(), ensure_ascii=False, indent=2)
+        try:
+            return json.dumps(self.to_dict(), ensure_ascii=False, indent=2)
+        except Exception as e:
+            from .exceptions import FormattingError
+            raise FormattingError(f"Не удалось преобразовать конфигурацию в JSON: {e}", 
+                                formatter_type="json", original_error=e)
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ExplainerConfig':
@@ -192,4 +221,8 @@ class ExplainerConfig:
         Returns:
             ExplainerConfig instance
         """
-        return cls(**data)
+        try:
+            return cls(**data)
+        except Exception as e:
+            from .exceptions import ConfigurationError
+            raise ConfigurationError(f"Не удалось создать ExplainerConfig из словаря: {e}", original_error=e)

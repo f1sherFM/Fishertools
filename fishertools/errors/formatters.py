@@ -330,8 +330,10 @@ def get_formatter(format_type: str, **kwargs) -> Any:
         Formatter instance
         
     Raises:
-        ValueError: If format_type is not supported
+        FormattingError: If format_type is not supported or formatter creation fails
     """
+    from .exceptions import FormattingError
+    
     formatters = {
         'console': ConsoleFormatter,
         'plain': PlainFormatter,
@@ -339,13 +341,18 @@ def get_formatter(format_type: str, **kwargs) -> Any:
     }
     
     if format_type not in formatters:
-        raise ValueError(f"Unsupported format type: {format_type}. "
-                        f"Supported types: {list(formatters.keys())}")
+        raise FormattingError(f"Неподдерживаемый тип форматтера: {format_type}. "
+                            f"Поддерживаемые типы: {list(formatters.keys())}", 
+                            formatter_type=format_type)
     
-    formatter_class = formatters[format_type]
-    
-    # Only pass kwargs that the formatter accepts
-    if format_type == 'console':
-        return formatter_class(use_colors=kwargs.get('use_colors', True))
-    else:
-        return formatter_class()
+    try:
+        formatter_class = formatters[format_type]
+        
+        # Only pass kwargs that the formatter accepts
+        if format_type == 'console':
+            return formatter_class(use_colors=kwargs.get('use_colors', True))
+        else:
+            return formatter_class()
+    except Exception as e:
+        raise FormattingError(f"Не удалось создать форматтер типа {format_type}: {e}", 
+                            formatter_type=format_type, original_error=e)

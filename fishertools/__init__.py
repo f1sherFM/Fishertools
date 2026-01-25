@@ -1,29 +1,72 @@
 """
 Fishertools - инструменты, которые делают Python удобнее и безопаснее для новичков
+
+Основная функция:
+    explain_error() - объясняет ошибки Python в понятных словах
+
+Модули:
+    errors - система объяснения ошибок
+    safe - безопасные утилиты для новичков
+    learn - обучающие инструменты
+    legacy - функции для обратной совместимости
 """
 
 __version__ = "0.2.0"
 __author__ = "f1sherFM"
 
-# Main API exports - the primary interface for users
+# Primary API - main interface for users
 from .errors import explain_error
+
+# Exception classes for error handling
+from .errors import (
+    FishertoolsError, ExplanationError, FormattingError, 
+    ConfigurationError, PatternError, SafeUtilityError
+)
+
+# Safe utilities - commonly used beginner-friendly functions
+from .safe import (
+    safe_get, safe_divide, safe_max, safe_min, safe_sum,
+    safe_read_file, safe_write_file, safe_file_exists, 
+    safe_get_file_size, safe_list_files
+)
+
+# Learning tools - educational functions
+from .learn import (
+    generate_example, show_best_practice, 
+    list_available_concepts, list_available_topics
+)
 
 # Legacy imports for backward compatibility
 from . import utils
 from . import decorators  
 from . import helpers
 
-# Module imports for advanced users
+# Module imports for advanced users who want to access specific modules
 from . import errors
 from . import safe
 from . import learn
 from . import legacy
 
 __all__ = [
-    # Primary API
+    # Primary API - the main function users should import
     "explain_error",
-    # Legacy modules
+    
+    # Exception classes for error handling
+    "FishertoolsError", "ExplanationError", "FormattingError", 
+    "ConfigurationError", "PatternError", "SafeUtilityError",
+    
+    # Safe utilities - direct access to commonly used functions
+    "safe_get", "safe_divide", "safe_max", "safe_min", "safe_sum",
+    "safe_read_file", "safe_write_file", "safe_file_exists", 
+    "safe_get_file_size", "safe_list_files",
+    
+    # Learning tools - direct access to educational functions
+    "generate_example", "show_best_practice", 
+    "list_available_concepts", "list_available_topics",
+    
+    # Legacy modules for backward compatibility
     "utils", "decorators", "helpers",
-    # New modules
+    
+    # New modules for advanced usage
     "errors", "safe", "learn", "legacy"
 ]

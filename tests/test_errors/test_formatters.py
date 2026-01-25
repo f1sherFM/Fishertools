@@ -289,7 +289,8 @@ class TestFormatterFactory:
     
     def test_get_formatter_invalid(self):
         """Test getting invalid formatter raises error."""
-        with pytest.raises(ValueError, match="Unsupported format type"):
+        from fishertools.errors.exceptions import FormattingError
+        with pytest.raises(FormattingError, match="Неподдерживаемый тип форматтера"):
             get_formatter('invalid')
 
 
