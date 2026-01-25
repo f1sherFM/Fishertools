@@ -47,6 +47,12 @@ from . import safe
 from . import learn
 from . import legacy
 
+# New enhancement modules (fishertools-enhancements)
+from . import learning
+from . import documentation
+from . import examples
+from . import config
+
 __all__ = [
     # Primary API - the main function users should import
     "explain_error",
@@ -68,5 +74,8 @@ __all__ = [
     "utils", "decorators", "helpers",
     
     # New modules for advanced usage
-    "errors", "safe", "learn", "legacy"
+    "errors", "safe", "learn", "legacy",
+    
+    # Enhancement modules (fishertools-enhancements)
+    "learning", "documentation", "examples", "config"
 ]

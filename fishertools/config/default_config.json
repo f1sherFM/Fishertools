@@ -1,0 +1,17 @@
+{
+  "default_level": "beginner",
+  "explanation_verbosity": "detailed",
+  "visual_aids_enabled": true,
+  "diagram_style": "modern",
+  "color_scheme": "default",
+  "progress_tracking_enabled": true,
+  "save_progress_locally": true,
+  "suggested_topics_count": 3,
+  "max_examples_per_topic": 5,
+  "exercise_difficulty_progression": ["beginner", "intermediate", "advanced"],
+  "readthedocs_project": null,
+  "sphinx_theme": "sphinx_rtd_theme",
+  "enable_interactive_sessions": true,
+  "session_timeout_minutes": 30,
+  "max_hint_count": 3
+}

@@ -90,6 +90,7 @@ def safe_divide(a: Union[int, float], b: Union[int, float], default: Union[int, 
         -1
     """
     from ..errors.exceptions import SafeUtilityError
+    import math
     
     # Проверяем типы входных данных
     if not isinstance(a, (int, float)):
@@ -108,7 +109,14 @@ def safe_divide(a: Union[int, float], b: Union[int, float], default: Union[int, 
     if b == 0:
         return default
     
-    return a / b
+    # Выполняем деление
+    result = a / b
+    
+    # Проверяем на бесконечность или NaN
+    if math.isinf(result) or math.isnan(result):
+        return default
+    
+    return result
 
 
 def safe_max(collection: Union[List, Tuple], default: Any = None) -> Any:

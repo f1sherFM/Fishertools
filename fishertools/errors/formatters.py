@@ -268,6 +268,28 @@ class PlainFormatter:
     Useful for logging, file output, or environments that don't support colors.
     """
     
+    def _strip_ansi_codes(self, text: str) -> str:
+        """
+        Remove ANSI escape codes from text.
+        
+        Args:
+            text: Text that may contain ANSI codes
+            
+        Returns:
+            Text with ANSI codes removed
+        """
+        import re
+        # Remove ANSI escape sequences - both complete and incomplete
+        # This pattern matches \x1b[ or \033[ followed by any characters until a letter
+        ansi_escape = re.compile(r'(\x1b\[|\033\[)[0-9;]*[a-zA-Z]?')
+        # Also remove standalone \x1b[ or \033[ sequences
+        standalone_escape = re.compile(r'(\x1b\[|\033\[)')
+        
+        # First remove complete sequences, then standalone ones
+        text = ansi_escape.sub('', text)
+        text = standalone_escape.sub('', text)
+        return text
+    
     def format(self, explanation: ErrorExplanation) -> str:
         """
         Format error explanation as plain text.
@@ -280,20 +302,26 @@ class PlainFormatter:
         """
         sections = []
         
-        sections.append(f"Ошибка Python: {explanation.error_type}")
+        sections.append(f"Ошибка Python: {self._strip_ansi_codes(explanation.error_type)}")
         sections.append("=" * 50)
         
         if explanation.original_error.strip():
-            sections.append(f"\nСообщение об ошибке:\n{explanation.original_error}")
+            clean_error = self._strip_ansi_codes(explanation.original_error)
+            sections.append(f"\nСообщение об ошибке:\n{clean_error}")
         
-        sections.append(f"\nЧто это означает:\n{explanation.simple_explanation}")
-        sections.append(f"\nКак исправить:\n{explanation.fix_tip}")
+        clean_explanation = self._strip_ansi_codes(explanation.simple_explanation)
+        sections.append(f"\nЧто это означает:\n{clean_explanation}")
+        
+        clean_tip = self._strip_ansi_codes(explanation.fix_tip)
+        sections.append(f"\nКак исправить:\n{clean_tip}")
         
         if explanation.code_example.strip():
-            sections.append(f"\nПример:\n{explanation.code_example}")
+            clean_code = self._strip_ansi_codes(explanation.code_example)
+            sections.append(f"\nПример:\n{clean_code}")
         
         if explanation.additional_info and explanation.additional_info.strip():
-            sections.append(f"\nДополнительная информация:\n{explanation.additional_info}")
+            clean_info = self._strip_ansi_codes(explanation.additional_info)
+            sections.append(f"\nДополнительная информация:\n{clean_info}")
         
         return '\n'.join(sections)
 
