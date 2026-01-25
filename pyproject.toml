@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mydevtools"
+name = "fishertools"
 version = "0.1.0"
-description = "Библиотека для быстрой и удобной разработки на Python"
+description = "FisherTools - библиотека для быстрой и удобной разработки на Python"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [

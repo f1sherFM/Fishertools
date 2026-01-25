@@ -1,4 +1,4 @@
-# MyDevTools
+# FisherTools
 
 Библиотека для быстрой и удобной разработки на Python.
 
@@ -26,7 +26,11 @@
 ## 📦 Установка
 
 ```bash
-# Из исходников
+pip install fishertools
+```
+
+Или из исходников:
+```bash
 git clone https://github.com/f1sherFM/My_1st_library_python.git
 cd My_1st_library_python
 pip install -e .
@@ -35,7 +39,7 @@ pip install -e .
 ## 💡 Использование
 
 ```python
-from mydevtools import utils, decorators, helpers
+from fishertools import utils, decorators, helpers
 
 # Работа с JSON
 data = {"name": "test", "config": {"debug": True}}

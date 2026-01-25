@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Примеры использования библиотеки MyDevTools
+Примеры использования библиотеки FisherTools
 """
 
-from mydevtools import utils, decorators, helpers
+from fishertools import utils, decorators, helpers
 
 
 def demo_utils():
@@ -112,3 +112,4 @@ if __name__ == "__main__":
     
     print("\n=== Демонстрация завершена ===")
     print("Теперь вы можете использовать библиотеку в своих проектах!")
+    print("Установка: pip install fishertools")
