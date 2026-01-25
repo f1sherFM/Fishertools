@@ -34,6 +34,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
+    "hypothesis>=6.0.0",
     "black>=24.0.0",
     "ruff>=0.1.0",
     "mypy>=1.8.0",
@@ -90,3 +91,9 @@ python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = "-v --tb=short"
+markers = [
+    "unit: Unit tests for specific functionality",
+    "property: Property-based tests using hypothesis",
+    "integration: Integration tests across modules",
+    "slow: Tests that take longer to run"
+]

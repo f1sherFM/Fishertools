@@ -113,3 +113,7 @@ test.json
 venv/
 test_env/
 test_main_pypi/
+
+.kiro
+
+.\PUBLISH.md
