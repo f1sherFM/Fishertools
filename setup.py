@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="fishertools",
-    version="0.2.0",
+    version="0.2.1",
     author="f1sherFM",
     author_email="kirillka229top@gmail.com",
     description="Fishertools - инструменты, которые делают Python удобнее и безопаснее для новичков",
