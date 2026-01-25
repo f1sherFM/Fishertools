@@ -105,3 +105,11 @@ dmypy.json
 
 # Test files
 test.json
+
+# PyPI configuration (contains API tokens)
+.pypirc
+
+# Virtual environments
+venv/
+test_env/
+test_main_pypi/
