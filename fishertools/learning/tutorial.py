@@ -22,6 +22,9 @@ class TutorialEngine:
     
     def __init__(self):
         """Initialize the tutorial engine."""
+        # Integration point for example repository
+        self._example_repository = None
+        
         # Code pattern explanations for different constructs
         self._code_patterns = {
             'variable_assignment': {
@@ -558,3 +561,66 @@ class TutorialEngine:
             feedback="Great job! You've created a working loop.",
             suggestions=["Try looping over different types of collections"]
         )
+    
+    def get_related_examples(self, topic: str, difficulty: DifficultyLevel = DifficultyLevel.BEGINNER):
+        """
+        Get related examples from the example repository.
+        
+        Args:
+            topic: Topic to find examples for
+            difficulty: Difficulty level filter
+            
+        Returns:
+            List of related examples if repository is available
+        """
+        if self._example_repository is None:
+            return []
+        
+        try:
+            examples = self._example_repository.get_examples_by_topic(topic)
+            # Filter by difficulty if needed
+            filtered_examples = [
+                ex for ex in examples 
+                if ex.difficulty == difficulty.value
+            ]
+            return filtered_examples[:3]  # Limit to 3 most relevant
+        except Exception:
+            return []
+    
+    def enhance_explanation_with_examples(self, explanation: StepExplanation, topic: str) -> StepExplanation:
+        """
+        Enhance a step explanation with related examples from the repository.
+        
+        Args:
+            explanation: Original explanation
+            topic: Topic to find examples for
+            
+        Returns:
+            Enhanced explanation with example references
+        """
+        if self._example_repository is None:
+            return explanation
+        
+        try:
+            related_examples = self.get_related_examples(topic)
+            if related_examples:
+                # Add example references to the explanation
+                example_titles = [ex.title for ex in related_examples[:2]]
+                enhanced_description = explanation.description
+                if example_titles:
+                    enhanced_description += f"\n\nRelated examples: {', '.join(example_titles)}"
+                
+                # Create enhanced explanation
+                return StepExplanation(
+                    step_number=explanation.step_number,
+                    description=enhanced_description,
+                    code_snippet=explanation.code_snippet,
+                    input_example=explanation.input_example,
+                    output_example=explanation.output_example,
+                    related_concepts=explanation.related_concepts,
+                    visual_aid=explanation.visual_aid
+                )
+        except Exception:
+            pass
+        
+        return explanation

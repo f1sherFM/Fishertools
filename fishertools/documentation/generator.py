@@ -31,6 +31,9 @@ class DocumentationGenerator:
         self.project_name = project_name
         self.output_dir = output_dir
         self.api_generator = APIGenerator()
+        
+        # Integration point for visual documentation
+        self._visual_docs = None
     
     def extract_api_info(self, module_path: str) -> APIInfo:
         """
@@ -434,3 +437,66 @@ sphinx-rtd-theme>=1.0.0
 sphinx-autodoc-typehints>=1.12.0
 """
         return requirements
+    
+    def generate_enhanced_documentation(self, module_paths: List[str]) -> Dict[str, Any]:
+        """
+        Generate enhanced documentation with visual elements.
+        
+        Args:
+            module_paths: List of module paths to document
+            
+        Returns:
+            Dictionary containing documentation and visual artifacts
+        """
+        try:
+            # Generate standard Sphinx documentation
+            sphinx_docs = self.build_documentation(module_paths)
+            
+            result = {
+                'sphinx_docs': sphinx_docs,
+                'visual_artifacts': {},
+                'enhanced_files': {}
+            }
+            
+            # Add visual elements if visual documentation is available
+            if self._visual_docs:
+                for module_path in module_paths:
+                    try:
+                        api_info = self.extract_api_info(module_path)
+                        
+                        # Create architecture diagram
+                        arch_diagram = self._visual_docs.create_architecture_diagram([api_info.module_name])
+                        result['visual_artifacts'][f"{api_info.module_name}_architecture"] = arch_diagram
+                        
+                        # Create enhanced RST with visual elements
+                        enhanced_rst = self._create_enhanced_rst(api_info, arch_diagram)
+                        result['enhanced_files'][f"{api_info.module_name}_enhanced.rst"] = enhanced_rst
+                        
+                    except Exception as e:
+                        logging.warning(f"Failed to create visuals for {module_path}: {e}")
+            
+            return result
+            
+        except Exception as e:
+            logging.error(f"Failed to generate enhanced documentation: {e}")
+            raise
+    
+    def _create_enhanced_rst(self, api_info, architecture_diagram) -> str:
+        """Create enhanced RST file with visual elements."""
+        base_rst = self.api_generator.generate_sphinx_rst(api_info)
+        
+        # Add architecture diagram at the beginning
+        enhanced_rst = f"""
+{api_info.module_name} Module
+{'=' * (len(api_info.module_name) + 7)}
+
+Architecture Overview
+--------------------
+
+.. mermaid::
+
+   {architecture_diagram.content if hasattr(architecture_diagram, 'content') else 'graph TD; A[Module] --> B[Components]'}
+
+{base_rst}
+"""
+        return enhanced_rst

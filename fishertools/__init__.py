@@ -52,6 +52,7 @@ from . import learning
 from . import documentation
 from . import examples
 from . import config
+from . import integration
 
 __all__ = [
     # Primary API - the main function users should import
@@ -77,5 +78,5 @@ __all__ = [
     "errors", "safe", "learn", "legacy",
     
     # Enhancement modules (fishertools-enhancements)
-    "learning", "documentation", "examples", "config"
+    "learning", "documentation", "examples", "config", "integration"
 ]

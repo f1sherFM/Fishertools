@@ -217,5 +217,31 @@ class ConfigurationManager:
         Returns:
             RecoveryAction: Recommended recovery action
         """
-        # Implementation will be added in task 11.2
-        raise NotImplementedError("Will be implemented in task 11.2")
+        from ..errors.recovery import get_recovery_manager, ErrorContext, ErrorSeverity
+        
+        recovery_manager = get_recovery_manager()
+        
+        # Determine error severity based on error type
+        if isinstance(error, FileNotFoundError):
+            severity = ErrorSeverity.MEDIUM
+            error_type = "config_file_missing"
+        elif "validation" in str(error).lower():
+            severity = ErrorSeverity.MEDIUM
+            error_type = "config_validation_error"
+        elif "parse" in str(error).lower() or "syntax" in str(error).lower():
+            severity = ErrorSeverity.HIGH
+            error_type = "config_parse_error"
+        else:
+            severity = ErrorSeverity.MEDIUM
+            error_type = "config_general_error"
+        
+        error_context = ErrorContext(
+            component="configuration",
+            operation="load_config",
+            error_type=error_type,
+            error_message=str(error),
+            severity=severity,
+            metadata={"config_path": getattr(error, 'config_path', 'unknown')}
+        )
+        
+        return recovery_manager.handle_error(error_context)

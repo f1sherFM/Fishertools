@@ -25,6 +25,9 @@ class InteractiveSessionManager:
         self._active_sessions: Dict[str, TutorialSession] = {}
         self._tutorial_engine = TutorialEngine()
         
+        # Integration points
+        self._example_repository = None
+        
         # Additional examples by topic for when users struggle
         self._additional_examples = {
             'variables': [
@@ -97,6 +100,70 @@ class InteractiveSessionManager:
         session = TutorialSession(
             session_id=session_id,
             topic=topic,
+            level=level,
+            start_time=datetime.now(),
+            exercises=exercises,
+            current_exercise_index=0,
+            is_completed=False
+        )
+        
+        # Store the session
+        self._active_sessions[session_id] = session
+        
+        return session
+    
+    def create_session_from_example(self, user_id: str, example):
+        """
+        Create a session based on a specific example from the repository.
+        
+        Args:
+            user_id: Unique identifier for the user
+            example: CodeExample from the repository
+            
+        Returns:
+            TutorialSession: New tutorial session based on the example
+        """
+        if not user_id or not isinstance(user_id, str):
+            raise ValueError("User ID must be a non-empty string")
+        
+        if not example:
+            raise ValueError("Example must be provided")
+        
+        # Generate session ID
+        session_id = str(uuid.uuid4())
+        
+        # Determine difficulty level from example
+        try:
+            from .models import DifficultyLevel
+            level = DifficultyLevel(example.difficulty)
+        except (ValueError, AttributeError):
+            level = DifficultyLevel.BEGINNER
+        
+        # Create exercises based on the example
+        exercises = []
+        
+        # Create main exercise from the example
+        main_exercise = InteractiveExercise(
+            id=str(uuid.uuid4()),
+            title=f"Practice: {example.title}",
+            description=f"{example.description}\n\nExample code:\n{example.code}",
+            starter_code=f"# Based on the example above, try to write similar code\n# {example.explanation}\n\n",
+            expected_output=getattr(example, 'expected_output', 'Working code implementation'),
+            hints=[
+                "Look at the example code for guidance",
+                "Break the problem into smaller steps",
+                "Test your code as you write it"
+            ] + getattr(example, 'common_mistakes', []),
+            difficulty_level=level,
+            topic=example.topics[0] if example.topics else "general",
+            status=ExerciseStatus.NOT_STARTED
+        )
+        exercises.append(main_exercise)
+        
+        # Create the session
+        session = TutorialSession(
+            session_id=session_id,
+            topic=example.topics[0] if example.topics else "general",
             level=level,
             start_time=datetime.now(),
             exercises=exercises,

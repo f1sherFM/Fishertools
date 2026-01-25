@@ -13,11 +13,17 @@ from .exceptions import (
     FishertoolsError, ExplanationError, FormattingError, 
     ConfigurationError, PatternError, SafeUtilityError
 )
+from .recovery import (
+    ErrorRecoveryManager, ErrorSeverity, RecoveryStrategy, ErrorContext, RecoveryAction,
+    get_recovery_manager, handle_error_with_recovery, with_error_recovery
+)
 
 __all__ = [
     "ErrorExplainer", "explain_error", "ErrorPattern", 
     "ConsoleFormatter", "PlainFormatter", "JsonFormatter", "get_formatter",
     "ErrorExplanation", "ExplainerConfig",
     "FishertoolsError", "ExplanationError", "FormattingError", 
-    "ConfigurationError", "PatternError", "SafeUtilityError"
+    "ConfigurationError", "PatternError", "SafeUtilityError",
+    "ErrorRecoveryManager", "ErrorSeverity", "RecoveryStrategy", "ErrorContext", "RecoveryAction",
+    "get_recovery_manager", "handle_error_with_recovery", "with_error_recovery"
 ]
