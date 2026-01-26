@@ -5,7 +5,7 @@ This module contains the ErrorExplainer class and explain_error function.
 """
 
 from typing import Optional, List
-from .models import ErrorExplanation, ExplainerConfig, ErrorPattern
+from .models import ErrorExplanation, ExplainerConfig, ErrorPattern, ExceptionExplanation
 from .patterns import load_default_patterns
 from .exceptions import ExplanationError, FormattingError, ConfigurationError, FishertoolsError
 
@@ -82,6 +82,92 @@ class ErrorExplainer:
                 raise
             # Graceful degradation - create a minimal explanation if all else fails
             return self._create_emergency_explanation(exception, e)
+    
+    def explain_structured(self, exception: Exception) -> ExceptionExplanation:
+        """
+        Create a structured explanation for the given exception.
+        
+        This method generates an ExceptionExplanation object with all required fields:
+        - exception_type: The type of the exception
+        - simple_explanation: Plain-language explanation of what went wrong
+        - fix_suggestions: List of ways to fix the problem
+        - code_example: Minimal code example showing correct usage
+        - traceback_context: Optional traceback information
+        
+        Args:
+            exception: The exception to explain
+            
+        Returns:
+            ExceptionExplanation object with structured explanation
+            
+        Raises:
+            ExceptionError: If explanation creation fails
+            
+        Example:
+            >>> try:
+            ...     x = 1 / 0
+            ... except Exception as e:
+            ...     explanation = explainer.explain_structured(e)
+            ...     print(explanation.simple_explanation)
+        """
+        if not isinstance(exception, Exception):
+            raise ExplanationError(f"Параметр должен быть экземпляром Exception, получен {type(exception).__name__}")
+        
+        try:
+            # Get the basic explanation
+            error_explanation = self.explain(exception)
+            
+            # Convert to structured format
+            return ExceptionExplanation(
+                exception_type=error_explanation.error_type,
+                simple_explanation=error_explanation.simple_explanation,
+                fix_suggestions=[error_explanation.fix_tip],  # Convert single tip to list
+                code_example=error_explanation.code_example,
+                traceback_context=error_explanation.additional_info
+            )
+        except Exception as e:
+            if isinstance(e, ExplanationError):
+                raise
+            # Graceful degradation
+            return self._create_emergency_structured_explanation(exception, e)
+    
+    def _create_emergency_structured_explanation(self, exception: Exception, 
+                                                 original_error: Exception) -> ExceptionExplanation:
+        """
+        Create a minimal structured explanation when all other methods fail.
+        
+        Args:
+            exception: The original exception to explain
+            original_error: The error that prevented normal explanation
+            
+        Returns:
+            Minimal ExceptionExplanation that should always work
+        """
+        try:
+            error_type = getattr(type(exception), '__name__', 'Unknown')
+            error_message = str(exception) if exception else 'Unknown error'
+            
+            return ExceptionExplanation(
+                exception_type=error_type,
+                simple_explanation="An error occurred in your code. Unfortunately, a detailed explanation could not be generated.",
+                fix_suggestions=[
+                    "Check the error message above and try to find the problem in your code.",
+                    "Search for information about this error type in Python documentation.",
+                    "Ask for help if you cannot solve the problem yourself."
+                ],
+                code_example=f"# General error handling:\ntry:\n    # your code\n    pass\nexcept {error_type} as e:\n    print(f'Error: {{e}}')",
+                traceback_context=f"Internal fishertools error: {original_error}"
+            )
+        except Exception:
+            # Absolute last resort
+            return ExceptionExplanation(
+                exception_type="Critical",
+                simple_explanation="A critical error occurred in the error explanation system.",
+                fix_suggestions=["Contact fishertools developers with a description of the problem."],
+                code_example="# Please contact support",
+                traceback_context="Critical system error"
+            )
+
     
     def _match_pattern(self, exception: Exception) -> Optional[ErrorPattern]:
         """

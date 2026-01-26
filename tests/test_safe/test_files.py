@@ -102,3 +102,121 @@ class TestSafeFileOperations:
         
         with pytest.raises(SafeUtilityError, match="должно быть строкой"):
             safe_write_file("test.txt", 123)
+
+
+
+class TestProjectRoot:
+    """Tests for project_root function."""
+    
+    def test_project_root_from_current_directory(self):
+        """Test finding project root from current directory."""
+        from fishertools.safe.files import project_root
+        
+        root = project_root()
+        assert root is not None
+        assert Path(root).exists()
+        # Should find one of the markers
+        markers = ['setup.py', 'pyproject.toml', '.git', '.gitignore']
+        assert any((Path(root) / marker).exists() for marker in markers)
+    
+    def test_project_root_from_subdirectory(self):
+        """Test finding project root from a subdirectory."""
+        from fishertools.safe.files import project_root
+        
+        # Get root from current directory
+        root1 = project_root()
+        
+        # Get root from a subdirectory
+        subdir = Path(root1) / "fishertools"
+        if subdir.exists():
+            root2 = project_root(subdir)
+            assert root1 == root2
+    
+    def test_project_root_not_found(self):
+        """Test that RuntimeError is raised when project root cannot be found."""
+        from fishertools.safe.files import project_root
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create a temporary directory with no markers
+            with pytest.raises(RuntimeError, match="Could not determine project root"):
+                project_root(temp_dir)
+
+
+class TestFindFile:
+    """Tests for find_file function."""
+    
+    def test_find_file_existing_file(self):
+        """Test finding an existing file."""
+        from fishertools.safe.files import find_file
+        
+        # Find setup.py which should exist in project root
+        path = find_file("setup.py")
+        assert path is not None
+        assert Path(path).exists()
+        assert Path(path).name == "setup.py"
+    
+    def test_find_file_nonexistent_file(self):
+        """Test finding a non-existent file returns None."""
+        from fishertools.safe.files import find_file
+        
+        path = find_file("nonexistent_file_12345.txt")
+        assert path is None
+    
+    def test_find_file_from_subdirectory(self):
+        """Test finding a file starting from a subdirectory."""
+        from fishertools.safe.files import find_file
+        
+        # Create a test file in a temporary subdirectory
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            subdir = temp_path / "subdir"
+            subdir.mkdir()
+            
+            # Create a test file in the subdirectory
+            test_file = subdir / "test.txt"
+            test_file.write_text("test content")
+            
+            # Find the file from the subdirectory
+            path = find_file("test.txt", subdir)
+            assert path is not None
+            assert Path(path).exists()
+            assert Path(path).name == "test.txt"
+
+
+class TestSafeOpen:
+    """Tests for safe_open function."""
+    
+    def test_safe_open_existing_file(self):
+        """Test opening an existing file."""
+        from fishertools.safe.files import safe_open
+        
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as f:
+            f.write("Test content")
+            temp_path = f.name
+        
+        try:
+            with safe_open(temp_path) as f:
+                content = f.read()
+            assert content == "Test content"
+        finally:
+            os.unlink(temp_path)
+    
+    def test_safe_open_nonexistent_file(self):
+        """Test opening a non-existent file raises FileNotFoundError."""
+        from fishertools.safe.files import safe_open
+        
+        with pytest.raises(FileNotFoundError):
+            safe_open("nonexistent_file_12345.txt")
+    
+    def test_safe_open_write_mode(self):
+        """Test opening a file in write mode."""
+        from fishertools.safe.files import safe_open
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = Path(temp_dir) / "test_file.txt"
+            
+            with safe_open(file_path, mode='w') as f:
+                f.write("Hello World")
+            
+            assert file_path.exists()
+            assert file_path.read_text(encoding='utf-8') == "Hello World"

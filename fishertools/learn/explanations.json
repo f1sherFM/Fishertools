@@ -1,0 +1,132 @@
+{
+  "int": {
+    "description": "Integer data type for whole numbers without decimals. Integers can be positive, negative, or zero.",
+    "when_to_use": "Use integers when you need to store whole numbers, count items, or perform mathematical operations that don't require decimal precision.",
+    "example": "x = 42\ny = -10\nz = 0\nprint(x + y)\nprint(type(x))"
+  },
+  "float": {
+    "description": "Floating-point data type for numbers with decimal places. Floats represent real numbers with fractional parts.",
+    "when_to_use": "Use floats when you need to store numbers with decimal precision, such as measurements, percentages, or scientific calculations.",
+    "example": "pi = 3.14159\ntemperature = -5.5\nheight = 1.75\nprint(pi * 2)\nprint(type(temperature))"
+  },
+  "str": {
+    "description": "String data type for text. Strings are sequences of characters enclosed in quotes (single, double, or triple).",
+    "when_to_use": "Use strings to store text data, user input, messages, names, or any textual information.",
+    "example": "name = \"Alice\"\nmessage = 'Hello, World!'\nmultiline = \"\"\"This is\na multiline\nstring\"\"\"\nprint(name + \" says: \" + message)"
+  },
+  "bool": {
+    "description": "Boolean data type with only two possible values: True or False. Used for logical operations and conditions.",
+    "when_to_use": "Use booleans in conditional statements, loops, and logical operations to control program flow based on true/false conditions.",
+    "example": "is_student = True\nis_working = False\nif is_student:\n    print(\"You are a student\")\nprint(type(is_student))"
+  },
+  "list": {
+    "description": "Ordered collection of items that can be of different types. Lists are mutable, meaning you can add, remove, or modify items.",
+    "when_to_use": "Use lists when you need to store multiple items in order and may need to modify them later. Perfect for storing collections of data.",
+    "example": "fruits = [\"apple\", \"banana\", \"orange\"]\nfruits.append(\"grape\")\nprint(fruits[0])\nprint(len(fruits))\nfor fruit in fruits:\n    print(fruit)"
+  },
+  "tuple": {
+    "description": "Ordered collection of items similar to lists, but immutable. Once created, tuples cannot be modified.",
+    "when_to_use": "Use tuples when you need an ordered collection that should not be changed, or when you need to use a collection as a dictionary key.",
+    "example": "coordinates = (10, 20)\nrgb_color = (255, 128, 0)\nprint(coordinates[0])\nprint(len(rgb_color))\nfor value in coordinates:\n    print(value)"
+  },
+  "set": {
+    "description": "Unordered collection of unique items. Sets automatically remove duplicates and are useful for membership testing.",
+    "when_to_use": "Use sets when you need to store unique items, remove duplicates, or perform set operations like union and intersection.",
+    "example": "numbers = {1, 2, 3, 3, 4}\nprint(numbers)\nprint(len(numbers))\nif 2 in numbers:\n    print(\"2 is in the set\")\nnumbers.add(5)\nprint(numbers)"
+  },
+  "dict": {
+    "description": "Unordered collection of key-value pairs. Dictionaries allow you to store and retrieve data using meaningful keys instead of numeric indices.",
+    "when_to_use": "Use dictionaries when you need to associate values with descriptive keys, store structured data, or create lookup tables.",
+    "example": "student = {\"name\": \"Bob\", \"age\": 20, \"course\": 2}\nprint(student[\"name\"])\nstudent[\"gpa\"] = 3.8\nfor key, value in student.items():\n    print(f\"{key}: {value}\")"
+  },
+  "if": {
+    "description": "Conditional statement that executes code only if a condition is true. Forms the basis of decision-making in programs.",
+    "when_to_use": "Use if statements to execute different code based on whether a condition is true or false.",
+    "example": "age = 18\nif age >= 18:\n    print(\"You are an adult\")\nelse:\n    print(\"You are a minor\")"
+  },
+  "for": {
+    "description": "Loop statement that iterates over a sequence (list, tuple, string, etc.) and executes code for each item.",
+    "when_to_use": "Use for loops when you need to repeat code for each item in a collection or a specific number of times.",
+    "example": "fruits = [\"apple\", \"banana\", \"orange\"]\nfor fruit in fruits:\n    print(fruit)\nfor i in range(3):\n    print(f\"Number: {i}\")"
+  },
+  "while": {
+    "description": "Loop statement that repeatedly executes code as long as a condition is true. Useful when you don't know how many iterations you need.",
+    "when_to_use": "Use while loops when you need to repeat code until a certain condition becomes false.",
+    "example": "count = 0\nwhile count < 5:\n    print(f\"Count: {count}\")\n    count += 1\nprint(\"Done!\")"
+  },
+  "break": {
+    "description": "Statement that immediately exits the current loop, skipping any remaining iterations.",
+    "when_to_use": "Use break when you need to exit a loop early based on a condition, such as finding a target value.",
+    "example": "numbers = [1, 2, 3, 4, 5]\nfor num in numbers:\n    if num == 3:\n        break\n    print(num)\nprint(\"Loop ended\")"
+  },
+  "continue": {
+    "description": "Statement that skips the current iteration of a loop and moves to the next iteration.",
+    "when_to_use": "Use continue when you need to skip certain iterations based on a condition but keep looping.",
+    "example": "for i in range(5):\n    if i == 2:\n        continue\n    print(i)\nprint(\"Loop completed\")"
+  },
+  "function": {
+    "description": "Reusable block of code that performs a specific task. Functions help organize code and avoid repetition.",
+    "when_to_use": "Use functions to encapsulate code that you use multiple times or to organize complex logic into manageable pieces.",
+    "example": "def greet(name):\n    return f\"Hello, {name}!\"\n\nresult = greet(\"Alice\")\nprint(result)\nprint(greet(\"Bob\"))"
+  },
+  "return": {
+    "description": "Statement that sends a value back from a function to the caller. A function can return any type of data.",
+    "when_to_use": "Use return to send results from a function back to the code that called it.",
+    "example": "def add(a, b):\n    return a + b\n\nresult = add(5, 3)\nprint(result)\n\ndef get_info():\n    return \"name\", \"age\"\nname, age = get_info()"
+  },
+  "lambda": {
+    "description": "Anonymous function defined with a single expression. Lambdas are useful for short, simple functions.",
+    "when_to_use": "Use lambda functions for simple operations, especially when passing functions as arguments to other functions.",
+    "example": "square = lambda x: x ** 2\nprint(square(5))\n\nnumbers = [1, 2, 3, 4, 5]\nsquared = list(map(lambda x: x ** 2, numbers))\nprint(squared)"
+  },
+  "*args": {
+    "description": "Special parameter that allows a function to accept any number of positional arguments as a tuple.",
+    "when_to_use": "Use *args when you want a function to accept a variable number of arguments without knowing how many in advance.",
+    "example": "def sum_all(*args):\n    total = 0\n    for num in args:\n        total += num\n    return total\n\nprint(sum_all(1, 2, 3))\nprint(sum_all(10, 20, 30, 40))"
+  },
+  "**kwargs": {
+    "description": "Special parameter that allows a function to accept any number of keyword arguments as a dictionary.",
+    "when_to_use": "Use **kwargs when you want a function to accept a variable number of named arguments.",
+    "example": "def print_info(**kwargs):\n    for key, value in kwargs.items():\n        print(f\"{key}: {value}\")\n\nprint_info(name=\"Alice\", age=25, city=\"NYC\")\nprint_info(product=\"Laptop\", price=999)"
+  },
+  "try": {
+    "description": "Statement that begins a block of code where exceptions might occur. Used with except to handle errors gracefully.",
+    "when_to_use": "Use try blocks to wrap code that might raise exceptions, allowing you to handle errors without crashing.",
+    "example": "try:\n    x = 10 / 2\n    print(x)\nexcept ZeroDivisionError:\n    print(\"Cannot divide by zero\")"
+  },
+  "except": {
+    "description": "Statement that catches and handles specific exceptions that occur in a try block.",
+    "when_to_use": "Use except blocks to handle specific errors and provide appropriate responses or recovery actions.",
+    "example": "try:\n    number = int(\"abc\")\nexcept ValueError:\n    print(\"Invalid number format\")\nexcept Exception as e:\n    print(f\"An error occurred: {e}\")"
+  },
+  "finally": {
+    "description": "Statement that executes code after try and except blocks, regardless of whether an exception occurred.",
+    "when_to_use": "Use finally blocks for cleanup code that must run whether an error occurred or not, such as closing files.",
+    "example": "try:\n    file = open(\"data.txt\")\n    data = file.read()\nexcept FileNotFoundError:\n    print(\"File not found\")\nfinally:\n    file.close()\n    print(\"Cleanup complete\")"
+  },
+  "raise": {
+    "description": "Statement that manually raises an exception to signal an error condition in your code.",
+    "when_to_use": "Use raise to create custom error handling and signal when something goes wrong in your program.",
+    "example": "def validate_age(age):\n    if age < 0:\n        raise ValueError(\"Age cannot be negative\")\n    return age\n\ntry:\n    validate_age(-5)\nexcept ValueError as e:\n    print(f\"Error: {e}\")"
+  },
+  "open": {
+    "description": "Function that opens a file and returns a file object. Used to read from or write to files.",
+    "when_to_use": "Use open() to access files on disk. Always use it with 'with' statement or ensure you close the file.",
+    "example": "with open(\"data.txt\", \"r\") as file:\n    content = file.read()\n    print(content)\n\nwith open(\"output.txt\", \"w\") as file:\n    file.write(\"Hello, World!\")"
+  },
+  "read": {
+    "description": "Method that reads the entire contents of a file as a string, or reads a specific number of characters.",
+    "when_to_use": "Use read() when you need to get the entire file content or a specific number of bytes.",
+    "example": "with open(\"data.txt\", \"r\") as file:\n    content = file.read()\n    print(content)\n\nwith open(\"data.txt\", \"r\") as file:\n    first_100_chars = file.read(100)\n    print(first_100_chars)"
+  },
+  "write": {
+    "description": "Method that writes data to a file. Creates the file if it doesn't exist, or overwrites it if it does.",
+    "when_to_use": "Use write() to save data to a file. Use 'w' mode to create/overwrite or 'a' mode to append.",
+    "example": "with open(\"output.txt\", \"w\") as file:\n    file.write(\"Hello, World!\")\n    file.write(\"\\nSecond line\")\n\nwith open(\"output.txt\", \"a\") as file:\n    file.write(\"\\nAppended line\")"
+  },
+  "with": {
+    "description": "Context manager statement that automatically handles resource management, ensuring files are properly closed.",
+    "when_to_use": "Always use 'with' when working with files to ensure they are properly closed even if an error occurs.",
+    "example": "with open(\"data.txt\", \"r\") as file:\n    for line in file:\n        print(line.strip())\n\nwith open(\"output.txt\", \"w\") as file:\n    file.write(\"Data\")"
+  }
+}

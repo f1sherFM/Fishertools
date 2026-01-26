@@ -226,3 +226,75 @@ class ExplainerConfig:
         except Exception as e:
             from .exceptions import ConfigurationError
             raise ConfigurationError(f"Не удалось создать ExplainerConfig из словаря: {e}", original_error=e)
+
+
+
+@dataclass
+class ExceptionExplanation:
+    """
+    Structured explanation of an exception.
+    
+    This dataclass provides a comprehensive explanation of a Python exception,
+    including the exception type, a simple explanation, fix suggestions,
+    a code example, and optional traceback context.
+    """
+    exception_type: str
+    simple_explanation: str
+    fix_suggestions: List[str]
+    code_example: str
+    traceback_context: Optional[str] = None
+    
+    def __post_init__(self):
+        """Validate the explanation after initialization."""
+        from .exceptions import ExplanationError
+        
+        if not self.exception_type.strip():
+            raise ExplanationError("exception_type cannot be empty")
+        if not self.simple_explanation.strip():
+            raise ExplanationError("simple_explanation cannot be empty")
+        if not self.fix_suggestions:
+            raise ExplanationError("fix_suggestions cannot be empty")
+        if not all(isinstance(s, str) and s.strip() for s in self.fix_suggestions):
+            raise ExplanationError("All fix_suggestions must be non-empty strings")
+        if not self.code_example.strip():
+            raise ExplanationError("code_example cannot be empty")
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """
+        Convert explanation to dictionary for serialization.
+        
+        Returns:
+            Dictionary representation of the explanation
+        """
+        return asdict(self)
+    
+    def to_json(self) -> str:
+        """
+        Convert explanation to JSON string.
+        
+        Returns:
+            JSON representation of the explanation
+        """
+        try:
+            return json.dumps(self.to_dict(), ensure_ascii=False, indent=2)
+        except Exception as e:
+            from .exceptions import FormattingError
+            raise FormattingError(f"Could not convert explanation to JSON: {e}", 
+                                formatter_type="json", original_error=e)
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'ExceptionExplanation':
+        """
+        Create ExceptionExplanation from dictionary.
+        
+        Args:
+            data: Dictionary containing explanation data
+            
+        Returns:
+            ExceptionExplanation instance
+        """
+        try:
+            return cls(**data)
+        except Exception as e:
+            from .exceptions import ExplanationError
+            raise ExplanationError(f"Could not create ExceptionExplanation from dictionary: {e}", original_error=e)

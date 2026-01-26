@@ -155,6 +155,58 @@ class TestErrorPatternMatching:
         assert "синтаксическая ошибка" in explanation.simple_explanation
         assert "скобки" in explanation.fix_tip or "отступы" in explanation.fix_tip
         assert ":" in explanation.code_example
+    
+    def test_file_not_found_error_pattern_matching(self):
+        """Test FileNotFoundError pattern matching."""
+        explainer = ErrorExplainer()
+        
+        # Test file not found error
+        exception = FileNotFoundError("[Errno 2] No such file or directory: 'data.txt'")
+        explanation = explainer.explain(exception)
+        
+        assert explanation.error_type == "FileNotFoundError"
+        assert "не существует" in explanation.simple_explanation
+        assert "путь" in explanation.fix_tip or "файл" in explanation.fix_tip
+        assert "os.path.exists" in explanation.code_example or "exists" in explanation.code_example
+    
+    def test_permission_error_pattern_matching(self):
+        """Test PermissionError pattern matching."""
+        explainer = ErrorExplainer()
+        
+        # Test permission error
+        exception = PermissionError("[Errno 13] Permission denied: 'protected_file.txt'")
+        explanation = explainer.explain(exception)
+        
+        assert explanation.error_type == "PermissionError"
+        assert "прав доступа" in explanation.simple_explanation or "Permission" in explanation.simple_explanation
+        assert "права" in explanation.fix_tip or "доступ" in explanation.fix_tip
+        assert "os.access" in explanation.code_example or "access" in explanation.code_example
+    
+    def test_zero_division_error_pattern_matching(self):
+        """Test ZeroDivisionError pattern matching."""
+        explainer = ErrorExplainer()
+        
+        # Test zero division error
+        exception = ZeroDivisionError("division by zero")
+        explanation = explainer.explain(exception)
+        
+        assert explanation.error_type == "ZeroDivisionError"
+        assert "ноль" in explanation.simple_explanation
+        assert "делитель" in explanation.fix_tip or "ноль" in explanation.fix_tip
+        assert "!= 0" in explanation.code_example or "if" in explanation.code_example
+    
+    def test_name_error_pattern_matching(self):
+        """Test NameError pattern matching."""
+        explainer = ErrorExplainer()
+        
+        # Test name error
+        exception = NameError("name 'undefined_var' is not defined")
+        explanation = explainer.explain(exception)
+        
+        assert explanation.error_type == "NameError"
+        assert "не была определена" in explanation.simple_explanation or "not defined" in explanation.simple_explanation
+        assert "определена" in explanation.fix_tip or "defined" in explanation.fix_tip
+        assert "=" in explanation.code_example
 
 
 class TestErrorPatternValidation:

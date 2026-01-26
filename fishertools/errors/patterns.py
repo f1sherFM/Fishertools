@@ -105,6 +105,46 @@ DEFAULT_PATTERNS = [
         tip="Внимательно проверьте строку, указанную в ошибке. Убедитесь, что все скобки закрыты, отступы правильные, и нет опечаток в ключевых словах.",
         example="# Неправильно:\n# if x > 5  # забыли двоеточие\n#     print('больше 5')\n# print('привет'  # незакрытая скобка\n\n# Правильно:\nif x > 5:  # двоеточие обязательно\n    print('больше 5')  # правильный отступ\nprint('привет')  # закрытая скобка",
         common_causes=["забыли двоеточие после if/for/def", "незакрытые скобки", "неправильные отступы", "опечатки в ключевых словах"]
+    ),
+    
+    # FileNotFoundError patterns
+    ErrorPattern(
+        error_type=FileNotFoundError,
+        error_keywords=["No such file or directory", "cannot find the file"],
+        explanation="Файл, который вы пытаетесь открыть, не существует. Возможно, неправильно указан путь к файлу или файл находится в другой папке.",
+        tip="Проверьте правильность пути к файлу. Убедитесь, что файл существует в указанной папке. Используйте абсолютный путь или проверьте текущую рабочую папку.",
+        example="# Неправильно:\n# with open('data.txt', 'r') as f:  # файл может не существовать\n#     data = f.read()\n\n# Правильно:\nimport os\nfilepath = 'data.txt'\nif os.path.exists(filepath):\n    with open(filepath, 'r') as f:\n        data = f.read()\nelse:\n    print(f'Файл {filepath} не найден')",
+        common_causes=["неправильный путь к файлу", "файл не существует", "неправильная рабочая папка", "опечатка в имени файла"]
+    ),
+    
+    # PermissionError patterns
+    ErrorPattern(
+        error_type=PermissionError,
+        error_keywords=["Permission denied", "access denied"],
+        explanation="У вас нет прав доступа для выполнения этой операции с файлом. Это может быть файл, защищенный от записи, или папка, к которой нет доступа.",
+        tip="Проверьте права доступа к файлу. Попробуйте запустить программу с правами администратора. Убедитесь, что файл не открыт в другой программе.",
+        example="# Неправильно:\n# with open('protected_file.txt', 'w') as f:  # может быть защищен\n#     f.write('data')\n\n# Правильно:\nimport os\nfilepath = 'protected_file.txt'\nif os.access(filepath, os.W_OK):\n    with open(filepath, 'w') as f:\n        f.write('data')\nelse:\n    print(f'Нет прав доступа к файлу {filepath}')",
+        common_causes=["файл защищен от записи", "недостаточно прав доступа", "файл открыт в другой программе", "папка защищена"]
+    ),
+    
+    # ZeroDivisionError patterns
+    ErrorPattern(
+        error_type=ZeroDivisionError,
+        error_keywords=["division by zero", "integer division or modulo by zero"],
+        explanation="Вы пытаетесь разделить число на ноль, что математически невозможно. Это может быть деление или операция модуля (%).",
+        tip="Проверьте, что делитель не равен нулю перед выполнением операции деления. Используйте условие if для проверки.",
+        example="# Неправильно:\n# result = 10 / 0  # ZeroDivisionError\n\n# Правильно:\ndivisor = 0\nif divisor != 0:\n    result = 10 / divisor\nelse:\n    print('Нельзя делить на ноль')\n    result = None",
+        common_causes=["деление на ноль", "модуль по нулю", "переменная содержит ноль неожиданно", "ошибка в расчетах"]
+    ),
+    
+    # NameError patterns
+    ErrorPattern(
+        error_type=NameError,
+        error_keywords=["is not defined", "name"],
+        explanation="Вы используете переменную или функцию, которая не была определена. Возможно, опечатка в имени или переменная определена в другой области видимости.",
+        tip="Проверьте правильность написания имени переменной. Убедитесь, что переменная определена перед использованием. Проверьте область видимости переменной.",
+        example="# Неправильно:\n# print(my_variable)  # NameError - переменная не определена\n\n# Правильно:\nmy_variable = 'Hello'  # определяем переменную\nprint(my_variable)  # теперь можно использовать\n\n# Или проверяем область видимости:\nif True:\n    local_var = 'local'\nprint(local_var)  # NameError - переменная локальная",
+        common_causes=["опечатка в имени переменной", "переменная не определена", "переменная в другой области видимости", "забыли импортировать модуль"]
     )
 ]
 

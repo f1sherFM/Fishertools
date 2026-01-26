@@ -5,6 +5,8 @@ This module contains functions to generate educational code examples
 for common Python concepts that beginners need to learn.
 """
 
+import json
+import os
 from typing import Dict, Optional
 
 
@@ -548,3 +550,88 @@ def get_concept_info(concept: str) -> Optional[Dict[str, str]]:
         "title": CODE_EXAMPLES[concept_lower]["title"],
         "description": CODE_EXAMPLES[concept_lower]["description"]
     }
+
+
+
+def explain(topic: str) -> Dict[str, str]:
+    """
+    Get a structured explanation for a Python topic.
+    
+    This function loads explanations from the explanations.json file and returns
+    a dictionary containing a description, usage guidance, and code example for
+    the requested topic.
+    
+    Parameters
+    ----------
+    topic : str
+        The name of the Python topic to explain (e.g., 'list', 'for', 'lambda').
+        Topic names are case-insensitive.
+    
+    Returns
+    -------
+    dict
+        A dictionary with the following keys:
+        - 'description' (str): A clear, concise explanation of what the topic is
+        - 'when_to_use' (str): Practical guidance on when to use this topic
+        - 'example' (str): Valid, runnable Python code demonstrating the topic
+    
+    Raises
+    ------
+    ValueError
+        If the topic is not found in the explanations database. The error message
+        includes a helpful list of all available topics.
+    FileNotFoundError
+        If the explanations.json file cannot be found.
+    json.JSONDecodeError
+        If the explanations.json file is corrupted or invalid.
+    
+    Examples
+    --------
+    >>> explanation = explain('list')
+    >>> print(explanation['description'])
+    Ordered collection of items that can be of different types...
+    
+    >>> explanation = explain('lambda')
+    >>> print(explanation['example'])
+    square = lambda x: x ** 2
+    print(square(5))
+    
+    >>> try:
+    ...     explain('invalid_topic')
+    ... except ValueError as e:
+    ...     print(str(e))
+    Topic 'invalid_topic' not found. Available topics: int, float, str, ...
+    """
+    # Normalize the topic name
+    topic_normalized = topic.strip().lower()
+    
+    # Get the path to the explanations.json file
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    explanations_path = os.path.join(current_dir, 'explanations.json')
+    
+    # Load the explanations from JSON file
+    try:
+        with open(explanations_path, 'r', encoding='utf-8') as f:
+            explanations = json.load(f)
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            f"Explanations file not found at {explanations_path}. "
+            "Please ensure explanations.json is in the fishertools/learn/ directory."
+        )
+    except json.JSONDecodeError as e:
+        raise json.JSONDecodeError(
+            f"Failed to parse explanations.json: {e.msg}",
+            e.doc,
+            e.pos
+        )
+    
+    # Check if the topic exists
+    if topic_normalized not in explanations:
+        available_topics = sorted(explanations.keys())
+        topics_str = ", ".join(available_topics)
+        raise ValueError(
+            f"Topic '{topic}' not found. Available topics: {topics_str}"
+        )
+    
+    # Return the explanation dictionary
+    return explanations[topic_normalized]

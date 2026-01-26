@@ -89,6 +89,47 @@ example = generate_example("functions")
 print(example)
 ```
 
+### 🎓 Объяснение Python концепций
+Получайте структурированные объяснения Python тем с примерами:
+
+```python
+from fishertools.learn import explain
+
+# Получить объяснение темы
+explanation = explain("list")
+print(explanation["description"])
+print(explanation["when_to_use"])
+print(explanation["example"])
+```
+
+### 🔧 Готовые паттерны
+Используйте готовые шаблоны для типичных задач:
+
+```python
+from fishertools.patterns import simple_menu, JSONStorage, SimpleLogger, SimpleCLI
+
+# Интерактивное меню
+simple_menu({
+    "Опция 1": lambda: print("Выбрана опция 1"),
+    "Опция 2": lambda: print("Выбрана опция 2")
+})
+
+# Сохранение данных в JSON
+storage = JSONStorage("data.json")
+storage.save({"name": "Alice", "age": 30})
+
+# Логирование
+logger = SimpleLogger("app.log")
+logger.info("Приложение запущено")
+
+# CLI приложение
+cli = SimpleCLI("myapp", "Мое приложение")
+@cli.command("greet", "Поздравить пользователя")
+def greet(name):
+    print(f"Привет, {name}!")
+cli.run()
+```
+
 ### 🔄 Обратная совместимость
 Все полезные функции из предыдущих версий сохранены:
 
@@ -132,6 +173,205 @@ safe_result = safe_get([1, 2, 3], 5, "default")
 # Обучающие инструменты  
 from fishertools.learn import show_best_practice
 show_best_practice("functions")
+```
+
+## 📚 Обучающие инструменты v0.3.1
+
+### Объяснение Python концепций с помощью explain()
+
+Функция `explain()` предоставляет структурированные объяснения для 30+ Python тем с примерами кода:
+
+```python
+from fishertools.learn import explain
+
+# Получить объяснение темы
+explanation = explain("list")
+print(explanation["description"])    # Что это такое
+print(explanation["when_to_use"])    # Когда использовать
+print(explanation["example"])        # Пример кода
+```
+
+**Поддерживаемые темы:**
+
+- **Типы данных**: int, float, str, bool, list, tuple, set, dict
+- **Управляющие конструкции**: if, for, while, break, continue
+- **Функции**: function, return, lambda, *args, **kwargs
+- **Обработка ошибок**: try, except, finally, raise
+- **Работа с файлами**: open, read, write, with
+
+**Пример использования:**
+
+```python
+from fishertools.learn import explain
+
+# Объяснение списков
+list_info = explain("list")
+print(list_info)
+# {
+#     "description": "Упорядоченная коллекция элементов",
+#     "when_to_use": "Используйте, когда нужно хранить несколько элементов в порядке",
+#     "example": "items = [1, 2, 3]\nitems.append(4)\nprint(items[0])"
+# }
+
+# Объяснение цикла for
+for_info = explain("for")
+print(for_info["example"])
+```
+
+### Готовые паттерны для типичных задач
+
+Модуль `fishertools.patterns` предоставляет готовые шаблоны для типичных программных задач.
+
+#### 1. simple_menu() - Интерактивное меню
+
+Создавайте интерактивные консольные меню без лишнего кода:
+
+```python
+from fishertools.patterns import simple_menu
+
+def show_greeting():
+    print("Привет! 👋")
+
+def show_goodbye():
+    print("До свидания! 👋")
+
+def show_help():
+    print("Это справка по приложению")
+
+simple_menu({
+    "Поздравить": show_greeting,
+    "Попрощаться": show_goodbye,
+    "Справка": show_help
+})
+```
+
+**Особенности:**
+- Автоматическая нумерация опций
+- Обработка некорректного ввода
+- Команды "quit" и "exit" для выхода
+- Повторный запрос при ошибке
+
+#### 2. JSONStorage - Сохранение данных
+
+Сохраняйте и загружайте данные в JSON без обработки ошибок:
+
+```python
+from fishertools.patterns import JSONStorage
+
+# Создание хранилища
+storage = JSONStorage("users.json")
+
+# Сохранение данных
+users = [
+    {"name": "Alice", "age": 30},
+    {"name": "Bob", "age": 25}
+]
+storage.save(users)
+
+# Загрузка данных
+loaded_users = storage.load()
+print(loaded_users)
+
+# Проверка существования файла
+if storage.exists():
+    print("Файл существует")
+```
+
+**Особенности:**
+- Автоматическое создание директорий
+- Автоматическое создание файла при сохранении
+- Обработка ошибок файловых операций
+- Простой API для сохранения/загрузки
+
+#### 3. SimpleLogger - Логирование
+
+Добавляйте логирование в приложение с временными метками:
+
+```python
+from fishertools.patterns import SimpleLogger
+
+# Создание логгера
+logger = SimpleLogger("app.log")
+
+# Логирование сообщений
+logger.info("Приложение запущено")
+logger.warning("Низкий уровень памяти")
+logger.error("Ошибка подключения")
+```
+
+**Формат логов:**
+```
+[2024-01-15 10:30:45] [INFO] Приложение запущено
+[2024-01-15 10:30:46] [WARNING] Низкий уровень памяти
+[2024-01-15 10:30:47] [ERROR] Ошибка подключения
+```
+
+**Особенности:**
+- Автоматические временные метки
+- Три уровня логирования: INFO, WARNING, ERROR
+- Автоматическое создание файла логов
+- Добавление к существующему файлу
+
+#### 4. SimpleCLI - Командная строка
+
+Создавайте CLI приложения с минимальным кодом:
+
+```python
+from fishertools.patterns import SimpleCLI
+
+# Создание CLI приложения
+cli = SimpleCLI("myapp", "Мое приложение")
+
+# Регистрация команд через декоратор
+@cli.command("greet", "Поздравить пользователя")
+def greet(name):
+    print(f"Привет, {name}!")
+
+@cli.command("add", "Сложить два числа")
+def add(a, b):
+    result = int(a) + int(b)
+    print(f"Результат: {result}")
+
+# Запуск приложения
+if __name__ == "__main__":
+    cli.run()
+```
+
+**Использование:**
+```bash
+python myapp.py greet Alice
+# Привет, Alice!
+
+python myapp.py add 5 3
+# Результат: 8
+
+python myapp.py --help
+# Показать все доступные команды
+```
+
+**Особенности:**
+- Регистрация команд через декоратор
+- Автоматический парсинг аргументов
+- Встроенная справка (--help)
+- Обработка неправильных команд
+
+### Примеры использования
+
+Полные примеры использования всех компонентов находятся в директории `fishertools/examples/`:
+
+- `learn_example.py` - Примеры использования explain()
+- `menu_example.py` - Примеры simple_menu()
+- `storage_example.py` - Примеры JSONStorage
+- `logger_example.py` - Примеры SimpleLogger
+- `cli_example.py` - Примеры SimpleCLI
+
+Вы можете запустить любой пример:
+```bash
+python -m fishertools.examples.learn_example
+python -m fishertools.examples.menu_example
+python -m fishertools.examples.storage_example
+python -m fishertools.examples.logger_example
+python -m fishertools.examples.cli_example
 ```
 
 ## 📖 Документация

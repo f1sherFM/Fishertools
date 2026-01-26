@@ -19,7 +19,7 @@ from .errors import explain_error
 
 # Exception classes for error handling
 from .errors import (
-    FishertoolsError, ExplanationError, FormattingError, 
+    FishertoolsError, ExceptionExplanation, ExplanationError, FormattingError, 
     ConfigurationError, PatternError, SafeUtilityError
 )
 
@@ -27,13 +27,19 @@ from .errors import (
 from .safe import (
     safe_get, safe_divide, safe_max, safe_min, safe_sum,
     safe_read_file, safe_write_file, safe_file_exists, 
-    safe_get_file_size, safe_list_files
+    safe_get_file_size, safe_list_files,
+    safe_open, find_file, project_root
 )
 
 # Learning tools - educational functions
 from .learn import (
     generate_example, show_best_practice, 
     list_available_concepts, list_available_topics
+)
+
+# Input validation functions
+from .input_utils import (
+    ask_int, ask_float, ask_str, ask_choice
 )
 
 # Legacy imports for backward compatibility
@@ -46,6 +52,7 @@ from . import errors
 from . import safe
 from . import learn
 from . import legacy
+from . import input_utils
 
 # New enhancement modules (fishertools-enhancements)
 from . import learning
@@ -59,13 +66,17 @@ __all__ = [
     "explain_error",
     
     # Exception classes for error handling
-    "FishertoolsError", "ExplanationError", "FormattingError", 
+    "FishertoolsError", "ExceptionExplanation", "ExplanationError", "FormattingError", 
     "ConfigurationError", "PatternError", "SafeUtilityError",
     
     # Safe utilities - direct access to commonly used functions
     "safe_get", "safe_divide", "safe_max", "safe_min", "safe_sum",
     "safe_read_file", "safe_write_file", "safe_file_exists", 
     "safe_get_file_size", "safe_list_files",
+    "safe_open", "find_file", "project_root",
+    
+    # Input validation functions
+    "ask_int", "ask_float", "ask_str", "ask_choice",
     
     # Learning tools - direct access to educational functions
     "generate_example", "show_best_practice", 
@@ -75,7 +86,7 @@ __all__ = [
     "utils", "decorators", "helpers",
     
     # New modules for advanced usage
-    "errors", "safe", "learn", "legacy",
+    "errors", "safe", "learn", "legacy", "input_utils",
     
     # Enhancement modules (fishertools-enhancements)
     "learning", "documentation", "examples", "config", "integration"

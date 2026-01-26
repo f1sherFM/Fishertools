@@ -238,3 +238,123 @@ def safe_list_files(directory: Union[str, Path], pattern: str = "*", default: Op
         return sorted(files)
     except (OSError, ValueError):
         return default
+
+
+
+def project_root(start_dir: Optional[Union[str, Path]] = None) -> str:
+    """
+    Detect and return the project root directory.
+    
+    Looks for markers: setup.py, pyproject.toml, .git, .gitignore
+    
+    Args:
+        start_dir: Starting directory (default: current directory)
+        
+    Returns:
+        Path to project root
+        
+    Raises:
+        RuntimeError: If project root cannot be determined
+        
+    Examples:
+        >>> root = project_root()
+        >>> root = project_root("/path/to/subdir")
+    """
+    if start_dir is None:
+        start_dir = Path.cwd()
+    else:
+        start_dir = Path(start_dir)
+    
+    # Markers that indicate project root
+    markers = ['setup.py', 'pyproject.toml', '.git', '.gitignore']
+    
+    current = start_dir.resolve()
+    
+    # Walk up the directory tree
+    while True:
+        # Check if any marker exists in current directory
+        for marker in markers:
+            if (current / marker).exists():
+                return str(current)
+        
+        # Move to parent directory
+        parent = current.parent
+        if parent == current:
+            # Reached filesystem root without finding project root
+            raise RuntimeError(f"Could not determine project root starting from {start_dir}")
+        
+        current = parent
+
+
+def find_file(filename: str, start_dir: Optional[Union[str, Path]] = None) -> Optional[str]:
+    """
+    Search for a file in the project directory tree.
+    
+    Args:
+        filename: Name of file to find
+        start_dir: Starting directory (default: project root)
+        
+    Returns:
+        Full path to file if found, None otherwise
+        
+    Examples:
+        >>> path = find_file("setup.py")
+        >>> path = find_file("config.json", "/path/to/start")
+    """
+    if start_dir is None:
+        try:
+            start_dir = project_root()
+        except RuntimeError:
+            start_dir = Path.cwd()
+    else:
+        start_dir = Path(start_dir)
+    
+    start_dir = Path(start_dir).resolve()
+    
+    # Search for the file
+    for path in start_dir.rglob(filename):
+        if path.is_file():
+            return str(path)
+    
+    return None
+
+
+def safe_open(filepath: Union[str, Path], mode: str = 'r', encoding: str = 'utf-8'):
+    """
+    Safely open a file with helpful error messages.
+    
+    Args:
+        filepath: Path to file (relative or absolute)
+        mode: File open mode ('r', 'w', 'a', etc.)
+        encoding: Text encoding (default: utf-8)
+        
+    Returns:
+        File object
+        
+    Raises:
+        FileNotFoundError: With helpful suggestions if file not found
+        PermissionError: With helpful suggestions if permission denied
+        
+    Examples:
+        >>> with safe_open("data.txt") as f:
+        ...     content = f.read()
+    """
+    from ..errors.exceptions import SafeUtilityError
+    
+    filepath = Path(filepath)
+    
+    # If relative path, try to resolve relative to project root
+    if not filepath.is_absolute():
+        try:
+            root = project_root()
+            filepath = Path(root) / filepath
+        except RuntimeError:
+            # If project root not found, use as-is
+            pass
+    
+    try:
+        return open(filepath, mode, encoding=encoding)
+    except FileNotFoundError as e:
+        raise FileNotFoundError(f"File not found: {filepath}") from e
+    except PermissionError as e:
+        raise PermissionError(f"Permission denied: {filepath}") from e
