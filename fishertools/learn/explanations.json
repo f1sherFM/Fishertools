@@ -128,5 +128,25 @@
     "description": "Context manager statement that automatically handles resource management, ensuring files are properly closed.",
     "when_to_use": "Always use 'with' when working with files to ensure they are properly closed even if an error occurs.",
     "example": "with open(\"data.txt\", \"r\") as file:\n    for line in file:\n        print(line.strip())\n\nwith open(\"output.txt\", \"w\") as file:\n    file.write(\"Data\")"
+  },
+  "import": {
+    "description": "Statement that loads a module or specific items from a module into your program. Modules contain reusable code.",
+    "when_to_use": "Use import to access functions, classes, and variables from other modules or libraries.",
+    "example": "import math\nprint(math.pi)\nprint(math.sqrt(16))\n\nfrom datetime import datetime\nnow = datetime.now()\nprint(now)"
+  },
+  "slice": {
+    "description": "Technique to extract a portion of a sequence (list, tuple, string) using start:stop:step notation.",
+    "when_to_use": "Use slicing to get subsets of sequences, reverse sequences, or extract every nth element.",
+    "example": "numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]\nprint(numbers[2:5])\nprint(numbers[:3])\nprint(numbers[::2])\nprint(numbers[::-1])"
+  },
+  "list_comprehension": {
+    "description": "Concise way to create a new list by applying an expression to each item in an existing sequence.",
+    "when_to_use": "Use list comprehensions for creating filtered or transformed lists in a single, readable line.",
+    "example": "numbers = [1, 2, 3, 4, 5]\nsquared = [x ** 2 for x in numbers]\nprint(squared)\n\nevens = [x for x in numbers if x % 2 == 0]\nprint(evens)"
+  },
+  "enumerate": {
+    "description": "Built-in function that returns both the index and value when iterating over a sequence.",
+    "when_to_use": "Use enumerate when you need both the position and value of items in a loop.",
+    "example": "fruits = [\"apple\", \"banana\", \"orange\"]\nfor index, fruit in enumerate(fruits):\n    print(f\"{index}: {fruit}\")\n\nfor i, char in enumerate(\"hello\"):\n    print(f\"Position {i}: {char}\")"
   }
 }

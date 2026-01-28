@@ -358,3 +358,211 @@ def safe_open(filepath: Union[str, Path], mode: str = 'r', encoding: str = 'utf-
         raise FileNotFoundError(f"File not found: {filepath}") from e
     except PermissionError as e:
         raise PermissionError(f"Permission denied: {filepath}") from e
+
+
+
+# ============================================================================
+# New file utility functions for fishertools-file-utils spec
+# ============================================================================
+
+import hashlib
+
+
+def ensure_dir(path: Union[str, Path]) -> Path:
+    """
+    Создаёт директорию рекурсивно, как os.makedirs с exist_ok=True.
+    
+    Args:
+        path: Путь к директории (str или Path).
+    
+    Returns:
+        Path: Объект pathlib.Path созданной директории.
+    
+    Raises:
+        OSError: Если директория не может быть создана.
+        PermissionError: Если нет прав доступа.
+        
+    Examples:
+        >>> ensure_dir("/path/to/directory")
+        PosixPath('/path/to/directory')
+        >>> ensure_dir("./nested/dir/structure")
+        PosixPath('./nested/dir/structure')
+    """
+    try:
+        path_obj = Path(path)
+        path_obj.mkdir(parents=True, exist_ok=True)
+        return path_obj
+    except PermissionError as e:
+        raise PermissionError(f"Permission denied creating directory: {path}") from e
+    except OSError as e:
+        raise OSError(f"Failed to create directory: {path}") from e
+
+
+def get_file_hash(
+    file_path: Union[str, Path],
+    algorithm: str = 'sha256'
+) -> str:
+    """
+    Вычисляет хэш файла потоковым методом (8KB чанки).
+    
+    Args:
+        file_path: Путь к файлу (str или Path).
+        algorithm: Алгоритм хэширования (md5, sha1, sha256, sha512, blake2b).
+    
+    Returns:
+        str: Хэш файла в hex формате.
+    
+    Raises:
+        FileNotFoundError: Если файл не существует.
+        ValueError: Если алгоритм не поддерживается.
+        PermissionError: Если нет прав доступа на чтение.
+        
+    Examples:
+        >>> get_file_hash("data.txt")
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+        >>> get_file_hash("data.txt", algorithm='md5')
+        'd41d8cd98f00b204e9800998ecf8427e'
+    """
+    # Supported algorithms
+    supported_algorithms = {'md5', 'sha1', 'sha256', 'sha512', 'blake2b'}
+    
+    # Validate algorithm
+    if algorithm not in supported_algorithms:
+        raise ValueError(
+            f"Unsupported algorithm: {algorithm}. "
+            f"Supported algorithms: {', '.join(sorted(supported_algorithms))}"
+        )
+    
+    # Convert to Path object
+    file_path_obj = Path(file_path)
+    
+    # Check if file exists
+    if not file_path_obj.exists():
+        raise FileNotFoundError(f"File not found: {file_path}")
+    
+    # Create hash object
+    if algorithm == 'blake2b':
+        hash_obj = hashlib.blake2b()
+    else:
+        hash_obj = hashlib.new(algorithm)
+    
+    # Read file in chunks and update hash
+    chunk_size = 8192  # 8KB chunks
+    try:
+        with open(file_path_obj, 'rb') as f:
+            while True:
+                chunk = f.read(chunk_size)
+                if not chunk:
+                    break
+                hash_obj.update(chunk)
+    except PermissionError as e:
+        raise PermissionError(f"Permission denied reading file: {file_path}") from e
+    except OSError as e:
+        raise OSError(f"Error reading file: {file_path}") from e
+    
+    return hash_obj.hexdigest()
+
+
+def read_last_lines(
+    file_path: Union[str, Path],
+    n: int = 10
+) -> List[str]:
+    """
+    Читает последние N строк файла буферным алгоритмом от конца.
+    
+    Args:
+        file_path: Путь к файлу (str или Path).
+        n: Количество строк для чтения (по умолчанию 10).
+    
+    Returns:
+        List[str]: Список последних N строк без символов новой строки.
+    
+    Raises:
+        FileNotFoundError: Если файл не существует.
+        PermissionError: Если нет прав доступа на чтение.
+        
+    Examples:
+        >>> read_last_lines("log.txt", n=5)
+        ['line 1', 'line 2', 'line 3', 'line 4', 'line 5']
+        >>> read_last_lines("data.txt")
+        ['last line']
+    """
+    # Convert to Path object
+    file_path_obj = Path(file_path)
+    
+    # Check if file exists
+    if not file_path_obj.exists():
+        raise FileNotFoundError(f"File not found: {file_path}")
+    
+    try:
+        with open(file_path_obj, 'rb') as f:
+            # Get file size
+            f.seek(0, 2)  # Seek to end
+            file_size = f.tell()
+            
+            # If file is empty, return empty list
+            if file_size == 0:
+                return []
+            
+            # Buffer for reading from end
+            buffer_size = 8192  # 8KB buffer
+            lines = []
+            position = file_size
+            
+            # Read file from end in chunks
+            while position > 0 and len(lines) < n:
+                # Calculate how much to read
+                read_size = min(buffer_size, position)
+                position -= read_size
+                
+                # Seek and read
+                f.seek(position)
+                chunk = f.read(read_size)
+                
+                # Decode chunk
+                try:
+                    text = chunk.decode('utf-8')
+                except UnicodeDecodeError:
+                    # Try with latin-1 as fallback
+                    text = chunk.decode('latin-1', errors='replace')
+                
+                # Split by newlines and process
+                chunk_lines = text.split('\n')
+                
+                # If we're not at the start of file, the first line is incomplete
+                if position > 0:
+                    # Keep the incomplete line for next iteration
+                    incomplete_line = chunk_lines[0]
+                    chunk_lines = chunk_lines[1:]
+                else:
+                    # At start of file, all lines are complete
+                    incomplete_line = None
+                
+                # Add lines in reverse order (we're reading backwards)
+                for line in reversed(chunk_lines):
+                    if line or lines:  # Skip empty lines at the end
+                        lines.insert(0, line)
+                        if len(lines) >= n:
+                            break
+                
+                # If we're at the start and have incomplete line, add it
+                if position == 0 and incomplete_line:
+                    lines.insert(0, incomplete_line)
+            
+            # Clean up: remove empty lines at the end and limit to n
+            result = []
+            for line in lines:
+                # Strip newline characters
+                cleaned = line.rstrip('\r\n')
+                result.append(cleaned)
+            
+            # Return only the last n lines
+            return result[-n:] if len(result) > n else result
+    
+    except PermissionError as e:
+        raise PermissionError(f"Permission denied reading file: {file_path}") from e
+    except OSError as e:
+        raise OSError(f"Error reading file: {file_path}") from e
+
+
+__all__ = ['ensure_dir', 'get_file_hash', 'read_last_lines']

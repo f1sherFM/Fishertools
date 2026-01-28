@@ -128,7 +128,7 @@ except Exception as e:
 Функции, которые предотвращают типичные ошибки новичков:
 
 ```python
-from fishertools.safe import safe_get, safe_divide, safe_read_file
+from fishertools.safe import safe_get, safe_divide, safe_read_file, ensure_dir, get_file_hash, read_last_lines
 
 # Безопасное получение элемента
 numbers = [1, 2, 3]
@@ -139,6 +139,16 @@ result = safe_divide(10, 0, 0)  # 0 вместо ошибки
 
 # Безопасное чтение файла
 content = safe_read_file("file.txt", default="файл не найден")
+
+# Рекурсивное создание директорий
+path = ensure_dir("./data/nested/directory")  # Создаст все промежуточные папки
+
+# Вычисление хэша файла
+file_hash = get_file_hash("data.txt")  # SHA256 по умолчанию
+md5_hash = get_file_hash("data.txt", algorithm='md5')
+
+# Чтение последних строк файла
+last_lines = read_last_lines("log.txt", n=10)  # Последние 10 строк
 ```
 
 ### 📚 Обучающие инструменты
@@ -210,16 +220,35 @@ config = QuickConfig({"debug": True})
 
 ## 📦 Установка
 
-```bash
-pip install fishertools
-```
+### Текущий статус версии
 
-Или из исходников:
+⚠️ **Важно:** Версия 0.3.1 ещё не опубликована на PyPI. Последняя версия на PyPI - это 0.2.1.
+
+Для установки версии 0.3.1 используйте один из следующих способов:
+
+### Установка из исходников
+
 ```bash
 git clone https://github.com/f1sherFM/My_1st_library_python.git
 cd My_1st_library_python
 pip install -e .
 ```
+
+### Установка последней версии с PyPI (v0.2.1)
+
+```bash
+pip install fishertools
+```
+
+### Установка для разработки
+
+```bash
+git clone https://github.com/f1sherFM/My_1st_library_python.git
+cd My_1st_library_python
+pip install -e ".[dev]"
+```
+
+**Примечание:** Версия 0.3.1 будет опубликована на PyPI после завершения тестирования и финализации документации.
 
 ## 🚀 Быстрый старт
 
@@ -257,13 +286,79 @@ print(explanation["when_to_use"])    # Когда использовать
 print(explanation["example"])        # Пример кода
 ```
 
-**Поддерживаемые темы:**
+### Структура данных explain()
 
-- **Типы данных**: int, float, str, bool, list, tuple, set, dict
-- **Управляющие конструкции**: if, for, while, break, continue
-- **Функции**: function, return, lambda, *args, **kwargs
-- **Обработка ошибок**: try, except, finally, raise
-- **Работа с файлами**: open, read, write, with
+Функция `explain()` возвращает словарь с тремя ключами, содержащими полную информацию о теме:
+
+```python
+from fishertools.learn import explain
+
+explanation = explain("list")
+print(explanation)
+# {
+#     "description": "Ordered collection of items that can be of different types. Lists are mutable, meaning you can add, remove, or modify items.",
+#     "when_to_use": "Use lists when you need to store multiple items in order and may need to modify them later. Perfect for storing collections of data.",
+#     "example": "fruits = [\"apple\", \"banana\", \"orange\"]\nfruits.append(\"grape\")\nprint(fruits[0])\nprint(len(fruits))\nfor fruit in fruits:\n    print(fruit)"
+# }
+```
+
+**Доступ к полям:**
+
+```python
+from fishertools.learn import explain
+
+explanation = explain("list")
+
+# Получить описание
+print(explanation["description"])
+# Ordered collection of items that can be of different types...
+
+# Получить информацию о применении
+print(explanation["when_to_use"])
+# Use lists when you need to store multiple items in order...
+
+# Получить пример кода
+print(explanation["example"])
+# fruits = ["apple", "banana", "orange"]
+# fruits.append("grape")
+# print(fruits[0])
+# ...
+```
+
+### Поддерживаемые темы
+
+| Категория | Тема | Описание |
+|-----------|------|---------|
+| **Типы данных** | int | Integer data type for whole numbers without decimals. Integers can be positive, negative, or zero. |
+| **Типы данных** | float | Floating-point data type for numbers with decimal places. Floats represent real numbers with fractional parts. |
+| **Типы данных** | str | String data type for text. Strings are sequences of characters enclosed in quotes (single, double, or triple). |
+| **Типы данных** | bool | Boolean data type with only two possible values: True or False. Used for logical operations and conditions. |
+| **Типы данных** | list | Ordered collection of items that can be of different types. Lists are mutable, meaning you can add, remove, or modify items. |
+| **Типы данных** | tuple | Ordered collection of items similar to lists, but immutable. Once created, tuples cannot be modified. |
+| **Типы данных** | set | Unordered collection of unique items. Sets automatically remove duplicates and are useful for membership testing. |
+| **Типы данных** | dict | Unordered collection of key-value pairs. Dictionaries allow you to store and retrieve data using meaningful keys instead of numeric indices. |
+| **Управляющие конструкции** | if | Conditional statement that executes code only if a condition is true. Forms the basis of decision-making in programs. |
+| **Управляющие конструкции** | for | Loop statement that iterates over a sequence (list, tuple, string, etc.) and executes code for each item. |
+| **Управляющие конструкции** | while | Loop statement that repeatedly executes code as long as a condition is true. Useful when you don't know how many iterations you need. |
+| **Управляющие конструкции** | break | Statement that immediately exits the current loop, skipping any remaining iterations. |
+| **Управляющие конструкции** | continue | Statement that skips the current iteration of a loop and moves to the next iteration. |
+| **Функции** | function | Reusable block of code that performs a specific task. Functions help organize code and avoid repetition. |
+| **Функции** | return | Statement that sends a value back from a function to the caller. A function can return any type of data. |
+| **Функции** | lambda | Anonymous function defined with a single expression. Lambdas are useful for short, simple functions. |
+| **Функции** | *args | Special parameter that allows a function to accept any number of positional arguments as a tuple. |
+| **Функции** | **kwargs | Special parameter that allows a function to accept any number of keyword arguments as a dictionary. |
+| **Обработка ошибок** | try | Statement that begins a block of code where exceptions might occur. Used with except to handle errors gracefully. |
+| **Обработка ошибок** | except | Statement that catches and handles specific exceptions that occur in a try block. |
+| **Обработка ошибок** | finally | Statement that executes code after try and except blocks, regardless of whether an exception occurred. |
+| **Обработка ошибок** | raise | Statement that manually raises an exception to signal an error condition in your code. |
+| **Работа с файлами** | open | Function that opens a file and returns a file object. Used to read from or write to files. |
+| **Работа с файлами** | read | Method that reads the entire contents of a file as a string, or reads a specific number of characters. |
+| **Работа с файлами** | write | Method that writes data to a file. Creates the file if it doesn't exist, or overwrites it if it does. |
+| **Работа с файлами** | with | Context manager statement that automatically handles resource management, ensuring files are properly closed. |
+| **Типы данных** | slice | Technique to extract a portion of a sequence (list, tuple, string) using start:stop:step notation. |
+| **Типы данных** | list_comprehension | Concise way to create a new list by applying an expression to each item in an existing sequence. |
+| **Типы данных** | enumerate | Built-in function that returns both the index and value when iterating over a sequence. |
+| **Управляющие конструкции** | import | Statement that loads a module or specific items from a module into your program. Modules contain reusable code. |
 
 **Пример использования:**
 
@@ -283,6 +378,27 @@ print(list_info)
 for_info = explain("for")
 print(for_info["example"])
 ```
+
+### Расширение и локализация
+
+Все темы хранятся в JSON файле `fishertools/learn/explanations.json`, что делает их легко расширяемыми и локализуемыми:
+
+**Для контрибьюторов:**
+- Добавьте новую тему в JSON файл `fishertools/learn/explanations.json`
+- Каждая тема должна содержать три поля: `description`, `when_to_use`, и `example`
+- Функция `explain()` автоматически загружает все темы из этого файла
+
+**Для локализации:**
+- Переведите существующие темы на другой язык
+- Создайте новый JSON файл с переводами
+- Используйте параметр `language` при вызове `explain()` для выбора языка
+
+**Для кастомизации:**
+- Используйте свой JSON файл с дополнительными темами
+- Передайте путь к файлу при инициализации модуля
+- Это позволяет добавлять специфичные для вашего проекта темы
+
+Благодаря JSON-хранилищу, расширение fishertools не требует изменения кода - просто добавьте новые записи в JSON файл!
 
 ### Готовые паттерны для типичных задач
 
@@ -444,15 +560,71 @@ python -m fishertools.examples.cli_example
 
 ### Поддерживаемые типы ошибок
 
-Fishertools объясняет следующие типы ошибок Python:
+Fishertools объясняет следующие типы ошибок Python. Это полный список поддерживаемых типов ошибок:
 
-- **TypeError** - ошибки типов данных
-- **ValueError** - неправильные значения
-- **AttributeError** - отсутствующие атрибуты
-- **IndexError** - выход за границы списка
-- **KeyError** - отсутствующие ключи словаря
-- **ImportError** - проблемы с импортом модулей
-- **SyntaxError** - синтаксические ошибки
+#### Ошибки типов и значений
+
+- **TypeError** - возникает при попытке выполнить операцию над значениями несовместимых типов (например, сложить число и строку)
+- **ValueError** - возникает когда функция получает аргумент правильного типа, но неправильного значения (например, int("abc"))
+
+#### Ошибки доступа к данным
+
+- **AttributeError** - возникает при попытке доступа к несуществующему атрибуту объекта
+- **IndexError** - возникает при попытке доступа к элементу списка по индексу, который выходит за границы списка
+- **KeyError** - возникает при попытке доступа к несуществующему ключу в словаре
+
+#### Ошибки импорта и синтаксиса
+
+- **ImportError** - возникает при проблемах с импортом модулей (модуль не найден или ошибка в модуле)
+- **SyntaxError** - возникает при синтаксических ошибках в коде (неправильный синтаксис Python)
+
+#### Ошибки имён и вычислений
+
+- **NameError** - возникает при использовании переменной или имени, которое не было определено
+- **ZeroDivisionError** - возникает при попытке деления на ноль
+
+#### Ошибки файловой системы
+
+- **FileNotFoundError** - возникает при попытке открыть файл, который не существует
+
+**Примеры использования:**
+
+```python
+from fishertools import explain_error
+
+# Пример 1: TypeError
+try:
+    result = "5" + 10
+except Exception as e:
+    explain_error(e)
+
+# Пример 2: ValueError
+try:
+    number = int("abc")
+except Exception as e:
+    explain_error(e)
+
+# Пример 3: IndexError
+try:
+    items = [1, 2, 3]
+    print(items[10])
+except Exception as e:
+    explain_error(e)
+
+# Пример 4: KeyError
+try:
+    data = {"name": "Alice"}
+    print(data["age"])
+except Exception as e:
+    explain_error(e)
+
+# Пример 5: FileNotFoundError
+try:
+    with open("nonexistent.txt") as f:
+        content = f.read()
+except Exception as e:
+    explain_error(e)
+```
 
 ### Безопасные утилиты
 
@@ -462,6 +634,9 @@ Fishertools объясняет следующие типы ошибок Python:
 - `safe_min(collection, default)` - минимум из коллекции
 - `safe_sum(collection, default)` - сумма элементов
 - `safe_read_file(path, default)` - чтение файла без ошибок
+- `ensure_dir(path)` - рекурсивное создание директорий
+- `get_file_hash(path, algorithm='sha256')` - вычисление хэша файла
+- `read_last_lines(path, n=10)` - чтение последних N строк файла
 
 ### Обучающие функции
 
@@ -469,6 +644,59 @@ Fishertools объясняет следующие типы ошибок Python:
 - `generate_example(concept)` - сгенерировать пример кода
 - `list_available_concepts()` - список доступных концепций
 - `list_available_topics()` - список доступных тем
+
+## ⚠️ Ограничения
+
+Текущая версия fishertools имеет следующие известные ограничения:
+
+### explain_error() и SyntaxError
+
+`explain_error()` не может объяснить `SyntaxError` до исполнения кода. Это связано с тем, что синтаксические ошибки обнаруживаются на этапе парсинга (анализа кода), который происходит **до** выполнения программы. Это означает, что вы не сможете поймать `SyntaxError` в блоке `try-except`, так как программа не будет запущена вообще.
+
+**Пример:**
+```python
+# Это вызовет SyntaxError ДО выполнения программы
+try:
+    x = 5 +  # Синтаксическая ошибка - неполное выражение
+except SyntaxError as e:
+    explain_error(e)  # Этот код никогда не выполнится
+```
+
+Однако вы можете объяснить другие типы ошибок, которые возникают во время выполнения:
+```python
+# Это работает - ошибка возникает во время выполнения
+try:
+    result = 10 / 0  # ZeroDivisionError
+except Exception as e:
+    explain_error(e)  # Работает корректно
+```
+
+### explain() и объектно-ориентированное программирование
+
+Функция `explain()` пока не поддерживает объяснение классов и концепций OOP (объектно-ориентированного программирования), таких как:
+- Классы и объекты
+- Наследование
+- Полиморфизм
+- Инкапсуляция
+- Методы и свойства класса
+
+Поддержка OOP планируется в будущих версиях fishertools. На данный момент `explain()` работает с базовыми типами данных и управляющими конструкциями.
+
+**Текущие возможности explain():**
+```python
+from fishertools.learn import explain
+
+# Это работает
+explain("list")        # Типы данных
+explain("for")         # Управляющие конструкции
+explain("function")    # Функции
+explain("try")         # Обработка ошибок
+
+# Это пока не поддерживается
+# explain("class")      # Классы
+# explain("inheritance") # Наследование
+# explain("polymorphism") # Полиморфизм
+```
 
 ## 🧪 Тестирование
 
