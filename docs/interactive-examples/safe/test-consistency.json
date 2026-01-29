@@ -1,0 +1,11 @@
+{
+  "id": "test-consistency",
+  "module": "safe",
+  "title": "Test Example",
+  "code": "result = 2 + 2",
+  "expected_output": "output",
+  "explanation": "This is a test",
+  "variations": [],
+  "difficulty": "beginner",
+  "tags": []
+}

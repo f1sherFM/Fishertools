@@ -1,0 +1,11 @@
+{
+  "id": "test-multi-4",
+  "module": "learn",
+  "title": "\u00ee\u0014\ubd37\rC",
+  "code": "x = 1",
+  "expected_output": "output",
+  "explanation": "This is a test",
+  "variations": [],
+  "difficulty": "beginner",
+  "tags": []
+}

@@ -1,0 +1,11 @@
+{
+  "id": "test-multi-8",
+  "module": "documentation",
+  "title": "W\t\u00e9\u00e0/\u00d5\u00b0I\ud986\udd5d\udad3\ude87\u00f3\u0096\u00feJ{\u0082I\u001c\u00a5\ud888\ude8c",
+  "code": "x = 1",
+  "expected_output": "output",
+  "explanation": "This is a test",
+  "variations": [],
+  "difficulty": "beginner",
+  "tags": []
+}

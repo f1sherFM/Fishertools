@@ -1,8 +1,8 @@
 """
-Data models for the Documentation Generation module.
+Data models for the Documentation Generation module and Extended Documentation system.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Any
 from enum import Enum
 
@@ -33,7 +33,7 @@ class FunctionInfo:
     module_path: str
     line_number: int
     examples: List[str] = None
-    
+
     def __post_init__(self):
         if self.examples is None:
             self.examples = []
@@ -56,7 +56,7 @@ class NavigationTree:
     name: str
     path: str
     children: List['NavigationTree'] = None
-    
+
     def __post_init__(self):
         if self.children is None:
             self.children = []
@@ -87,7 +87,7 @@ class PublishResult:
     url: Optional[str] = None
     error_message: Optional[str] = None
     build_log: List[str] = None
-    
+
     def __post_init__(self):
         if self.build_log is None:
             self.build_log = []
@@ -124,3 +124,121 @@ class StructureDiagram:
     data: Any
     visualization: str
     title: Optional[str] = None
+
+
+# Extended Documentation System Models
+
+
+@dataclass
+class CodeExample:
+    """Represents a single code example."""
+    id: str
+    module: str  # errors, safe, learn, patterns, config, documentation
+    title: str
+    code: str
+    expected_output: str
+    explanation: str
+    variations: List[str] = field(default_factory=list)
+    difficulty: str = "beginner"  # beginner, intermediate, advanced
+    tags: List[str] = field(default_factory=list)
+
+
+@dataclass
+class Diagram:
+    """Represents a diagram."""
+    id: str
+    title: str
+    type: str  # architecture, flow, concept
+    modules: List[str] = field(default_factory=list)
+    description: str = ""
+    content: str = ""  # Mermaid or SVG
+    labels: Dict[str, str] = field(default_factory=dict)
+    legend: str = ""
+
+
+@dataclass
+class FAQEntry:
+    """Represents a FAQ entry."""
+    id: str
+    question: str
+    answer: str
+    topic: str  # module or topic name
+    code_example: Optional[str] = None
+    related_entries: List[str] = field(default_factory=list)
+    difficulty: str = "beginner"  # beginner, intermediate, advanced
+    tags: List[str] = field(default_factory=list)
+
+
+@dataclass
+class GuideSection:
+    """Represents a section in a guide."""
+    id: str
+    title: str
+    content: str
+    difficulty: str = "beginner"  # beginner, intermediate, advanced
+    estimated_time: int = 0  # minutes
+    exercises: List[str] = field(default_factory=list)
+    checkpoints: List[str] = field(default_factory=list)
+    code_examples: List[str] = field(default_factory=list)
+
+
+@dataclass
+class Guide:
+    """Represents a complete guide."""
+    id: str
+    module: str
+    title: str
+    description: str = ""
+    prerequisites: List[str] = field(default_factory=list)
+    sections: List[GuideSection] = field(default_factory=list)
+    reading_order: List[str] = field(default_factory=list)
+
+
+@dataclass
+class Practice:
+    """Represents a best practice."""
+    id: str
+    title: str
+    category: str  # error_handling, safety, learning
+    module: str
+    description: str = ""
+    correct_example: str = ""
+    incorrect_example: str = ""
+    explanation: str = ""
+    performance_notes: Optional[str] = None
+    tags: List[str] = field(default_factory=list)
+
+
+@dataclass
+class TroubleshootingEntry:
+    """Represents a troubleshooting entry."""
+    id: str
+    error_type: str
+    title: str
+    description: str = ""
+    cause: str = ""
+    solution: str = ""
+    step_by_step: List[str] = field(default_factory=list)
+    prevention: str = ""
+    module: str = ""
+    related_entries: List[str] = field(default_factory=list)
+    tags: List[str] = field(default_factory=list)
+
+
+@dataclass
+class NavigationNode:
+    """Represents a navigation node."""
+    id: str
+    title: str
+    path: str
+    parent: Optional[str] = None
+    children: List[str] = field(default_factory=list)
+    type: str = ""  # guide, example, faq, practice, troubleshooting
+
+
+@dataclass
+class ValidationResult:
+    """Represents validation result."""
+    is_valid: bool
+    errors: List[str] = field(default_factory=list)
+    warnings: List[str] = field(default_factory=list)

@@ -1,0 +1,11 @@
+{
+  "id": "test-multi-7",
+  "module": "documentation",
+  "title": "\u00fe\u00d4\u00fcB",
+  "code": "x = 1",
+  "expected_output": "output",
+  "explanation": "This is a test",
+  "variations": [],
+  "difficulty": "beginner",
+  "tags": []
+}

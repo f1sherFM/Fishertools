@@ -1,0 +1,11 @@
+{
+  "id": "test-org-safe",
+  "module": "safe",
+  "title": "Test Example",
+  "code": "x = 1",
+  "expected_output": "output",
+  "explanation": "This is a test",
+  "variations": [],
+  "difficulty": "beginner",
+  "tags": []
+}

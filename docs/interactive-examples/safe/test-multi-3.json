@@ -1,0 +1,11 @@
+{
+  "id": "test-multi-3",
+  "module": "safe",
+  "title": "\u00f0\u00ac\u00b3\ud919\udc20",
+  "code": "x = 1",
+  "expected_output": "output",
+  "explanation": "This is a test",
+  "variations": [],
+  "difficulty": "beginner",
+  "tags": []
+}

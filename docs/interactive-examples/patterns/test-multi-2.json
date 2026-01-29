@@ -1,0 +1,11 @@
+{
+  "id": "test-multi-2",
+  "module": "patterns",
+  "title": "\ud903\ude09\u00e2=\u0094",
+  "code": "x = 1",
+  "expected_output": "output",
+  "explanation": "This is a test",
+  "variations": [],
+  "difficulty": "beginner",
+  "tags": []
+}

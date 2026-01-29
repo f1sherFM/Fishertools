@@ -1,0 +1,11 @@
+{
+  "id": "test-multi-7",
+  "module": "safe",
+  "title": "\uda24\udeb7\u008eyc",
+  "code": "x = 1",
+  "expected_output": "output",
+  "explanation": "This is a test",
+  "variations": [],
+  "difficulty": "beginner",
+  "tags": []
+}

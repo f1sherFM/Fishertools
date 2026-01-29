@@ -1,0 +1,11 @@
+{
+  "id": "test-multi-9",
+  "module": "errors",
+  "title": "\ud8ad\udd8bS\u00e6\u008c\uda87\udf44 \u008c\u00bd\u001a\u008f\u000e\n\u0003cZ\t",
+  "code": "x = 1",
+  "expected_output": "output",
+  "explanation": "This is a test",
+  "variations": [],
+  "difficulty": "beginner",
+  "tags": []
+}
