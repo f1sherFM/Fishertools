@@ -272,6 +272,61 @@ show_best_practice("functions")
 
 ## 📚 Обучающие инструменты v0.3.1
 
+### Knowledge Engine - Образовательная система для Python
+
+Knowledge Engine предоставляет структурированные объяснения 35+ Python концепций для новичков с примерами, типичными ошибками и связанными темами:
+
+```python
+from fishertools.learn import get_topic, list_topics, search_topics, get_learning_path
+
+# Получить информацию о теме
+topic = get_topic("Lists")
+print(topic["description"])      # Описание
+print(topic["when_to_use"])      # Когда использовать
+print(topic["example"])          # Пример кода
+print(topic["common_mistakes"])  # Типичные ошибки
+
+# Получить список всех тем
+all_topics = list_topics()
+print(f"Всего тем: {len(all_topics)}")
+
+# Поиск по ключевому слову
+results = search_topics("loop")
+print(f"Найдено тем о циклах: {len(results)}")
+
+# Получить рекомендуемый путь обучения
+learning_path = get_learning_path()
+for i, topic_name in enumerate(learning_path[:5], 1):
+    print(f"{i}. {topic_name}")
+```
+
+**Структура темы:**
+
+```python
+{
+    "topic": "Lists",
+    "category": "Collections",
+    "description": "Ordered collections of items...",
+    "when_to_use": "Use lists when you need to store multiple items...",
+    "example": "fruits = ['apple', 'banana']\nprint(fruits[0])",
+    "common_mistakes": ["Forgetting that indexing starts at 0", ...],
+    "related_topics": ["List Indexing", "List Slicing", ...],
+    "difficulty": "beginner",
+    "order": 6
+}
+```
+
+**Категории тем (35 тем всего):**
+
+- **Basic Types** (5 тем): Variables, Integers, Strings, Booleans, Type Conversion
+- **Collections** (6 тем): Lists, List Indexing, List Slicing, Dictionaries, Tuples, Sets
+- **Control Flow** (5 тем): If Statements, Comparison Operators, Logical Operators, For Loops, While Loops
+- **Functions** (5 тем): Function Definition, Parameters, Return Statements, Default Parameters, Variable Scope
+- **String Operations** (4 темы): String Methods, Formatting, Concatenation, Indexing
+- **File Operations** (3 темы): Reading Files, Writing Files, File Paths
+- **Error Handling** (3 темы): Try-Except Blocks, Common Exceptions, Raising Exceptions
+- **Advanced Basics** (4 темы): List Comprehensions, Lambda Functions, Map and Filter, Enumerate
+
 ### Объяснение Python концепций с помощью explain()
 
 Функция `explain()` предоставляет структурированные объяснения для 30+ Python тем с примерами кода:

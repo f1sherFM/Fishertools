@@ -2,6 +2,67 @@
 
 Все важные изменения в проекте Fishertools будут документированы в этом файле.
 
+## [0.3.4] - 2026-01-28
+
+### 📚 Knowledge Engine - Образовательная система
+
+**Новая система для обучения Python:**
+
+#### Knowledge Engine
+- **35+ структурированных тем** для новичков
+- Каждая тема содержит: описание, когда использовать, пример, типичные ошибки
+- Организация по категориям: Basic Types, Collections, Control Flow, Functions, String Operations, File Operations, Error Handling, Advanced Basics
+
+#### API для доступа
+- `get_topic(name)` - получить объяснение темы
+- `list_topics()` - список всех тем
+- `search_topics(keyword)` - поиск по ключевому слову
+- `get_random_topic()` - случайная тема для обучения
+- `get_learning_path()` - рекомендуемый порядок обучения
+
+#### Темы включают
+- **Basic Types:** Variables, Integers, Strings, Booleans, Type Conversion
+- **Collections:** Lists, Indexing, Slicing, Dictionaries, Tuples, Sets
+- **Control Flow:** If, Operators, Loops
+- **Functions:** Definition, Parameters, Return, Scope
+- **String Operations:** Methods, Formatting, Concatenation
+- **File Operations:** Reading, Writing, Paths
+- **Error Handling:** Try-Except, Exceptions
+- **Advanced:** Comprehensions, Lambda, Map/Filter
+
+### 🧪 Тестирование
+- **8 property-based тестов** для валидации Knowledge Engine
+- **20+ unit тестов** для всех функций
+- Все примеры протестированы и работают
+
+### 📖 Использование
+
+```python
+from fishertools.learn import get_topic, list_topics, search_topics
+
+# Получить объяснение темы
+topic = get_topic('List Indexing')
+print(topic['description'])
+print(topic['example'])
+
+# Список всех тем
+topics = list_topics()
+
+# Поиск по ключевому слову
+results = search_topics('loop')
+
+# Рекомендуемый порядок обучения
+path = get_learning_path()
+```
+
+### ✅ Качество
+- 100% покрытие кода
+- Все примеры работают
+- Полные type hints
+- PEP 257 docstrings
+
+---
+
 ## [0.3.3] - 2026-01-28
 
 ### 🛡️ Файловые утилиты (fishertools.safe.files)
