@@ -2,7 +2,7 @@
   "id": "test-example-1",
   "module": "errors",
   "title": "Test Example",
-  "code": "result = 2 + 2",
+  "code": "x = 1\nprint(x)",
   "expected_output": "output",
   "explanation": "This is a test",
   "variations": [],

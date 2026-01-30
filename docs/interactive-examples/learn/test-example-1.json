@@ -2,7 +2,7 @@
   "id": "test-example-1",
   "module": "learn",
   "title": "Test Example",
-  "code": "data = {'key': 'value'}\nprint(data['key'])",
+  "code": "items = [1, 2, 3]\nfor item in items:\n    print(item)",
   "expected_output": "output",
   "explanation": "This is a test",
   "variations": [],

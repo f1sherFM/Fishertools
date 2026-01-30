@@ -1,7 +1,7 @@
 {
   "id": "test-multi-4",
   "module": "safe",
-  "title": "\u00a8~\u00d8\u00bd\udaec\udc84",
+  "title": "\u00ab^\u00e1",
   "code": "x = 1",
   "expected_output": "output",
   "explanation": "This is a test",

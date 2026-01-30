@@ -8,132 +8,142 @@ that prevent typical mistakes and provide helpful error messages.
 from typing import Any, Optional, Union, List, Dict, Tuple
 
 
-def safe_get(collection: Union[List, Tuple, Dict, str], index: Union[int, str], default: Any = None) -> Any:
+def safe_get(collection: Union[List, Tuple, Dict, str], 
+             index: Union[int, str], 
+             default: Any = None) -> Any:
     """
     Safely get an element from a collection by index or key.
     
-    Предотвращает ошибки IndexError и KeyError, возвращая значение по умолчанию
-    вместо исключения. Подходит для списков, кортежей, словарей и строк.
+    Works with lists, tuples, dicts, and strings. Returns default value
+    instead of raising KeyError or IndexError.
     
     Args:
-        collection: Коллекция (список, кортеж, словарь или строка)
-        index: Индекс (для списков/кортежей/строк) или ключ (для словарей)
-        default: Значение по умолчанию, если элемент не найден
+        collection: Collection (list, tuple, dict, or string)
+        index: Index (for sequences) or key (for dicts)
+        default: Value to return if element not found
         
     Returns:
-        Элемент коллекции или значение по умолчанию
+        Element from collection or default value
         
     Raises:
-        SafeUtilityError: If collection is None or unsupported type
+        SafeUtilityError: If collection is None or obviously wrong type
         
     Examples:
         >>> safe_get([1, 2, 3], 1)
         2
-        >>> safe_get([1, 2, 3], 10, "не найдено")
-        'не найдено'
-        >>> safe_get({"name": "Иван"}, "name")
-        'Иван'
-        >>> safe_get({"name": "Иван"}, "age", 0)
+        >>> safe_get([1, 2, 3], 10, "not found")
+        'not found'
+        >>> safe_get({"name": "Ivan"}, "name")
+        'Ivan'
+        >>> safe_get({"name": "Ivan"}, "age", 0)
         0
+        >>> safe_get("hello", 0)
+        'h'
+        >>> safe_get("hello", 10)
+        None
+        
+    Note:
+        We check for obviously wrong types (None, bool, numbers) to help beginners.
+        For valid collection types, we use EAFP (Easier to Ask Forgiveness than Permission).
     """
     from ..errors.exceptions import SafeUtilityError
     
-    if collection is None:
-        raise SafeUtilityError("Коллекция не может быть None. Передайте список, кортеж, словарь или строку.", 
-                             utility_name="safe_get")
+    # Check for obviously wrong types that beginners might pass
+    if collection is None or isinstance(collection, (bool, int, float, complex)):
+        raise SafeUtilityError(
+            "Коллекция не может быть None или числом. Передайте список, кортеж, словарь или строку.",
+            utility_name="safe_get"
+        )
     
-    # Для словарей используем get()
-    if isinstance(collection, dict):
-        return collection.get(index, default)
-    
-    # Для списков, кортежей и строк проверяем индекс
-    if isinstance(collection, (list, tuple, str)):
-        if not isinstance(index, int):
-            raise SafeUtilityError(f"Для {type(collection).__name__} индекс должен быть числом, получен {type(index).__name__}", 
-                                 utility_name="safe_get")
-        
-        if 0 <= index < len(collection):
-            return collection[index]
-        else:
-            return default
-    
-    # Неподдерживаемый тип коллекции
-    raise SafeUtilityError(f"Неподдерживаемый тип коллекции: {type(collection).__name__}. "
-                         f"Поддерживаются: list, tuple, dict, str", 
-                         utility_name="safe_get")
+    # For everything else, use EAFP - try and handle exceptions
+    try:
+        return collection[index]
+    except (KeyError, IndexError, TypeError):
+        # KeyError: dict key not found
+        # IndexError: sequence index out of range
+        # TypeError: wrong index type or unsupported collection
+        return default
 
 
-def safe_divide(a: Union[int, float], b: Union[int, float], default: Union[int, float] = 0) -> Union[int, float]:
+def safe_divide(a: Union[int, float], b: Union[int, float], 
+                default: Optional[Union[int, float]] = None) -> Optional[Union[int, float]]:
     """
     Safely divide two numbers with zero division handling.
     
-    Предотвращает ошибку ZeroDivisionError, возвращая значение по умолчанию
-    при делении на ноль.
+    Returns None when dividing by zero (mathematically correct: undefined).
+    You can specify a custom default value if needed.
     
     Args:
-        a: Делимое (число)
-        b: Делитель (число)
-        default: Значение по умолчанию при делении на ноль
+        a: Dividend (number)
+        b: Divisor (number)
+        default: Value to return when dividing by zero (default: None)
         
     Returns:
-        Результат деления или значение по умолчанию
+        Result of division, or default value if b is zero
         
     Raises:
-        SafeUtilityError: If arguments are not numbers
+        SafeUtilityError: If arguments are obviously wrong types (None, bool, complex, str)
         
     Examples:
         >>> safe_divide(10, 2)
         5.0
-        >>> safe_divide(10, 0)
+        >>> safe_divide(10, 0)  # Mathematically undefined
+        None
+        >>> safe_divide(10, 0, default=0)  # Explicitly specified
         0
-        >>> safe_divide(10, 0, -1)
-        -1
+        >>> safe_divide(10, 0, default=float('inf'))
+        inf
+        
+    Note:
+        Division by zero is mathematically undefined. Returning 0 by default
+        would be incorrect. Use default parameter if you need specific behavior.
     """
     from ..errors.exceptions import SafeUtilityError
     import math
     
-    # Проверяем типы входных данных
-    if not isinstance(a, (int, float)):
-        raise SafeUtilityError(f"Делимое должно быть числом, получен {type(a).__name__}", 
-                             utility_name="safe_divide")
+    # Check for obviously wrong types that beginners might pass
+    if a is None or isinstance(a, (bool, complex, str)):
+        raise SafeUtilityError(
+            f"Делимое должно быть числом (int или float), получен {type(a).__name__}",
+            utility_name="safe_divide"
+        )
     
-    if not isinstance(b, (int, float)):
-        raise SafeUtilityError(f"Делитель должен быть числом, получен {type(b).__name__}", 
-                             utility_name="safe_divide")
+    if b is None or isinstance(b, (bool, complex, str)):
+        raise SafeUtilityError(
+            f"Делитель должен быть числом (int или float), получен {type(b).__name__}",
+            utility_name="safe_divide"
+        )
     
-    if not isinstance(default, (int, float)):
-        raise SafeUtilityError(f"Значение по умолчанию должно быть числом, получен {type(default).__name__}", 
-                             utility_name="safe_divide")
-    
-    # Проверяем деление на ноль
+    # Check for zero division
     if b == 0:
         return default
     
-    # Выполняем деление
-    result = a / b
-    
-    # Проверяем на бесконечность или NaN
-    if math.isinf(result) or math.isnan(result):
+    try:
+        # Perform division
+        result = a / b
+        
+        # Check for infinity or NaN (edge cases)
+        if math.isinf(result) or math.isnan(result):
+            return default
+        
+        return result
+    except (TypeError, ValueError):
+        # Fallback for any other edge cases
         return default
-    
-    return result
 
 
 def safe_max(collection: Union[List, Tuple], default: Any = None) -> Any:
     """
     Safely find maximum value in a collection.
     
-    Предотвращает ошибку ValueError при пустой коллекции.
+    Returns default value for empty collections instead of raising ValueError.
     
     Args:
-        collection: Коллекция чисел
-        default: Значение по умолчанию для пустой коллекции
+        collection: Collection of comparable items
+        default: Value to return for empty collection
         
     Returns:
-        Максимальное значение или значение по умолчанию
-        
-    Raises:
-        SafeUtilityError: If collection is not a list or tuple, or elements are not comparable
+        Maximum value or default value
         
     Examples:
         >>> safe_max([1, 5, 3])
@@ -142,39 +152,29 @@ def safe_max(collection: Union[List, Tuple], default: Any = None) -> Any:
         None
         >>> safe_max([], 0)
         0
+        >>> safe_max(['a', 'z', 'b'])
+        'z'
     """
-    from ..errors.exceptions import SafeUtilityError
-    
-    if not isinstance(collection, (list, tuple)):
-        raise SafeUtilityError(f"Коллекция должна быть списком или кортежем, получен {type(collection).__name__}", 
-                             utility_name="safe_max")
-    
-    if len(collection) == 0:
-        return default
-    
     try:
         return max(collection)
-    except TypeError as e:
-        raise SafeUtilityError(f"Не удалось найти максимум: {str(e)}. "
-                             f"Убедитесь, что все элементы коллекции сравнимы.", 
-                             utility_name="safe_max", original_error=e)
+    except (ValueError, TypeError):
+        # ValueError: empty sequence
+        # TypeError: items not comparable
+        return default
 
 
 def safe_min(collection: Union[List, Tuple], default: Any = None) -> Any:
     """
     Safely find minimum value in a collection.
     
-    Предотвращает ошибку ValueError при пустой коллекции.
+    Returns default value for empty collections instead of raising ValueError.
     
     Args:
-        collection: Коллекция чисел
-        default: Значение по умолчанию для пустой коллекции
+        collection: Collection of comparable items
+        default: Value to return for empty collection
         
     Returns:
-        Минимальное значение или значение по умолчанию
-        
-    Raises:
-        SafeUtilityError: If collection is not a list or tuple, or elements are not comparable
+        Minimum value or default value
         
     Examples:
         >>> safe_min([1, 5, 3])
@@ -183,39 +183,29 @@ def safe_min(collection: Union[List, Tuple], default: Any = None) -> Any:
         None
         >>> safe_min([], 0)
         0
+        >>> safe_min(['a', 'z', 'b'])
+        'a'
     """
-    from ..errors.exceptions import SafeUtilityError
-    
-    if not isinstance(collection, (list, tuple)):
-        raise SafeUtilityError(f"Коллекция должна быть списком или кортежем, получен {type(collection).__name__}", 
-                             utility_name="safe_min")
-    
-    if len(collection) == 0:
-        return default
-    
     try:
         return min(collection)
-    except TypeError as e:
-        raise SafeUtilityError(f"Не удалось найти минимум: {str(e)}. "
-                             f"Убедитесь, что все элементы коллекции сравнимы.", 
-                             utility_name="safe_min", original_error=e)
+    except (ValueError, TypeError):
+        # ValueError: empty sequence
+        # TypeError: items not comparable
+        return default
 
 
 def safe_sum(collection: Union[List, Tuple], default: Union[int, float] = 0) -> Union[int, float]:
     """
     Safely calculate sum of a collection.
     
-    Предотвращает ошибки при пустой коллекции или несовместимых типах.
+    Returns default value for empty collections or if items can't be summed.
     
     Args:
-        collection: Коллекция чисел
-        default: Значение по умолчанию для пустой коллекции
+        collection: Collection of numbers
+        default: Value to return for empty collection or on error
         
     Returns:
-        Сумма элементов или значение по умолчанию
-        
-    Raises:
-        SafeUtilityError: If collection is not a list or tuple, or elements are not numbers
+        Sum of elements or default value
         
     Examples:
         >>> safe_sum([1, 2, 3])
@@ -224,19 +214,16 @@ def safe_sum(collection: Union[List, Tuple], default: Union[int, float] = 0) -> 
         0
         >>> safe_sum([], 10)
         10
+        >>> safe_sum([1.5, 2.5, 3.0])
+        7.0
     """
-    from ..errors.exceptions import SafeUtilityError
-    
-    if not isinstance(collection, (list, tuple)):
-        raise SafeUtilityError(f"Коллекция должна быть списком или кортежем, получен {type(collection).__name__}", 
-                             utility_name="safe_sum")
-    
-    if len(collection) == 0:
+    # Handle empty collection explicitly
+    if not collection:
         return default
     
     try:
         return sum(collection)
-    except TypeError as e:
-        raise SafeUtilityError(f"Не удалось вычислить сумму: {str(e)}. "
-                             f"Убедитесь, что все элементы коллекции являются числами.", 
-                             utility_name="safe_sum", original_error=e)
+    except (TypeError, ValueError):
+        # TypeError: items not numbers
+        # ValueError: other calculation errors
+        return default

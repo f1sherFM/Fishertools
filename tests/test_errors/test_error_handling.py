@@ -192,19 +192,18 @@ class TestSafeUtilityErrorHandling:
         assert "не может быть None" in str(exc_info.value)
         assert exc_info.value.utility_name == "safe_get"
         
-        # Test with invalid collection type
+        # Test with invalid collection type (number)
         with pytest.raises(SafeUtilityError) as exc_info:
             safe_get(123, 0)  # Number is not a valid collection
-        assert "Неподдерживаемый тип коллекции" in str(exc_info.value)
+        assert "не может быть None или числом" in str(exc_info.value)
         
-        # Test with invalid index type for list
-        with pytest.raises(SafeUtilityError) as exc_info:
-            safe_get([1, 2, 3], "invalid_index")
-        assert "индекс должен быть числом" in str(exc_info.value)
+        # Test with invalid index type for list - now returns default instead of raising
+        result = safe_get([1, 2, 3], "invalid_index", default="not found")
+        assert result == "not found"  # Pythonic approach: EAFP
     
     def test_safe_divide_error_handling(self):
         """Test safe_divide error handling with custom exceptions."""
-        # Test with invalid types
+        # Test with invalid types (None, bool, complex, str)
         with pytest.raises(SafeUtilityError) as exc_info:
             safe_divide("not_a_number", 2)
         assert "должно быть числом" in str(exc_info.value)
@@ -214,9 +213,9 @@ class TestSafeUtilityErrorHandling:
             safe_divide(10, "not_a_number")
         assert "должен быть числом" in str(exc_info.value)
         
-        with pytest.raises(SafeUtilityError) as exc_info:
-            safe_divide(10, 2, "not_a_number")
-        assert "должно быть числом" in str(exc_info.value)
+        # default can be any type now - more flexible
+        result = safe_divide(10, 0, default="undefined")
+        assert result == "undefined"  # Flexible default value
 
 
 class TestModelValidationErrors:
