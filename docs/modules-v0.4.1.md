@@ -1,8 +1,8 @@
-# Phase 1 Modules (v0.5.0)
+# Phase 1 Modules (v0.4.1)
 
 ## Overview
 
-Version 0.5.0 introduces three powerful core modules for data visualization, type validation, and step-by-step debugging. These modules are designed to help both beginners and experienced developers write better code.
+Version 0.4.1 introduces three powerful core modules for data visualization, type validation, and step-by-step debugging. These modules are designed to help both beginners and experienced developers write better code.
 
 ## 📊 Visualization Module
 
