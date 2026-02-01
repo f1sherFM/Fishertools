@@ -16,7 +16,7 @@ class TestSessionManagerBasic:
         """Test creating a session manager."""
         with tempfile.TemporaryDirectory() as tmpdir:
             manager = SessionManager(tmpdir)
-            assert manager is not None
+            assert manager.storage_path == Path(tmpdir)
             assert manager.storage_path == Path(tmpdir)
     
     def test_mark_topic_viewed(self):

@@ -2,6 +2,31 @@
 
 Все важные изменения в проекте Fishertools будут документированы в этом файле.
 
+## [0.4.3.3] - 2026-02-01
+
+### 🔧 Code Quality Improvements
+
+**Масштабная оптимизация кода - устранены дублирующиеся литералы и снижена когнитивная сложность**
+
+#### 📝 Константы вместо дублирующихся литералов:
+- **fishertools/documentation/generator.py** - константы для имен файлов (INDEX_RST, CONF_PY, etc.)
+- **fishertools/documentation/visual.py** - константы для HTML тегов (DIV_CLOSE, DIV_OPEN)
+- **fishertools/examples/logger_example.py** - константы для имен лог-файлов
+- **fishertools/examples/repository.py** - полный набор констант для концепций и паттернов кода
+- **fishertools/learn/repl/command_handler.py** - константы для сообщений пользователю
+- **fishertools/learn/repl/command_parser.py** - константы для сообщений об ошибках
+
+#### 🧠 Рефакторинг сложных функций:
+- **fishertools/examples/repository.py** - разбита анонимная функция с когнитивной сложностью 46 на множество специализированных методов
+- **fishertools/learn/repl/engine.py** - функция `_handle_command` (сложность 65→15) разбита на 15 специализированных методов
+
+#### 🐛 Исправлены синтаксические ошибки:
+- **fishertools/documentation/api.py** - исправлена индентация и удален дублирующийся код
+- **fishertools/readme_transformer.py** - исправлена индентация в блоке try-except
+- **fishertools/visualization/formatters.py** - удален дублирующийся код функции
+
+Код стал значительно более читаемым, поддерживаемым и менее подверженным ошибкам.
+
 ## [0.4.3.2] - 2026-02-01
 
 ### 🐛 Bug Fixes

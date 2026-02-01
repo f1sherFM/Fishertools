@@ -32,6 +32,10 @@ class CommandHandler:
         >>> print(output)
     """
     
+    # Message constants
+    TYPE_TOPIC_MESSAGE = "Type a topic name to view it.\n"
+    NO_CURRENT_TOPIC_MESSAGE = "❌ No current topic. View a topic first.\n"
+    
     def __init__(self, engine: KnowledgeEngine, session_manager: SessionManager):
         """
         Initialize the command handler.
@@ -101,7 +105,7 @@ class CommandHandler:
             output += f"• {topic}\n"
         
         output += f"\nFound {len(results)} topic(s).\n"
-        output += "Type a topic name to view it.\n"
+        output += self.TYPE_TOPIC_MESSAGE
         
         return output
     
@@ -175,7 +179,7 @@ class CommandHandler:
             output += f"• {topic}\n"
         
         output += f"\nTotal topics: {len(topics)}\n"
-        output += "Type a topic name to view it.\n"
+        output += self.TYPE_TOPIC_MESSAGE
         
         return output
     
@@ -212,7 +216,7 @@ class CommandHandler:
             Formatted string with related topics
         """
         if not topic_name:
-            return "❌ No current topic. View a topic first.\n"
+            return self.NO_CURRENT_TOPIC_MESSAGE
         
         related = self.engine.get_related_topics(topic_name)
         
@@ -226,7 +230,7 @@ class CommandHandler:
             output += f"• {topic}\n"
         
         output += f"\nTotal related topics: {len(related)}\n"
-        output += "Type a topic name to view it.\n"
+        output += self.TYPE_TOPIC_MESSAGE
         
         return output
     
@@ -282,7 +286,7 @@ class CommandHandler:
             Formatted string with a hint
         """
         if not topic_name:
-            return "❌ No current topic. View a topic first.\n"
+            return self.NO_CURRENT_TOPIC_MESSAGE
         
         topic = self.engine.get_topic(topic_name)
         if not topic:
@@ -331,7 +335,7 @@ class CommandHandler:
             Formatted string with all tips
         """
         if not topic_name:
-            return "❌ No current topic. View a topic first.\n"
+            return self.NO_CURRENT_TOPIC_MESSAGE
         
         topic = self.engine.get_topic(topic_name)
         if not topic:

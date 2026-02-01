@@ -17,6 +17,10 @@ class VisualDocumentation:
     flowcharts using Mermaid and other visualization tools.
     """
     
+    # HTML tag constants
+    DIV_CLOSE = '</div>'
+    DIV_OPEN = '<div>'
+    
     def __init__(self, style: str = "modern"):
         """
         Initialize the visual documentation generator.
@@ -164,6 +168,84 @@ class VisualDocumentation:
         # Simple code analysis - split by lines and identify key structures
         lines = [line.strip() for line in code.split('\n') if line.strip()]
         
+        for i, line in enumerate(lines):
+            step_id = f"step_{i}"
+            step_type, description = self._analyze_code_line(line)
+            
+            steps.append({
+                "id": step_id,
+                "type": step_type,
+                "description": description,
+                "line_number": i + 1
+            })
+            
+            # Connect to previous step (simple linear flow)
+            if i > 0:
+                connections.append({
+                    "from": f"step_{i - 1}",
+                    "to": step_id,
+                    "label": ""
+                })
+        
+        # Generate title if not provided
+        if title is None:
+            title = self._generate_flowchart_title(lines)
+        
+        return Flowchart(
+            steps=steps,
+            connections=connections,
+            title=title
+        )
+    
+    def _analyze_code_line(self, line: str) -> tuple[str, str]:
+        """Analyze a line of code and return its type and description."""
+        if line.startswith('def '):
+            return "start", f"Function: {line}"
+        elif line.startswith('if '):
+            return "decision", f"Decision: {line}"
+        elif line.startswith('elif '):
+            return "decision", f"Alternative: {line}"
+        elif line.startswith('else:'):
+            return "decision", "Else branch"
+        elif line.startswith('for ') or line.startswith('while '):
+            return "loop", f"Loop: {line}"
+        elif line.startswith('return '):
+            return "end", f"Return: {line}"
+        elif line.startswith('print(') or 'print(' in line:
+            return "output", f"Output: {line}"
+        else:
+            return "process", line
+    
+    def _generate_flowchart_title(self, lines: List[str]) -> str:
+        """Generate a title for the flowchart based on the code."""
+        if not lines:
+            return "Algorithm Flowchart"
+        
+        first_line = lines[0]
+        if first_line.startswith('def '):
+            func_name = first_line.split('(')[0].replace('def ', '')
+            return f"Algorithm: {func_name}"
+        else:
+            return "Algorithm Flowchart"
+        """
+        Create a flowchart for an algorithm.
+        
+        Args:
+            code: Python code to analyze
+            title: Optional title for the flowchart
+            
+        Returns:
+            Flowchart: Generated algorithm flowchart
+        """
+        if not code.strip():
+            raise ValueError("Code cannot be empty")
+        
+        steps = []
+        connections = []
+        
+        # Simple code analysis - split by lines and identify key structures
+        lines = [line.strip() for line in code.split('\n') if line.strip()]
+        
         step_counter = 0
         
         for i, line in enumerate(lines):
@@ -229,6 +311,83 @@ class VisualDocumentation:
         )
     
     def visualize_data_structure(self, data: Any, title: Optional[str] = None) -> StructureDiagram:
+        """
+        Create a visual representation of a data structure.
+        
+        Args:
+            data: Data structure to visualize
+            title: Optional title for the diagram
+            
+        Returns:
+            StructureDiagram: Generated structure diagram
+        """
+        structure_type, visualization = self._get_structure_info(data)
+        
+        if title is None:
+            title = f"{structure_type.title()} Visualization"
+        
+        return StructureDiagram(
+            structure_type=structure_type,
+            data=data,
+            visualization=visualization,
+            title=title
+        )
+    
+    def _get_structure_info(self, data: Any) -> tuple[str, str]:
+        """Get structure type and visualization for data."""
+        if data is None:
+            return "None", "null"
+        elif isinstance(data, (list, tuple)):
+            return self._visualize_sequence(data)
+        elif isinstance(data, dict):
+            return self._visualize_dict(data)
+        elif isinstance(data, set):
+            return self._visualize_set(data)
+        elif isinstance(data, str):
+            return self._visualize_string(data)
+        elif isinstance(data, (int, float, bool)):
+            return type(data).__name__, str(data)
+        else:
+            return type(data).__name__, f"<{type(data).__name__} object>"
+    
+    def _visualize_sequence(self, data) -> tuple[str, str]:
+        """Visualize list or tuple."""
+        structure_type = "list" if isinstance(data, list) else "tuple"
+        if len(data) <= 10:
+            items = [str(item) for item in data]
+            visualization = f"[{', '.join(items)}]"
+        else:
+            items = [str(item) for item in data[:5]]
+            visualization = f"[{', '.join(items)}, ... ({len(data)} items total)]"
+        return structure_type, visualization
+    
+    def _visualize_dict(self, data: dict) -> tuple[str, str]:
+        """Visualize dictionary."""
+        if len(data) <= 5:
+            items = [f"'{k}': {repr(v)}" for k, v in data.items()]
+            visualization = f"{{{', '.join(items)}}}"
+        else:
+            items = [f"'{k}': {repr(v)}" for k, v in list(data.items())[:3]]
+            visualization = f"{{{', '.join(items)}, ... ({len(data)} keys total)}}"
+        return "dict", visualization
+    
+    def _visualize_set(self, data: set) -> tuple[str, str]:
+        """Visualize set."""
+        if len(data) <= 5:
+            items = [str(item) for item in data]
+            visualization = f"{{{', '.join(items)}}}"
+        else:
+            items = [str(item) for item in list(data)[:3]]
+            visualization = f"{{{', '.join(items)}, ... ({len(data)} items total)}}"
+        return "set", visualization
+    
+    def _visualize_string(self, data: str) -> tuple[str, str]:
+        """Visualize string."""
+        if len(data) <= 50:
+            visualization = f'"{data}"'
+        else:
+            visualization = f'"{data[:47]}..." ({len(data)} chars)'
+        return "string", visualization
         """
         Create a visual representation of a data structure.
         
@@ -316,7 +475,7 @@ class VisualDocumentation:
         html_parts.append('<pre class="code-block">')
         html_parts.append(f'<code>{self._escape_html(code)}</code>')
         html_parts.append('</pre>')
-        html_parts.append('</div>')
+        html_parts.append(self.DIV_CLOSE)
         
         # Arrow
         html_parts.append('<div class="arrow">↓</div>')
@@ -329,12 +488,12 @@ class VisualDocumentation:
         result_viz = self.visualize_data_structure(result)
         html_parts.append(f'<div class="result-content">{self._escape_html(result_viz.visualization)}</div>')
         html_parts.append(f'<div class="result-type">Type: {result_viz.structure_type}</div>')
-        html_parts.append('</div>')
+        html_parts.append(self.DIV_CLOSE)
         
         # Styling
         html_parts.append(self._get_example_styles())
         
-        html_parts.append('</div>')
+        html_parts.append(self.DIV_CLOSE)
         
         return '\n'.join(html_parts)
     
@@ -508,6 +667,89 @@ class VisualDocumentation:
 </style>'''
     
     def apply_consistent_styling(self, diagram: MermaidDiagram) -> MermaidDiagram:
+        """
+        Apply consistent styling to a diagram.
+        
+        Args:
+            diagram: Diagram to style
+            
+        Returns:
+            MermaidDiagram: Styled diagram
+        """
+        if not diagram.content:
+            raise ValueError("Diagram content cannot be empty")
+        
+        styled_content = diagram.content
+        
+        # Add theme configuration if not present
+        if "%%{init:" not in styled_content:
+            theme_config = self._get_theme_config()
+            styled_content = theme_config + "\n" + styled_content
+        
+        # Add diagram-specific styling
+        styled_content = self._add_diagram_specific_styling(diagram, styled_content)
+        
+        return MermaidDiagram(
+            diagram_type=diagram.diagram_type,
+            content=styled_content,
+            title=diagram.title
+        )
+    
+    def _get_theme_config(self) -> str:
+        """Get theme configuration based on style."""
+        theme_configs = {
+            "modern": '''%%{init: {"theme": "base", "themeVariables": {
+    "primaryColor": "#e1f5fe",
+    "primaryTextColor": "#01579b", 
+    "primaryBorderColor": "#01579b",
+    "lineColor": "#4a148c",
+    "secondaryColor": "#f3e5f5",
+    "tertiaryColor": "#fff"
+}}}%%''',
+            "classic": '''%%{init: {"theme": "base", "themeVariables": {
+    "primaryColor": "#fff3e0",
+    "primaryTextColor": "#e65100",
+    "primaryBorderColor": "#e65100", 
+    "lineColor": "#880e4f",
+    "secondaryColor": "#fce4ec",
+    "tertiaryColor": "#fff"
+}}}%%''',
+            "minimal": '''%%{init: {"theme": "base", "themeVariables": {
+    "primaryColor": "#f5f5f5",
+    "primaryTextColor": "#333",
+    "primaryBorderColor": "#666",
+    "lineColor": "#999",
+    "secondaryColor": "#fafafa",
+    "tertiaryColor": "#fff"
+}}}%%'''
+        }
+        return theme_configs.get(self.style, theme_configs["minimal"])
+    
+    def _add_diagram_specific_styling(self, diagram: MermaidDiagram, content: str) -> str:
+        """Add styling specific to diagram type."""
+        if diagram.diagram_type == DiagramType.ARCHITECTURE and "classDef" not in content:
+            return content + self._get_architecture_styling()
+        elif diagram.diagram_type == DiagramType.DATA_FLOW and "linkStyle" not in content:
+            return content + self._get_data_flow_styling()
+        return content
+    
+    def _get_architecture_styling(self) -> str:
+        """Get architecture-specific styling."""
+        style_map = {
+            "modern": "\n    classDef default fill:#e1f5fe,stroke:#01579b,stroke-width:2px",
+            "classic": "\n    classDef default fill:#fff3e0,stroke:#e65100,stroke-width:2px",
+            "minimal": "\n    classDef default fill:#f5f5f5,stroke:#666,stroke-width:1px"
+        }
+        return style_map.get(self.style, style_map["minimal"])
+    
+    def _get_data_flow_styling(self) -> str:
+        """Get data flow-specific styling."""
+        style_map = {
+            "modern": "\n    linkStyle default stroke:#4a148c,stroke-width:2px",
+            "classic": "\n    linkStyle default stroke:#880e4f,stroke-width:2px",
+            "minimal": "\n    linkStyle default stroke:#999,stroke-width:1px"
+        }
+        return style_map.get(self.style, style_map["minimal"])
         """
         Apply consistent styling to a diagram.
         

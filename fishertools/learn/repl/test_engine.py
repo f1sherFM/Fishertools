@@ -43,7 +43,11 @@ class TestREPLEngineInitialization:
     def test_repl_engine_default_initialization(self):
         """Test REPL engine with default initialization."""
         engine = REPLEngine()
-        assert engine is not None
+        assert engine.engine is not None
+        assert engine.session_manager is not None
+
+
+class TestREPLEngineTopicDisplay:
         assert engine.engine is not None
         assert engine.session_manager is not None
 

@@ -17,6 +17,24 @@ class ExampleRepository:
     and simple project templates.
     """
     
+    # Concept name constants
+    CONCEPT_VARIABLE_ASSIGNMENT = "variable assignment"
+    CONCEPT_LISTS = "lists"
+    CONCEPT_LIST_METHODS = "list methods"
+    CONCEPT_DICTIONARIES = "dictionaries"
+    CONCEPT_FUNCTIONS = "functions"
+    CONCEPT_FUNCTION_CALLS = "function calls"
+    CONCEPT_LOOPS = "loops"
+    CONCEPT_FOR_LOOPS = "for loops"
+    CONCEPT_WHILE_LOOPS = "while loops"
+    CONCEPT_CONDITIONALS = "conditionals"
+    CONCEPT_USER_INPUT = "user input"
+    CONCEPT_OUTPUT = "output"
+    CONCEPT_ERROR_HANDLING = "error handling"
+    
+    # Code pattern constants
+    INPUT_FUNCTION = 'input('
+    
     def __init__(self, examples_dir: Optional[str] = None):
         """
         Initialize the example repository.
@@ -215,7 +233,7 @@ class ExampleRepository:
     
     def _analyze_assignment(self, line: str) -> tuple[str, List[str]]:
         """Analyze variable assignment lines."""
-        concepts = ["variable assignment"]
+        concepts = [self.CONCEPT_VARIABLE_ASSIGNMENT]
         var_name = line.split('=')[0].strip()
         
         if '[' in line and ']' in line:
@@ -230,12 +248,12 @@ class ExampleRepository:
             concepts.append("dictionaries")
             return f"Creates a dictionary and assigns it to variable '{var_name}'", concepts
         
-        if 'input(' in line:
-            concepts.append("user input")
+        if self.INPUT_FUNCTION in line:
+            concepts.append(self.CONCEPT_USER_INPUT)
             return f"Gets input from user and stores it in variable '{var_name}'", concepts
         
         if '(' in line and ')' in line:
-            concepts.append("function calls")
+            concepts.append(self.CONCEPT_FUNCTION_CALLS)
             return f"Calls a function and assigns the result to '{var_name}'", concepts
         
         return f"Assigns a value to variable '{var_name}'", concepts
@@ -246,22 +264,22 @@ class ExampleRepository:
     
     def _analyze_function_call(self, line: str) -> tuple[str, List[str]]:
         """Analyze function call lines."""
-        concepts = ["function calls"]
+        concepts = [self.CONCEPT_FUNCTION_CALLS]
         
         if 'print(' in line:
             concepts.append("output")
             return "Prints output to the console", concepts
         
-        if 'input(' in line:
-            concepts.append("user input")
+        if self.INPUT_FUNCTION in line:
+            concepts.append(self.CONCEPT_USER_INPUT)
             return "Gets input from the user", concepts
         
         if '.append(' in line:
-            concepts.extend(["lists", "list methods"])
+            concepts.extend([self.CONCEPT_LISTS, self.CONCEPT_LIST_METHODS])
             return "Adds an item to the end of a list", concepts
         
         if '.extend(' in line:
-            concepts.extend(["lists", "list methods"])
+            concepts.extend([self.CONCEPT_LISTS, self.CONCEPT_LIST_METHODS])
             return "Adds multiple items to the end of a list", concepts
         
         if '.get(' in line:
@@ -286,24 +304,26 @@ class ExampleRepository:
             return "Executes when no previous conditions were true", ["conditionals", "else statements"]
         
         if line.startswith('while '):
-            return "Repeats code while a condition is true", ["loops", "while loops"]
+            return "Repeats code while a condition is true", [self.CONCEPT_LOOPS, self.CONCEPT_WHILE_LOOPS]
         
         if line.startswith('for '):
-            return "Repeats code for each item in a sequence", ["loops", "for loops"]
+            return "Repeats code for each item in a sequence", [self.CONCEPT_LOOPS, self.CONCEPT_FOR_LOOPS]
         
         return None
     
     def _analyze_exception_handling(self, line: str) -> tuple[str, List[str]] | None:
         """Analyze exception handling lines."""
         if line.startswith('try:'):
-            return "Starts a block that might cause an error", ["error handling", "try-except"]
+            return "Starts a block that might cause an error", [self.CONCEPT_ERROR_HANDLING, "try-except"]
         
         if line.startswith('except'):
-            return "Handles errors that occur in the try block", ["error handling", "try-except"]
+            return "Handles errors that occur in the try block", [self.CONCEPT_ERROR_HANDLING, "try-except"]
         
         return None
+    
+    def _analyze_line_detailed(self, line: str) -> tuple[str, List[str]]:
         """
-        Analyze a single line of code and generate explanation.
+        Analyze a single line of code and generate detailed explanation.
         
         Args:
             line: Code line to analyze
@@ -311,103 +331,135 @@ class ExampleRepository:
         Returns:
             tuple: (explanation, concepts)
         """
-        concepts = []
+        # Check variable assignment first
+        if self._is_variable_assignment_detailed(line):
+            return self._analyze_assignment_detailed(line)
         
-        # Variable assignment
-        if '=' in line and not any(op in line for op in ['==', '!=', '<=', '>=']):
-            if line.count('=') == 1 and '=' not in line.replace('=', ''):
-                concepts.append("variable assignment")
-                var_name = line.split('=')[0].strip()
-                if '[' in line and ']' in line:
-                    concepts.append("lists")
-                    if line.count('[') == 1 and line.count(']') == 1 and not line.endswith(']'):
-                        # This is indexing, not list creation
-                        concepts.extend(["indexing", "list access"])
-                        explanation = f"Accesses an element from a list using indexing and assigns it to '{var_name}'"
-                    else:
-                        explanation = f"Creates a list and assigns it to variable '{var_name}'"
-                elif '{' in line and '}' in line:
-                    concepts.append("dictionaries")
-                    explanation = f"Creates a dictionary and assigns it to variable '{var_name}'"
-                elif 'input(' in line:
-                    concepts.append("user input")
-                    explanation = f"Gets input from user and stores it in variable '{var_name}'"
-                elif '(' in line and ')' in line:
-                    concepts.append("function calls")
-                    explanation = f"Calls a function and assigns the result to '{var_name}'"
-                else:
-                    explanation = f"Assigns a value to variable '{var_name}'"
+        # Check function definitions
+        if line.startswith('def '):
+            return self._analyze_function_definition(line)
         
-        # Function definitions
-        elif line.startswith('def '):
-            concepts.extend(["functions", "function definition"])
-            func_name = line.split('(')[0].replace('def ', '').strip()
-            explanation = f"Defines a function named '{func_name}'"
+        # Check function calls
+        if '(' in line and ')' in line and not line.startswith('def'):
+            return self._analyze_function_call_detailed(line)
         
-        # Function calls
-        elif '(' in line and ')' in line and not line.startswith('def'):
-            concepts.append("function calls")
-            if 'print(' in line:
-                concepts.append("output")
-                explanation = "Prints output to the console"
-            elif 'input(' in line:
-                concepts.append("user input")
-                explanation = "Gets input from the user"
-            elif '.append(' in line:
-                concepts.extend(["lists", "list methods"])
-                explanation = "Adds an item to the end of a list"
-            elif '.extend(' in line:
-                concepts.extend(["lists", "list methods"])
-                explanation = "Adds multiple items to the end of a list"
-            elif '.get(' in line:
-                concepts.extend(["dictionaries", "dict methods"])
-                explanation = "Safely gets a value from a dictionary"
-            elif 'int(' in line or 'float(' in line or 'str(' in line:
-                concepts.append("type conversion")
-                explanation = "Converts a value to a different data type"
-            else:
-                explanation = "Calls a function to perform an operation"
+        # Check control structures
+        if self._is_control_structure(line):
+            return self._analyze_control_structure_detailed(line)
         
-        # Control structures
-        elif line.startswith('if '):
-            concepts.extend(["conditionals", "if statements"])
-            explanation = "Checks a condition and executes code if it's true"
-        elif line.startswith('elif '):
-            concepts.extend(["conditionals", "elif statements"])
-            explanation = "Checks an alternative condition"
-        elif line.startswith('else:'):
-            concepts.extend(["conditionals", "else statements"])
-            explanation = "Executes when no previous conditions were true"
-        elif line.startswith('while '):
-            concepts.extend(["loops", "while loops"])
-            explanation = "Repeats code while a condition is true"
-        elif line.startswith('for '):
-            concepts.extend(["loops", "for loops"])
-            explanation = "Repeats code for each item in a sequence"
+        # Check exception handling
+        if self._is_exception_handling(line):
+            return self._analyze_exception_detailed(line)
         
-        # Exception handling
-        elif line.startswith('try:'):
-            concepts.extend(["error handling", "try-except"])
-            explanation = "Starts a block that might cause an error"
-        elif line.startswith('except'):
-            concepts.extend(["error handling", "try-except"])
-            explanation = "Handles errors that occur in the try block"
+        # Check return statements
+        if line.startswith('return '):
+            return "Returns a value from the function", [self.CONCEPT_FUNCTIONS, "return statements"]
         
-        # Return statements
-        elif line.startswith('return '):
-            concepts.extend(["functions", "return statements"])
-            explanation = "Returns a value from the function"
-        
-        # Import statements
-        elif line.startswith('import ') or line.startswith('from '):
-            concepts.append("imports")
-            explanation = "Imports code from another module"
+        # Check import statements
+        if line.startswith('import ') or line.startswith('from '):
+            return "Imports code from another module", ["imports"]
         
         # Default case
+        return "Executes a Python statement", []
+    
+    def _is_variable_assignment_detailed(self, line: str) -> bool:
+        """Check if line is a variable assignment."""
+        return ('=' in line and 
+                not any(op in line for op in ['==', '!=', '<=', '>=']) and
+                line.count('=') == 1)
+    
+    def _analyze_assignment_detailed(self, line: str) -> tuple[str, List[str]]:
+        """Analyze variable assignment lines with detailed logic."""
+        concepts = [self.CONCEPT_VARIABLE_ASSIGNMENT]
+        var_name = line.split('=')[0].strip()
+        
+        if '[' in line and ']' in line:
+            concepts.append(self.CONCEPT_LISTS)
+            if self._is_list_indexing(line):
+                concepts.extend(["indexing", "list access"])
+                explanation = f"Accesses an element from a list using indexing and assigns it to '{var_name}'"
+            else:
+                explanation = f"Creates a list and assigns it to variable '{var_name}'"
+        elif '{' in line and '}' in line:
+            concepts.append(self.CONCEPT_DICTIONARIES)
+            explanation = f"Creates a dictionary and assigns it to variable '{var_name}'"
+        elif self.INPUT_FUNCTION in line:
+            concepts.append(self.CONCEPT_USER_INPUT)
+            explanation = f"Gets input from user and stores it in variable '{var_name}'"
+        elif '(' in line and ')' in line:
+            concepts.append(self.CONCEPT_FUNCTION_CALLS)
+            explanation = f"Calls a function and assigns the result to '{var_name}'"
         else:
-            explanation = "Executes a Python statement"
+            explanation = f"Assigns a value to variable '{var_name}'"
         
         return explanation, concepts
+    
+    def _analyze_function_definition(self, line: str) -> tuple[str, List[str]]:
+        """Analyze function definition lines."""
+        concepts = [self.CONCEPT_FUNCTIONS, "function definition"]
+        func_name = line.split('(')[0].replace('def ', '').strip()
+        explanation = f"Defines a function named '{func_name}'"
+        return explanation, concepts
+    
+    def _analyze_function_call_detailed(self, line: str) -> tuple[str, List[str]]:
+        """Analyze function call lines with detailed logic."""
+        concepts = [self.CONCEPT_FUNCTION_CALLS]
+        
+        if 'print(' in line:
+            concepts.append(self.CONCEPT_OUTPUT)
+            explanation = "Prints output to the console"
+        elif self.INPUT_FUNCTION in line:
+            concepts.append(self.CONCEPT_USER_INPUT)
+            explanation = "Gets input from the user"
+        elif '.append(' in line:
+            concepts.extend([self.CONCEPT_LISTS, self.CONCEPT_LIST_METHODS])
+            explanation = "Adds an item to the end of a list"
+        elif '.extend(' in line:
+            concepts.extend([self.CONCEPT_LISTS, self.CONCEPT_LIST_METHODS])
+            explanation = "Adds multiple items to the end of a list"
+        elif '.get(' in line:
+            concepts.extend([self.CONCEPT_DICTIONARIES, "dict methods"])
+            explanation = "Safely gets a value from a dictionary"
+        elif any(func in line for func in ['int(', 'float(', 'str(']):
+            concepts.append("type conversion")
+            explanation = "Converts a value to a different data type"
+        else:
+            explanation = "Calls a function to perform an operation"
+        
+        return explanation, concepts
+    
+    def _is_control_structure(self, line: str) -> bool:
+        """Check if line is a control structure."""
+        return any(line.startswith(keyword) for keyword in 
+                  ['if ', 'elif ', 'else:', 'while ', 'for '])
+    
+    def _analyze_control_structure_detailed(self, line: str) -> tuple[str, List[str]]:
+        """Analyze control structure lines."""
+        if line.startswith('if '):
+            return "Checks a condition and executes code if it's true", [self.CONCEPT_CONDITIONALS, "if statements"]
+        elif line.startswith('elif '):
+            return "Checks an alternative condition", [self.CONCEPT_CONDITIONALS, "elif statements"]
+        elif line.startswith('else:'):
+            return "Executes when no previous conditions were true", [self.CONCEPT_CONDITIONALS, "else statements"]
+        elif line.startswith('while '):
+            return "Repeats code while a condition is true", [self.CONCEPT_LOOPS, self.CONCEPT_WHILE_LOOPS]
+        elif line.startswith('for '):
+            return "Repeats code for each item in a sequence", [self.CONCEPT_LOOPS, self.CONCEPT_FOR_LOOPS]
+        
+        return "Control structure", []
+    
+    def _is_exception_handling(self, line: str) -> bool:
+        """Check if line is exception handling."""
+        return line.startswith('try:') or line.startswith('except')
+    
+    def _analyze_exception_detailed(self, line: str) -> tuple[str, List[str]]:
+        """Analyze exception handling lines."""
+        if line.startswith('try:'):
+            return "Starts a block that might cause an error", [self.CONCEPT_ERROR_HANDLING, "try-except"]
+        elif line.startswith('except'):
+            return "Handles errors that occur in the try block", [self.CONCEPT_ERROR_HANDLING, "try-except"]
+        
+        return "Exception handling", [self.CONCEPT_ERROR_HANDLING]
     
     def _generate_explanation_summary(self, example: CodeExample, key_concepts: List[str]) -> str:
         """
@@ -421,15 +473,15 @@ class ExampleRepository:
             str: Summary explanation
         """
         concept_descriptions = {
-            "variable assignment": "storing values in variables",
-            "lists": "working with ordered collections",
-            "dictionaries": "using key-value data structures",
-            "functions": "defining and calling reusable code blocks",
+            self.CONCEPT_VARIABLE_ASSIGNMENT: "storing values in variables",
+            self.CONCEPT_LISTS: "working with ordered collections",
+            self.CONCEPT_DICTIONARIES: "using key-value data structures",
+            self.CONCEPT_FUNCTIONS: "defining and calling reusable code blocks",
             "conditionals": "making decisions with if/else statements",
             "loops": "repeating code execution",
-            "user input": "getting data from users",
-            "error handling": "managing potential errors gracefully",
-            "output": "displaying results to users"
+            self.CONCEPT_USER_INPUT: "getting data from users",
+            self.CONCEPT_ERROR_HANDLING: "managing potential errors gracefully",
+            self.CONCEPT_OUTPUT: "displaying results to users"
         }
         
         if not key_concepts:
@@ -537,12 +589,12 @@ class ExampleRepository:
             List[str]: List of prerequisite concepts
         """
         prerequisites_map = {
-            "list comprehension": ["lists", "for loops", "expressions"],
-            "dictionary comprehension": ["dictionaries", "for loops", "key-value pairs"],
-            "exception handling": ["functions", "conditionals"],
-            "nested loops": ["for loops", "while loops", "indentation"],
-            "function parameters": ["functions", "variables"],
-            "lambda functions": ["functions", "expressions"],
+            "list comprehension": [self.CONCEPT_LISTS, self.CONCEPT_FOR_LOOPS, "expressions"],
+            "dictionary comprehension": [self.CONCEPT_DICTIONARIES, self.CONCEPT_FOR_LOOPS, "key-value pairs"],
+            "exception handling": [self.CONCEPT_FUNCTIONS, "conditionals"],
+            "nested loops": [self.CONCEPT_FOR_LOOPS, self.CONCEPT_WHILE_LOOPS, "indentation"],
+            "function parameters": [self.CONCEPT_FUNCTIONS, "variables"],
+            "lambda functions": [self.CONCEPT_FUNCTIONS, "expressions"],
             "file operations": ["strings", "exception handling"],
             "class methods": ["classes", "functions", "self parameter"]
         }

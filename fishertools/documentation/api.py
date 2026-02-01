@@ -181,49 +181,18 @@ class APIGenerator:
         """Helper method to process a list of arguments and extract type annotations."""
         for arg in args:
             param_name = arg.arg
-            if arg.annotation:
-                if hasattr(ast, 'unparse'):
-                    param_type = ast.unparse(arg.annotation)
-                else:
-                    param_type = str(arg.annotation)
-                parameters[param_name] = param_type
-            else:
-                parameters[param_name] = "Any"
-        """
-        Extract type annotations from a function.
+            param_type = self._extract_param_type(arg)
+            parameters[param_name] = param_type
+    
+    def _extract_param_type(self, arg: ast.arg) -> str:
+        """Extract type annotation from a single argument."""
+        if not arg.annotation:
+            return "Any"
         
-        Args:
-            func_node: Function AST node
-            
-        Returns:
-            Dict[str, str]: Parameter names mapped to type annotations
-        """
-        parameters = {}
-        
-        for arg in func_node.args.args:
-            param_name = arg.arg
-            if arg.annotation:
-                if hasattr(ast, 'unparse'):
-                    param_type = ast.unparse(arg.annotation)
-                else:
-                    param_type = str(arg.annotation)
-                parameters[param_name] = param_type
-            else:
-                parameters[param_name] = "Any"
-        
-        # Handle keyword-only arguments
-        for arg in func_node.args.kwonlyargs:
-            param_name = arg.arg
-            if arg.annotation:
-                if hasattr(ast, 'unparse'):
-                    param_type = ast.unparse(arg.annotation)
-                else:
-                    param_type = str(arg.annotation)
-                parameters[param_name] = param_type
-            else:
-                parameters[param_name] = "Any"
-        
-        return parameters
+        if hasattr(ast, 'unparse'):
+            return ast.unparse(arg.annotation)
+        else:
+            return str(arg.annotation)
     
     def generate_sphinx_rst(self, api_info: APIInfo) -> str:
         """

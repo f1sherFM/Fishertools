@@ -16,12 +16,17 @@ from fishertools.patterns import SimpleLogger
 def main():
     """Demonstrate SimpleLogger functionality."""
     
+    # Constants for log file names
+    DEMO_LOG_FILE = "demo_app.log"
+    INFO_DEMO_LOG_FILE = "info_demo.log"
+    NESTED_LOG_FILE = "logs/2024/01/application.log"
+    
     print("=" * 70)
     print("fishertools Patterns - SimpleLogger Demo")
     print("=" * 70)
     
     # Create a logger instance
-    log_file = "demo_app.log"
+    log_file = DEMO_LOG_FILE
     logger = SimpleLogger(log_file)
     
     # Clean up any existing log file from previous runs
@@ -91,7 +96,7 @@ def main():
     print("Example 4: Logging to nested directories")
     print("─" * 70)
     
-    nested_log_file = "logs/2024/01/application.log"
+    nested_log_file = NESTED_LOG_FILE
     nested_logger = SimpleLogger(nested_log_file)
     
     print(f"\nCreating logger for nested path: {nested_log_file}")
@@ -123,7 +128,7 @@ def main():
     print("Example 6: Different log levels")
     print("─" * 70)
     
-    info_logger = SimpleLogger("info_demo.log")
+    info_logger = SimpleLogger(INFO_DEMO_LOG_FILE)
     
     print("\nLogging different severity levels...")
     info_logger.info("This is an informational message")
@@ -133,11 +138,11 @@ def main():
     print("✓ Different log levels demonstrated")
     
     # Display the info demo log
-    print(f"\nContents of info_demo.log:")
+    print(f"\nContents of {INFO_DEMO_LOG_FILE}:")
     print("─" * 70)
     
     try:
-        with open("info_demo.log", 'r', encoding='utf-8') as f:
+        with open(INFO_DEMO_LOG_FILE, 'r', encoding='utf-8') as f:
             print(f.read())
     except FileNotFoundError:
         print("✗ Log file not found")
@@ -149,7 +154,7 @@ def main():
     print("Cleanup")
     print("─" * 70)
     
-    files_to_remove = [log_file, "info_demo.log", nested_log_file]
+    files_to_remove = [log_file, INFO_DEMO_LOG_FILE, nested_log_file]
     
     for file_to_remove in files_to_remove:
         if os.path.exists(file_to_remove):

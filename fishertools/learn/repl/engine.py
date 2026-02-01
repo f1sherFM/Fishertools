@@ -137,161 +137,227 @@ class REPLEngine:
         command_args = args[1:] if len(args) > 1 else []
         
         # Exit commands
-        if command in ["exit", "quit"]:
-            print("👋 Goodbye! Your progress has been saved.")
-            self.session_manager.save_session()
-            self.running = False
+        if self._handle_exit_commands(command):
             return
         
         # Edit mode commands
         if self.in_edit_mode:
-            if command == "exit_edit":
-                self._exit_edit_mode()
-            else:
-                print("❌ You are in edit mode. Type /exit_edit to exit.")
+            self._handle_edit_mode_commands(command)
             return
         
-        # Topic browsing commands
+        # Route to appropriate handler
+        if self._handle_topic_browsing_commands(command, command_args):
+            return
+        elif self._handle_navigation_commands(command, command_args):
+            return
+        elif self._handle_code_execution_commands(command, command_args):
+            return
+        elif self._handle_progress_commands(command, command_args):
+            return
+        elif self._handle_session_commands(command, command_args):
+            return
+        elif self._handle_help_commands(command, command_args):
+            return
+        else:
+            print(f"❌ Unknown command: {command}")
+    
+    def _handle_exit_commands(self, command: str) -> bool:
+        """Handle exit commands."""
+        if command in ["exit", "quit"]:
+            print("👋 Goodbye! Your progress has been saved.")
+            self.session_manager.save_session()
+            self.running = False
+            return True
+        return False
+    
+    def _handle_edit_mode_commands(self, command: str) -> None:
+        """Handle commands while in edit mode."""
+        if command == "exit_edit":
+            self._exit_edit_mode()
+        else:
+            print("❌ You are in edit mode. Type /exit_edit to exit.")
+    
+    def _handle_topic_browsing_commands(self, command: str, command_args: List[str]) -> bool:
+        """Handle topic browsing commands."""
         if command == "list":
             output = self.command_handler.handle_list()
             print(output)
-        
+            return True
         elif command == "search":
             keyword = " ".join(command_args) if command_args else ""
             output = self.command_handler.handle_search(keyword)
             print(output)
-        
+            return True
         elif command == "random":
             output = self.command_handler.handle_random()
             print(output)
-        
+            return True
         elif command == "categories":
             output = self.command_handler.handle_categories()
             print(output)
-        
+            return True
         elif command == "category":
             category = " ".join(command_args) if command_args else ""
             output = self.command_handler.handle_category(category)
             print(output)
-        
+            return True
         elif command == "path":
             output = self.command_handler.handle_path()
             print(output)
-        
+            return True
         elif command == "related":
             output = self.command_handler.handle_related(self.current_topic)
             print(output)
-        
-        elif command == "next":
+            return True
+        return False
+    
+    def _handle_navigation_commands(self, command: str, command_args: List[str]) -> bool:
+        """Handle navigation commands."""
+        if command == "next":
             self._navigate_next()
-        
+            return True
         elif command == "prev":
             self._navigate_prev()
-        
+            return True
         elif command == "goto":
             topic = " ".join(command_args) if command_args else ""
             self._navigate_to_topic(topic)
-        
-        # Code execution commands
-        elif command == "run":
-            if not self.current_topic:
-                print("❌ No current topic. View a topic first.")
-                return
-            
-            if not command_args:
-                print("❌ Please provide an example number.\nUsage: /run <number>")
-                return
-            
-            try:
-                example_num = int(command_args[0])
-                self._run_example(example_num)
-            except ValueError:
-                print("❌ Example number must be an integer.")
-        
+            return True
+        return False
+    
+    def _handle_code_execution_commands(self, command: str, command_args: List[str]) -> bool:
+        """Handle code execution commands."""
+        if command == "run":
+            return self._handle_run_command(command_args)
         elif command == "modify":
-            if not self.current_topic:
-                print("❌ No current topic. View a topic first.")
-                return
-            
-            if not command_args:
-                print("❌ Please provide an example number.\nUsage: /modify <number>")
-                return
-            
-            try:
-                example_num = int(command_args[0])
-                self._enter_edit_mode(example_num)
-            except ValueError:
-                print("❌ Example number must be an integer.")
+            return self._handle_modify_command(command_args)
+        return False
+    
+    def _handle_run_command(self, command_args: List[str]) -> bool:
+        """Handle the run command."""
+        if not self.current_topic:
+            print("❌ No current topic. View a topic first.")
+            return True
         
-        # Progress commands
-        elif command == "progress":
+        if not command_args:
+            print("❌ Please provide an example number.\nUsage: /run <number>")
+            return True
+        
+        try:
+            example_num = int(command_args[0])
+            self._run_example(example_num)
+        except ValueError:
+            print("❌ Example number must be an integer.")
+        return True
+    
+    def _handle_modify_command(self, command_args: List[str]) -> bool:
+        """Handle the modify command."""
+        if not self.current_topic:
+            print("❌ No current topic. View a topic first.")
+            return True
+        
+        if not command_args:
+            print("❌ Please provide an example number.\nUsage: /modify <number>")
+            return True
+        
+        try:
+            example_num = int(command_args[0])
+            self._enter_edit_mode(example_num)
+        except ValueError:
+            print("❌ Example number must be an integer.")
+        return True
+    
+    def _handle_progress_commands(self, command: str, command_args: List[str]) -> bool:
+        """Handle progress tracking commands."""
+        if command == "progress":
             output = self.command_handler.handle_progress()
             print(output)
-        
+            return True
         elif command == "stats":
             output = self.command_handler.handle_stats()
             print(output)
-        
+            return True
         elif command == "reset_progress":
-            response = input("⚠️  Are you sure you want to reset all progress? (yes/no): ").strip().lower()
-            if response == "yes":
-                self.session_manager.reset_progress()
-                print("✅ Progress reset.")
-            else:
-                print("❌ Reset cancelled.")
-        
-        # Session commands
-        elif command == "history":
-            history = self.session_manager.get_session_history()
-            if not history:
-                print("📋 Session history is empty.")
-            else:
-                print("📋 Session History:")
-                for i, topic in enumerate(history, 1):
-                    print(f"  {i}. {topic}")
-        
+            self._handle_reset_progress()
+            return True
+        return False
+    
+    def _handle_reset_progress(self) -> None:
+        """Handle progress reset with confirmation."""
+        response = input("⚠️  Are you sure you want to reset all progress? (yes/no): ").strip().lower()
+        if response == "yes":
+            self.session_manager.reset_progress()
+            print("✅ Progress reset.")
+        else:
+            print("❌ Reset cancelled.")
+    
+    def _handle_session_commands(self, command: str, command_args: List[str]) -> bool:
+        """Handle session management commands."""
+        if command == "history":
+            self._handle_history_command()
+            return True
         elif command == "clear_history":
-            response = input("⚠️  Are you sure you want to clear session history? (yes/no): ").strip().lower()
-            if response == "yes":
-                self.session_manager.clear_session_history()
-                print("✅ History cleared.")
-            else:
-                print("❌ Clear cancelled.")
-        
+            self._handle_clear_history()
+            return True
         elif command == "session":
-            info = self.session_manager.get_session_info()
-            print("📊 Session Information:")
-            for key, value in info.items():
-                print(f"  {key}: {value}")
-        
-        # Help commands
-        elif command == "help":
+            self._handle_session_info()
+            return True
+        return False
+    
+    def _handle_history_command(self) -> None:
+        """Handle the history command."""
+        history = self.session_manager.get_session_history()
+        if not history:
+            print("📋 Session history is empty.")
+        else:
+            print("📋 Session History:")
+            for i, topic in enumerate(history, 1):
+                print(f"  {i}. {topic}")
+    
+    def _handle_clear_history(self) -> None:
+        """Handle clear history with confirmation."""
+        response = input("⚠️  Are you sure you want to clear session history? (yes/no): ").strip().lower()
+        if response == "yes":
+            self.session_manager.clear_session_history()
+            print("✅ History cleared.")
+        else:
+            print("❌ Clear cancelled.")
+    
+    def _handle_session_info(self) -> None:
+        """Handle session info display."""
+        info = self.session_manager.get_session_info()
+        print("📊 Session Information:")
+        for key, value in info.items():
+            print(f"  {key}: {value}")
+    
+    def _handle_help_commands(self, command: str, command_args: List[str]) -> bool:
+        """Handle help and information commands."""
+        if command == "help":
             help_cmd = command_args[0] if command_args else None
             output = self.command_handler.handle_help(help_cmd)
             print(output)
-        
+            return True
         elif command == "commands":
             output = self.command_handler.handle_commands()
             print(output)
-        
+            return True
         elif command == "about":
             output = self.command_handler.handle_about()
             print(output)
-        
+            return True
         elif command == "hint":
             output = self.command_handler.handle_hint(self.current_topic)
             print(output)
-        
+            return True
         elif command == "tip":
             output = self.command_handler.handle_tip()
             print(output)
-        
+            return True
         elif command == "tips":
             output = self.command_handler.handle_tips(self.current_topic)
             print(output)
-        
-        else:
-            print(f"❌ Unknown command: {command}")
+            return True
+        return False
     
     def _handle_topic_input(self, topic_name: str) -> None:
         """

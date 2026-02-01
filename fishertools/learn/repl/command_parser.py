@@ -18,6 +18,9 @@ class CommandParser:
     - Edit mode input: Code or commands while in edit mode
     """
     
+    # Error message constants
+    EMPTY_COMMAND_ERROR = "Command cannot be empty"
+    
     # Commands that are recognized by the REPL
     VALID_COMMANDS = {
         "help", "list", "search", "random", "categories", "category",
@@ -91,7 +94,7 @@ class CommandParser:
         command_str = input_str[1:].strip()
         
         if not command_str:
-            raise ValueError("Command cannot be empty")
+            raise ValueError(CommandParser.EMPTY_COMMAND_ERROR)
         
         # Use shlex to handle quoted arguments
         try:
@@ -100,7 +103,7 @@ class CommandParser:
             raise ValueError(f"Invalid command format: {e}")
         
         if not parts:
-            raise ValueError("Command cannot be empty")
+            raise ValueError(CommandParser.EMPTY_COMMAND_ERROR)
         
         command_name = parts[0].lower()
         args = parts[1:] if len(parts) > 1 else []
@@ -156,7 +159,7 @@ class CommandParser:
         
         command_str = input_str[1:].strip()
         if not command_str:
-            raise ValueError("Command cannot be empty")
+            raise ValueError(CommandParser.EMPTY_COMMAND_ERROR)
         
         try:
             parts = shlex.split(command_str)

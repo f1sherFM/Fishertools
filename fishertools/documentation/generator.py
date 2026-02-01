@@ -20,6 +20,12 @@ class DocumentationGenerator:
     and publishes to ReadTheDocs automatically.
     """
     
+    # Constants for file names
+    INDEX_RST = "index.rst"
+    CONF_PY = "conf.py"
+    READTHEDOCS_YAML = ".readthedocs.yaml"
+    REQUIREMENTS_TXT = "requirements.txt"
+    
     def __init__(self, project_name: str, output_dir: str = "docs"):
         """
         Initialize the documentation generator.
@@ -65,16 +71,16 @@ class DocumentationGenerator:
         
         # Generate index.rst
         index_content = self._generate_index_rst([api_info.module_name])
-        source_files["index.rst"] = index_content
+        source_files[self.INDEX_RST] = index_content
         
         # Generate conf.py
         config = self._generate_sphinx_config()
-        source_files["conf.py"] = self._config_to_python_file(config)
+        source_files[self.CONF_PY] = self._config_to_python_file(config)
         
         # Create navigation tree
         navigation = NavigationTree(
             name=self.project_name,
-            path="index.rst",
+            path=self.INDEX_RST,
             children=[
                 NavigationTree(
                     name=api_info.module_name,
@@ -109,7 +115,7 @@ class DocumentationGenerator:
         
         return NavigationTree(
             name=self.project_name,
-            path="index.rst",
+            path=self.INDEX_RST,
             children=children
         )
     
@@ -165,13 +171,13 @@ class DocumentationGenerator:
             
             # Create .readthedocs.yaml configuration
             readthedocs_config = self._generate_readthedocs_config()
-            config_path = os.path.join(docs.build_path, ".readthedocs.yaml")
+            config_path = os.path.join(docs.build_path, self.READTHEDOCS_YAML)
             with open(config_path, 'w', encoding='utf-8') as f:
                 f.write(readthedocs_config)
             
             # Create requirements.txt for ReadTheDocs
             requirements_content = self._generate_requirements_txt()
-            req_path = os.path.join(docs.build_path, "requirements.txt")
+            req_path = os.path.join(docs.build_path, self.REQUIREMENTS_TXT)
             with open(req_path, 'w', encoding='utf-8') as f:
                 f.write(requirements_content)
             
@@ -212,11 +218,11 @@ class DocumentationGenerator:
         
         # Generate index.rst for all modules
         index_content = self._generate_index_rst(all_modules)
-        source_files["index.rst"] = index_content
+        source_files[self.INDEX_RST] = index_content
         
         # Generate conf.py
         config = self._generate_sphinx_config()
-        source_files["conf.py"] = self._config_to_python_file(config)
+        source_files[self.CONF_PY] = self._config_to_python_file(config)
         
         # Create navigation structure
         navigation = self.create_navigation_structure(all_modules)

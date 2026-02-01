@@ -75,24 +75,35 @@ def format_nested(
         return f"{repr(data)} [max depth reached]"
 
     if isinstance(data, dict):
-        if not data:
-            return "{}"
-        lines = ["{"]
-        for key, value in data.items():
-            formatted_value = format_nested(value, depth + 1, max_depth, indent)
-            lines.append(f"{indent * (depth + 1)}{repr(key)}: {formatted_value}")
-        lines.append(f"{indent * depth}}}")
-        return "\n".join(lines)
-
+        return _format_dict_nested(data, depth, max_depth, indent)
     elif isinstance(data, (list, tuple)):
-        if not data:
-            return "[]" if isinstance(data, list) else "()"
-        lines = ["[" if isinstance(data, list) else "("]
-        for item in data:
-            formatted_item = format_nested(item, depth + 1, max_depth, indent)
-            lines.append(f"{indent * (depth + 1)}{formatted_item}")
-        lines.append(f"{indent * depth}]" if isinstance(data, list) else ")")
-        return "\n".join(lines)
-
+        return _format_sequence_nested(data, depth, max_depth, indent)
     else:
         return repr(data)
+
+
+def _format_dict_nested(data: dict, depth: int, max_depth: int, indent: str) -> str:
+    """Format nested dictionary."""
+    if not data:
+        return "{}"
+    
+    lines = ["{"]
+    for key, value in data.items():
+        formatted_value = format_nested(value, depth + 1, max_depth, indent)
+        lines.append(f"{indent * (depth + 1)}{repr(key)}: {formatted_value}")
+    lines.append(f"{indent * depth}}}")
+    return "\n".join(lines)
+
+
+def _format_sequence_nested(data: Any, depth: int, max_depth: int, indent: str) -> str:
+    """Format nested list or tuple."""
+    if not data:
+        return "[]" if isinstance(data, list) else "()"
+    
+    is_list = isinstance(data, list)
+    lines = ["[" if is_list else "("]
+    for item in data:
+        formatted_item = format_nested(item, depth + 1, max_depth, indent)
+        lines.append(f"{indent * (depth + 1)}{formatted_item}")
+    lines.append(f"{indent * depth}]" if is_list else ")")
+    return "\n".join(lines)
