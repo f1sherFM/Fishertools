@@ -32,7 +32,7 @@ class FunctionInfo:
     return_type: Optional[str]
     module_path: str
     line_number: int
-    examples: List[str] = None
+    examples: Optional[List[str]] = None
 
     def __post_init__(self):
         if self.examples is None:
@@ -86,7 +86,7 @@ class PublishResult:
     status: PublishStatus
     url: Optional[str] = None
     error_message: Optional[str] = None
-    build_log: List[str] = None
+    build_log: Optional[List[str]] = None
 
     def __post_init__(self):
         if self.build_log is None:

@@ -58,7 +58,8 @@ class ReadmeParser:
             raise FileNotFoundError(f"README file not found: {self.readme_path}")
 
         try:
-            self.content = self.readme_path.read_text(encoding="utf-8")
+            with open(self.readme_path, 'r', encoding='utf-8') as f:
+                self.content = f.read()
             return self.content
         except IOError as e:
             raise IOError(f"Failed to read README file: {e}")
@@ -602,7 +603,7 @@ class ReadmeTransformer:
             IOError: If writing fails
         """
         try:
-            self.parser.readme_path.write_text(content, encoding="utf-8")
+                f.write(content)
         except IOError as e:
             raise IOError(f"Failed to write transformed README: {e}")
 

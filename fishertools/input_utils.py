@@ -15,86 +15,136 @@ Functions:
 from typing import List, Optional, Any
 
 
-def ask_int(prompt: str, min: Optional[int] = None, max: Optional[int] = None) -> int:
+def ask_int(
+    prompt: str, 
+    min_val: Optional[int] = None, 
+    max_val: Optional[int] = None,
+    max_attempts: int = 10
+) -> int:
     """
     Prompt user for an integer with optional range validation.
     
     Args:
         prompt: The prompt to display to the user
-        min: Minimum allowed value (inclusive), optional
-        max: Maximum allowed value (inclusive), optional
+        min_val: Minimum allowed value (inclusive), optional
+        max_val: Maximum allowed value (inclusive), optional
+        max_attempts: Maximum number of attempts before raising error
         
     Returns:
         Validated integer from user input
         
     Raises:
+        ValueError: If prompt is empty, min_val > max_val, or max attempts exceeded
         EOFError: If user provides EOF (Ctrl+D)
+        KeyboardInterrupt: If user cancels with Ctrl+C
         
     Example:
-        >>> age = ask_int("How old are you? ", min=0, max=150)
+        >>> age = ask_int("How old are you? ", min_val=0, max_val=150)
         >>> score = ask_int("Enter your score: ")
     """
-    while True:
+    # Валидация параметров
+    if not prompt or not prompt.strip():
+        raise ValueError("Prompt cannot be empty")
+    
+    if min_val is not None and max_val is not None and min_val > max_val:
+        raise ValueError(f"min_val ({min_val}) cannot be greater than max_val ({max_val})")
+    
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be at least 1")
+    
+    attempts = 0
+    while attempts < max_attempts:
+        attempts += 1
         try:
             user_input = input(prompt)
             value = int(user_input)
             
             # Check min constraint
-            if min is not None and value < min:
-                print(f"Error: Value must be at least {min}")
+            if min_val is not None and value < min_val:
+                remaining = max_attempts - attempts
+                print(f"Error: Value must be at least {min_val}. {remaining} attempts remaining.")
                 continue
             
             # Check max constraint
-            if max is not None and value > max:
-                print(f"Error: Value must be at most {max}")
+            if max_val is not None and value > max_val:
+                remaining = max_attempts - attempts
+                print(f"Error: Value must be at most {max_val}. {remaining} attempts remaining.")
                 continue
             
             return value
         except ValueError:
-            print(f"Error: Please enter a valid integer")
-        except EOFError:
+            remaining = max_attempts - attempts
+            print(f"Error: Please enter a valid integer. {remaining} attempts remaining.")
+        except (EOFError, KeyboardInterrupt):
             raise
+    
+    raise ValueError(f"Maximum attempts ({max_attempts}) exceeded")
 
 
-def ask_float(prompt: str, min: Optional[float] = None, max: Optional[float] = None) -> float:
+def ask_float(
+    prompt: str, 
+    min_val: Optional[float] = None, 
+    max_val: Optional[float] = None,
+    max_attempts: int = 10
+) -> float:
     """
     Prompt user for a float with optional range validation.
     
     Args:
         prompt: The prompt to display to the user
-        min: Minimum allowed value (inclusive), optional
-        max: Maximum allowed value (inclusive), optional
+        min_val: Minimum allowed value (inclusive), optional
+        max_val: Maximum allowed value (inclusive), optional
+        max_attempts: Maximum number of attempts before raising error
         
     Returns:
         Validated float from user input
         
     Raises:
+        ValueError: If prompt is empty, min_val > max_val, or max attempts exceeded
         EOFError: If user provides EOF (Ctrl+D)
+        KeyboardInterrupt: If user cancels with Ctrl+C
         
     Example:
-        >>> temperature = ask_float("Enter temperature (C): ", min=-273.15)
-        >>> price = ask_float("Enter price: ", min=0)
+        >>> temperature = ask_float("Enter temperature (C): ", min_val=-273.15)
+        >>> price = ask_float("Enter price: ", min_val=0)
     """
-    while True:
+    # Валидация параметров
+    if not prompt or not prompt.strip():
+        raise ValueError("Prompt cannot be empty")
+    
+    if min_val is not None and max_val is not None and min_val > max_val:
+        raise ValueError(f"min_val ({min_val}) cannot be greater than max_val ({max_val})")
+    
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be at least 1")
+    
+    attempts = 0
+    while attempts < max_attempts:
+        attempts += 1
         try:
             user_input = input(prompt)
             value = float(user_input)
             
             # Check min constraint
-            if min is not None and value < min:
-                print(f"Error: Value must be at least {min}")
+            if min_val is not None and value < min_val:
+                remaining = max_attempts - attempts
+                print(f"Error: Value must be at least {min_val}. {remaining} attempts remaining.")
                 continue
             
             # Check max constraint
-            if max is not None and value > max:
-                print(f"Error: Value must be at most {max}")
+            if max_val is not None and value > max_val:
+                remaining = max_attempts - attempts
+                print(f"Error: Value must be at most {max_val}. {remaining} attempts remaining.")
                 continue
             
             return value
         except ValueError:
-            print(f"Error: Please enter a valid number")
-        except EOFError:
+            remaining = max_attempts - attempts
+            print(f"Error: Please enter a valid number. {remaining} attempts remaining.")
+        except (EOFError, KeyboardInterrupt):
             raise
+    
+    raise ValueError(f"Maximum attempts ({max_attempts}) exceeded")
 
 
 def ask_str(prompt: str, min_length: Optional[int] = None, max_length: Optional[int] = None) -> str:

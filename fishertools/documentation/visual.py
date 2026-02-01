@@ -49,7 +49,6 @@ class VisualDocumentation:
         # Add nodes for each module
         for i, module in enumerate(modules):
             node_id = f"M{i}"
-            clean_name = module.replace(".", "_").replace("-", "_")
             lines.append(f'    {node_id}["{module}"]')
         
         # Add relationships based on common patterns

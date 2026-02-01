@@ -237,20 +237,37 @@ class REPLEngine:
         """Handle the run command."""
         if not self.current_topic:
             print("❌ No current topic. View a topic first.")
-            return True
+            return False
         
         if not command_args:
             print("❌ Please provide an example number.\nUsage: /run <number>")
-            return True
+            return False
         
         try:
             example_num = int(command_args[0])
             self._run_example(example_num)
+            return True
         except ValueError:
             print("❌ Example number must be an integer.")
-        return True
+            return False
     
     def _handle_modify_command(self, command_args: List[str]) -> bool:
+        """Handle the modify command."""
+        if not self.current_topic:
+            print("❌ No current topic. View a topic first.")
+            return False
+        
+        if not command_args:
+            print("❌ Please provide an example number.\nUsage: /modify <number>")
+            return False
+        
+        try:
+            example_num = int(command_args[0])
+            self._enter_edit_mode(example_num)
+            return True
+        except ValueError:
+            print("❌ Example number must be an integer.")
+            return False
         """Handle the modify command."""
         if not self.current_topic:
             print("❌ No current topic. View a topic first.")

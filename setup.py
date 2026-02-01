@@ -1,11 +1,17 @@
 from setuptools import setup, find_packages
+import os
+import sys
+
+# Add the package directory to the path to import version
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+from fishertools._version import __version__
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
     name="fishertools",
-    version="0.4.3.3",
+    version=__version__,
     author="f1sherFM",
     author_email="kirillka229top@gmail.com",
     description="Fishertools - инструменты, которые делают Python удобнее и безопаснее для новичков",

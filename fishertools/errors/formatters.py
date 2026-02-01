@@ -281,13 +281,11 @@ class PlainFormatter:
         import re
         # Remove ANSI escape sequences - both complete and incomplete
         # This pattern matches \x1b[ or \033[ followed by any characters until a letter
-        ansi_escape = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]?')
-        # Also remove standalone \x1b[ or \033[ sequences
+        # Also includes standalone \x1b[ or \033[ sequences
         ansi_escape = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]?|\x1b\[|\033\[')
         
-        # First remove complete sequences, then standalone ones
+        # Remove all ANSI sequences
         text = ansi_escape.sub('', text)
-        text = standalone_escape.sub('', text)
         return text
     
     def format(self, explanation: ErrorExplanation) -> str:

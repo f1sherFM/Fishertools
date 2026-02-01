@@ -17,7 +17,7 @@ class TestAskInt:
     def test_ask_int_with_min_max(self, monkeypatch):
         """Test integer input with min/max constraints."""
         monkeypatch.setattr('builtins.input', lambda _: '50')
-        result = ask_int("Enter a number: ", min=0, max=100)
+        result = ask_int("Enter a number: ", min_val=0, max_val=100)
         assert result == 50
 
 

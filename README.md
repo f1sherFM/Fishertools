@@ -4,16 +4,18 @@
 
 Fishertools is a Python library designed specifically for beginner developers. It provides clear error explanations, safe utilities, learning tools, and powerful debugging features to help you master Python.
 
-## 🚀 What's New in v0.4.3?
+## 🚀 What's New in v0.4.4?
 
-**Code Quality Refactoring** - Fixed "spaghetti code" and made the library more human-friendly:
+**Professional Code Quality Improvements** - Major refactoring based on comprehensive Code Review:
 
-- **🔧 Implemented safe_string_operations** - 6 new string utility functions
-- **🔢 Fixed safe_divide mathematics** - Now mathematically correct (returns None for 10/0, not 0!)
-- **🐍 Simplified error handling** - Pythonic EAFP approach, less code, more clarity
-- **📦 Refactored collection functions** - Reduced from 30+ to 5 lines per function
+- **🔒 Enhanced Type Safety** - Full type hints with `TypeVar` and `ParamSpec` in decorators
+- **✅ Better Input Validation** - `ask_int()` and `ask_float()` now validate parameters and limit attempts
+- **⚡ Performance Optimizations** - Pre-compiled regex patterns for faster string operations
+- **📦 Improved Dependency Management** - Fixed version pinning and optional dependencies
+- **🛡️ Security Enhancements** - Protection against infinite loops and DoS attacks
+- **📚 Centralized Versioning** - Single source of truth in `_version.py`
 
-[See what's new →](REFACTORING_SUMMARY.md) | [v0.4.1 Features →](docs/modules-v0.4.1.md)
+[See full changelog →](CHANGELOG.md) | [v0.4.3 Features →](CHANGELOG.md#0433---2026-02-01)
 
 ## Quick Start
 
@@ -295,8 +297,16 @@ result = analyze_data(data)
 
 ## 📊 Version History
 
-### v0.4.3 (Current)
-- 🔧 **Code Quality Refactoring** - Fixed "spaghetti code"
+### v0.4.4 (Current)
+- � **Enhanced Type Safety** - Full type hints with TypeVar and ParamSpec
+- ✅ **Better Input Validation** - Parameter validation and attempt limiting
+- ⚡ **Performance Optimizations** - Pre-compiled regex patterns
+- � **Improved Dependencies** - Fixed version pinning and optional extras
+- �️ **Security Enhancements** - DoS protection and better error handling
+- 📚 **Centralized Versioning** - Single source of truth in _version.py
+
+### v0.4.3
+- � **Code Quality Refactoring** - Fixed "spaghetti code"
 - ✨ **Implemented safe_string_operations** - 6 new string utilities
 - 🔢 **Fixed safe_divide mathematics** - Now returns None for 10/0 (correct!)
 - 🐍 **Simplified error handling** - Pythonic EAFP approach
@@ -376,4 +386,4 @@ Fishertools is built with ❤️ for the Python community, especially for beginn
 
 **Fishertools** - Making Python easier, safer, and more fun for everyone! 🐍✨
 
-**Current Version:** 0.4.3 | **Last Updated:** January 30, 2026
+**Current Version:** 0.4.4 | **Last Updated:** February 1, 2026
