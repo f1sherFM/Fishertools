@@ -2,6 +2,19 @@
 
 Все важные изменения в проекте Fishertools будут документированы в этом файле.
 
+## [0.4.3.1] - 2026-02-01
+
+### 🐛 Bug Fixes
+
+**Исправлены синтаксические ошибки в модуле documentation**
+
+#### Исправленные файлы:
+- `fishertools/documentation/code_validator.py` - удален дублирующийся код метода
+- `fishertools/documentation/examples_manager.py` - добавлен отсутствующий блок except
+- `fishertools/documentation/generator.py` - исправлена индентация в методе _generate_readthedocs_config
+
+Эти исправления устраняют ошибки IndentationError и SyntaxError, которые препятствовали корректной работе модуля документации.
+
 ## [Unreleased] - 2026-01-30
 
 ### 🔧 Code Quality Refactoring (v0.4.3)

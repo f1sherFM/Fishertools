@@ -167,24 +167,7 @@ class CodeExampleValidator:
 
         try:
             tree = ast.parse(code)
-
-            # Extract all imports
-            for node in ast.walk(tree):
-                if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        module_name = alias.name.split(".")[0]
-                        try:
-                            __import__(module_name)
-                        except ImportError:
-                            warnings.append(f"Module '{module_name}' may not be available")
-                elif isinstance(node, ast.ImportFrom):
-                    if node.module:
-                        module_name = node.module.split(".")[0]
-                        try:
-                            __import__(module_name)
-                        except ImportError:
-                            warnings.append(f"Module '{module_name}' may not be available")
-
+            CodeExampleValidator._check_imports_in_tree(tree, warnings)
         except Exception as e:
             errors.append(f"Error analyzing imports: {str(e)}")
 
@@ -193,6 +176,37 @@ class CodeExampleValidator:
             errors=errors,
             warnings=warnings,
         )
+
+    @staticmethod
+    def _check_imports_in_tree(tree: ast.AST, warnings: List[str]) -> None:
+        """Check all imports in the AST tree."""
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                CodeExampleValidator._check_import_node(node, warnings)
+            elif isinstance(node, ast.ImportFrom):
+                CodeExampleValidator._check_import_from_node(node, warnings)
+
+    @staticmethod
+    def _check_import_node(node: ast.Import, warnings: List[str]) -> None:
+        """Check a regular import node."""
+        for alias in node.names:
+            module_name = alias.name.split(".")[0]
+            CodeExampleValidator._try_import_module(module_name, warnings)
+
+    @staticmethod
+    def _check_import_from_node(node: ast.ImportFrom, warnings: List[str]) -> None:
+        """Check an import from node."""
+        if node.module:
+            module_name = node.module.split(".")[0]
+            CodeExampleValidator._try_import_module(module_name, warnings)
+
+    @staticmethod
+    def _try_import_module(module_name: str, warnings: List[str]) -> None:
+        """Try to import a module and add warning if not available."""
+        try:
+            __import__(module_name)
+        except ImportError:
+            warnings.append(f"Module '{module_name}' may not be available")
 
     @staticmethod
     def validate_code_complexity(code: str, max_lines: int = 50) -> ValidationResult:

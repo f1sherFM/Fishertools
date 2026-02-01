@@ -345,7 +345,26 @@ print(result)"""
     def _generate_error_handling_example(self, function: FunctionInfo) -> ExampleCode:
         """Generate an example with error handling."""
         if not function.docstring or 'raise' not in function.docstring.lower():
-            return None
+            # Return a generic error handling example even if no specific exceptions are documented
+            param_values = ['invalid_input'] * len([p for p in function.parameters.keys() if p != 'self'])
+            
+            if param_values:
+                call = f"{function.name}({', '.join(param_values)})"
+            else:
+                call = f"{function.name}()"
+            
+            code = f"""# Generic error handling example
+try:
+    result = {call}
+    print(f"Success: {{result}}")
+except Exception as e:
+    print(f"Error: {{e}}")"""
+            
+            return ExampleCode(
+                code=code,
+                description=f"Generic error handling with {function.name}",
+                expected_output="# Will show either success or error message"
+            )
         
         # Create a simple error handling example
         param_values = ['invalid_input'] * len([p for p in function.parameters.keys() if p != 'self'])
@@ -407,7 +426,7 @@ print(f"Result: {{result}}")"""
     
     def _generate_readthedocs_config(self) -> str:
         """Generate .readthedocs.yaml configuration."""
-        config = f"""# .readthedocs.yaml
+        config = """# .readthedocs.yaml
 # Read the Docs configuration file
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
 

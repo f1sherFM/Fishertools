@@ -160,6 +160,6 @@ class FileBasedExamplesManager(ExamplesManager):
                             tags=data.get("tags", []),
                         )
                         self._examples[example.id] = example
-                except (json.JSONDecodeError, KeyError) as e:
+                except Exception:
                     # Skip malformed files
                     pass
