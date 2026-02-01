@@ -2,11 +2,18 @@
 Main error explainer implementation.
 
 This module contains the ErrorExplainer class and explain_error function.
+
+Architecture improvements (v0.4.4.2):
+- Separated pattern loading into PatternLoader
+- Separated pattern matching into PatternMatcher
+- Separated explanation building into ExplanationBuilder
+- Improved Single Responsibility Principle compliance
 """
 
-from typing import Optional, List
-from .models import ErrorExplanation, ExplainerConfig, ErrorPattern, ExceptionExplanation
-from .patterns import load_default_patterns
+from typing import Optional
+from .models import ErrorExplanation, ExplainerConfig, ExceptionExplanation
+from .pattern_loader import PatternLoader, PatternMatcher
+from .explanation_builder import ExplanationBuilder
 from .exceptions import ExplanationError, FormattingError, ConfigurationError, FishertoolsError
 
 
@@ -16,6 +23,11 @@ class ErrorExplainer:
     
     Uses pattern matching to provide contextual explanations for different
     types of Python exceptions.
+    
+    Architecture:
+    - PatternLoader: Handles pattern loading and caching
+    - PatternMatcher: Handles pattern matching logic
+    - ExplanationBuilder: Handles explanation creation
     """
     
     def __init__(self, config: Optional[ExplainerConfig] = None):
@@ -31,26 +43,20 @@ class ErrorExplainer:
         """
         try:
             self.config = config or ExplainerConfig()
-            self.patterns = self._load_patterns()
+            
+            # Initialize components (SRP - Single Responsibility Principle)
+            self.pattern_loader = PatternLoader()
+            patterns = self.pattern_loader.load_patterns()
+            self.pattern_matcher = PatternMatcher(patterns)
+            self.explanation_builder = ExplanationBuilder()
+            
         except Exception as e:
             if isinstance(e, (ConfigurationError, ExplanationError)):
                 raise
-            raise ExplanationError(f"Не удалось инициализировать ErrorExplainer: {e}", original_error=e)
-    
-    def _load_patterns(self) -> List[ErrorPattern]:
-        """
-        Load error patterns for matching exceptions.
-        
-        Returns:
-            List of ErrorPattern objects
-            
-        Raises:
-            ExplanationError: If patterns cannot be loaded
-        """
-        try:
-            return load_default_patterns()
-        except Exception as e:
-            raise ExplanationError(f"Не удалось загрузить паттерны ошибок: {e}", original_error=e)
+            raise ExplanationError(
+                f"Не удалось инициализировать ErrorExplainer: {e}",
+                original_error=e
+            )
     
     def explain(self, exception: Exception) -> ErrorExplanation:
         """
@@ -66,22 +72,24 @@ class ErrorExplainer:
             ExplanationError: If explanation creation fails
         """
         if not isinstance(exception, Exception):
-            raise ExplanationError(f"Параметр должен быть экземпляром Exception, получен {type(exception).__name__}")
+            raise ExplanationError(
+                f"Параметр должен быть экземпляром Exception, получен {type(exception).__name__}"
+            )
         
         try:
             # Try to find a matching pattern
-            pattern = self._match_pattern(exception)
+            pattern = self.pattern_matcher.find_match(exception)
             
             if pattern:
-                return self._create_explanation_from_pattern(exception, pattern)
+                return self.explanation_builder.create_from_pattern(exception, pattern)
             else:
-                return self._create_fallback_explanation(exception)
+                return self.explanation_builder.create_fallback(exception)
                 
         except Exception as e:
             if isinstance(e, ExplanationError):
                 raise
-            # Graceful degradation - create a minimal explanation if all else fails
-            return self._create_emergency_explanation(exception, e)
+            # Graceful degradation
+            return self.explanation_builder.create_emergency(exception, e)
     
     def explain_structured(self, exception: Exception) -> ExceptionExplanation:
         """
@@ -111,172 +119,22 @@ class ErrorExplainer:
             ...     print(explanation.simple_explanation)
         """
         if not isinstance(exception, Exception):
-            raise ExplanationError(f"Параметр должен быть экземпляром Exception, получен {type(exception).__name__}")
+            raise ExplanationError(
+                f"Параметр должен быть экземпляром Exception, получен {type(exception).__name__}"
+            )
         
         try:
             # Get the basic explanation
             error_explanation = self.explain(exception)
             
             # Convert to structured format
-            return ExceptionExplanation(
-                exception_type=error_explanation.error_type,
-                simple_explanation=error_explanation.simple_explanation,
-                fix_suggestions=[error_explanation.fix_tip],  # Convert single tip to list
-                code_example=error_explanation.code_example,
-                traceback_context=error_explanation.additional_info
-            )
+            return self.explanation_builder.create_structured_from_basic(error_explanation)
+            
         except Exception as e:
             if isinstance(e, ExplanationError):
                 raise
             # Graceful degradation
-            return self._create_emergency_structured_explanation(exception, e)
-    
-    def _create_emergency_structured_explanation(self, exception: Exception, 
-                                                 original_error: Exception) -> ExceptionExplanation:
-        """
-        Create a minimal structured explanation when all other methods fail.
-        
-        Args:
-            exception: The original exception to explain
-            original_error: The error that prevented normal explanation
-            
-        Returns:
-            Minimal ExceptionExplanation that should always work
-        """
-        try:
-            error_type = getattr(type(exception), '__name__', 'Unknown')
-            error_message = str(exception) if exception else 'Unknown error'
-            
-            return ExceptionExplanation(
-                exception_type=error_type,
-                simple_explanation="An error occurred in your code. Unfortunately, a detailed explanation could not be generated.",
-                fix_suggestions=[
-                    "Check the error message above and try to find the problem in your code.",
-                    "Search for information about this error type in Python documentation.",
-                    "Ask for help if you cannot solve the problem yourself."
-                ],
-                code_example=f"# General error handling:\ntry:\n    # your code\n    pass\nexcept {error_type} as e:\n    print(f'Error: {{e}}')",
-                traceback_context=f"Internal fishertools error: {original_error}"
-            )
-        except Exception:
-            # Absolute last resort
-            return ExceptionExplanation(
-                exception_type="Critical",
-                simple_explanation="A critical error occurred in the error explanation system.",
-                fix_suggestions=["Contact fishertools developers with a description of the problem."],
-                code_example="# Please contact support",
-                traceback_context="Critical system error"
-            )
-
-    
-    def _match_pattern(self, exception: Exception) -> Optional[ErrorPattern]:
-        """
-        Find the best matching pattern for the given exception.
-        
-        Args:
-            exception: The exception to match
-            
-        Returns:
-            Matching ErrorPattern or None if no match found
-        """
-        try:
-            for pattern in self.patterns:
-                if pattern.matches(exception):
-                    return pattern
-            return None
-        except Exception as e:
-            # If pattern matching fails, log the error but don't raise
-            # This allows fallback explanation to work
-            return None
-    
-    def _create_explanation_from_pattern(self, exception: Exception, 
-                                       pattern: ErrorPattern) -> ErrorExplanation:
-        """
-        Create explanation using a matched pattern.
-        
-        Args:
-            exception: The original exception
-            pattern: The matched pattern
-            
-        Returns:
-            ErrorExplanation based on the pattern
-            
-        Raises:
-            ExplanationError: If explanation creation fails
-        """
-        try:
-            return ErrorExplanation(
-                original_error=str(exception),
-                error_type=type(exception).__name__,
-                simple_explanation=pattern.explanation,
-                fix_tip=pattern.tip,
-                code_example=pattern.example,
-                additional_info=f"Частые причины: {', '.join(pattern.common_causes)}"
-            )
-        except Exception as e:
-            raise ExplanationError(f"Не удалось создать объяснение из паттерна: {e}", 
-                                 exception_type=type(exception).__name__, original_error=e)
-    
-    def _create_fallback_explanation(self, exception: Exception) -> ErrorExplanation:
-        """
-        Create a generic explanation for unsupported exceptions.
-        
-        Args:
-            exception: The exception to explain
-            
-        Returns:
-            Generic ErrorExplanation
-        """
-        try:
-            error_type = type(exception).__name__
-            
-            return ErrorExplanation(
-                original_error=str(exception),
-                error_type=error_type,
-                simple_explanation=f"Произошла ошибка типа {error_type}. Это означает, что в вашем коде что-то пошло не так.",
-                fix_tip="Внимательно прочитайте сообщение об ошибке и проверьте строку кода, где произошла ошибка. Убедитесь, что все переменные определены и имеют правильные типы.",
-                code_example=f"# Пример обработки ошибки {error_type}:\ntry:\n    # ваш код здесь\n    pass\nexcept {error_type} as e:\n    print(f'Ошибка: {{e}}')",
-                additional_info="Если вы не можете решить проблему самостоятельно, попробуйте поискать информацию об этом типе ошибки в документации Python или задать вопрос на форуме."
-            )
-        except Exception as e:
-            # If even fallback fails, create emergency explanation
-            return self._create_emergency_explanation(exception, e)
-    
-    def _create_emergency_explanation(self, exception: Exception, original_error: Exception) -> ErrorExplanation:
-        """
-        Create a minimal explanation when all other methods fail.
-        
-        This is the last resort for graceful degradation.
-        
-        Args:
-            exception: The original exception to explain
-            original_error: The error that prevented normal explanation
-            
-        Returns:
-            Minimal ErrorExplanation that should always work
-        """
-        try:
-            error_type = getattr(type(exception), '__name__', 'Unknown')
-            error_message = str(exception) if exception else 'Неизвестная ошибка'
-            
-            return ErrorExplanation(
-                original_error=error_message,
-                error_type=error_type,
-                simple_explanation="Произошла ошибка в вашем коде. К сожалению, не удалось создать подробное объяснение.",
-                fix_tip="Проверьте сообщение об ошибке выше и попробуйте найти проблему в коде. Обратитесь за помощью, если не можете решить проблему самостоятельно.",
-                code_example="# Общий способ обработки ошибок:\ntry:\n    # ваш код\n    pass\nexcept Exception as e:\n    print(f'Ошибка: {e}')",
-                additional_info=f"Внутренняя ошибка fishertools: {original_error}"
-            )
-        except Exception:
-            # Absolute last resort - create explanation with minimal dependencies
-            return ErrorExplanation(
-                original_error="Критическая ошибка",
-                error_type="Critical",
-                simple_explanation="Произошла критическая ошибка в системе объяснения ошибок.",
-                fix_tip="Обратитесь к разработчикам fishertools с описанием проблемы.",
-                code_example="# Обратитесь за помощью",
-                additional_info="Критическая ошибка системы"
-            )
+            return self.explanation_builder.create_emergency_structured(exception, e)
 
 
 def explain_error(exception: Exception, 

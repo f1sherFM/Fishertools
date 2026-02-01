@@ -12,139 +12,192 @@ Functions:
     ask_choice() - Prompt user to choose from a list of options
 """
 
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Callable, Union, TypeVar
+
+# Security constants
+MAX_INPUT_LENGTH = 10000  # Maximum input length to prevent DoS
+DEFAULT_TIMEOUT = 300  # 5 minutes default timeout
+
+T = TypeVar('T', int, float)
+
+
+def _ask_numeric(
+    prompt: str,
+    converter: Callable[[str], T],
+    type_name: str,
+    min_val: Optional[Union[int, float]] = None,
+    max_val: Optional[Union[int, float]] = None,
+    max_attempts: int = 10,
+    timeout: Optional[int] = DEFAULT_TIMEOUT,
+    max_input_length: int = MAX_INPUT_LENGTH
+) -> T:
+    """
+    Internal function for numeric input with validation and security checks.
+    
+    Args:
+        prompt: The prompt to display to the user
+        converter: Function to convert string to numeric type (int or float)
+        type_name: Name of the type for error messages
+        min_val: Minimum allowed value (inclusive), optional
+        max_val: Maximum allowed value (inclusive), optional
+        max_attempts: Maximum number of attempts before raising error
+        timeout: Timeout in seconds (None for no timeout)
+        max_input_length: Maximum input length to prevent DoS
+        
+    Returns:
+        Validated numeric value from user input
+        
+    Raises:
+        ValueError: If validation fails or max attempts exceeded
+        TimeoutError: If input timeout is exceeded
+        EOFError: If user provides EOF (Ctrl+D)
+        KeyboardInterrupt: If user cancels with Ctrl+C
+    """
+    import signal
+    import sys
+    
+    # Валидация параметров
+    if not prompt or not prompt.strip():
+        raise ValueError("Prompt cannot be empty")
+    
+    if min_val is not None and max_val is not None and min_val > max_val:
+        raise ValueError(f"min_val ({min_val}) cannot be greater than max_val ({max_val})")
+    
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be at least 1")
+    
+    if max_input_length < 1:
+        raise ValueError("max_input_length must be at least 1")
+    
+    def timeout_handler(signum, frame):
+        raise TimeoutError(f"Input timeout ({timeout}s) exceeded")
+    
+    # Set up timeout (only on Unix-like systems)
+    old_handler = None
+    if timeout is not None and hasattr(signal, 'SIGALRM'):
+        old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(timeout)
+    
+    try:
+        attempts = 0
+        while attempts < max_attempts:
+            attempts += 1
+            try:
+                user_input = input(prompt)
+                
+                # Security: Check input length to prevent DoS
+                if len(user_input) > max_input_length:
+                    remaining = max_attempts - attempts
+                    print(f"Error: Input too long (max {max_input_length} characters). {remaining} attempts remaining.")
+                    continue
+                
+                # Convert to numeric type
+                value = converter(user_input)
+                
+                # Check min constraint
+                if min_val is not None and value < min_val:
+                    remaining = max_attempts - attempts
+                    print(f"Error: Value must be at least {min_val}. {remaining} attempts remaining.")
+                    continue
+                
+                # Check max constraint
+                if max_val is not None and value > max_val:
+                    remaining = max_attempts - attempts
+                    print(f"Error: Value must be at most {max_val}. {remaining} attempts remaining.")
+                    continue
+                
+                return value
+                
+            except ValueError:
+                remaining = max_attempts - attempts
+                print(f"Error: Please enter a valid {type_name}. {remaining} attempts remaining.")
+            except (EOFError, KeyboardInterrupt):
+                raise
+        
+        raise ValueError(f"Maximum attempts ({max_attempts}) exceeded")
+    
+    finally:
+        # Clean up timeout
+        if timeout is not None and hasattr(signal, 'SIGALRM'):
+            signal.alarm(0)
+            if old_handler is not None:
+                signal.signal(signal.SIGALRM, old_handler)
 
 
 def ask_int(
     prompt: str, 
     min_val: Optional[int] = None, 
     max_val: Optional[int] = None,
-    max_attempts: int = 10
+    max_attempts: int = 10,
+    timeout: Optional[int] = DEFAULT_TIMEOUT
 ) -> int:
     """
     Prompt user for an integer with optional range validation.
+    
+    Security features:
+    - Input length limit to prevent DoS attacks
+    - Optional timeout to prevent infinite waiting
+    - Maximum attempts limit
     
     Args:
         prompt: The prompt to display to the user
         min_val: Minimum allowed value (inclusive), optional
         max_val: Maximum allowed value (inclusive), optional
         max_attempts: Maximum number of attempts before raising error
+        timeout: Timeout in seconds (None for no timeout, default: 300s)
         
     Returns:
         Validated integer from user input
         
     Raises:
         ValueError: If prompt is empty, min_val > max_val, or max attempts exceeded
+        TimeoutError: If input timeout is exceeded
         EOFError: If user provides EOF (Ctrl+D)
         KeyboardInterrupt: If user cancels with Ctrl+C
         
     Example:
         >>> age = ask_int("How old are you? ", min_val=0, max_val=150)
-        >>> score = ask_int("Enter your score: ")
+        >>> score = ask_int("Enter your score: ", timeout=60)
     """
-    # Валидация параметров
-    if not prompt or not prompt.strip():
-        raise ValueError("Prompt cannot be empty")
-    
-    if min_val is not None and max_val is not None and min_val > max_val:
-        raise ValueError(f"min_val ({min_val}) cannot be greater than max_val ({max_val})")
-    
-    if max_attempts < 1:
-        raise ValueError("max_attempts must be at least 1")
-    
-    attempts = 0
-    while attempts < max_attempts:
-        attempts += 1
-        try:
-            user_input = input(prompt)
-            value = int(user_input)
-            
-            # Check min constraint
-            if min_val is not None and value < min_val:
-                remaining = max_attempts - attempts
-                print(f"Error: Value must be at least {min_val}. {remaining} attempts remaining.")
-                continue
-            
-            # Check max constraint
-            if max_val is not None and value > max_val:
-                remaining = max_attempts - attempts
-                print(f"Error: Value must be at most {max_val}. {remaining} attempts remaining.")
-                continue
-            
-            return value
-        except ValueError:
-            remaining = max_attempts - attempts
-            print(f"Error: Please enter a valid integer. {remaining} attempts remaining.")
-        except (EOFError, KeyboardInterrupt):
-            raise
-    
-    raise ValueError(f"Maximum attempts ({max_attempts}) exceeded")
+    return _ask_numeric(prompt, int, "integer", min_val, max_val, max_attempts, timeout)
 
 
 def ask_float(
     prompt: str, 
     min_val: Optional[float] = None, 
     max_val: Optional[float] = None,
-    max_attempts: int = 10
+    max_attempts: int = 10,
+    timeout: Optional[int] = DEFAULT_TIMEOUT
 ) -> float:
     """
     Prompt user for a float with optional range validation.
+    
+    Security features:
+    - Input length limit to prevent DoS attacks
+    - Optional timeout to prevent infinite waiting
+    - Maximum attempts limit
     
     Args:
         prompt: The prompt to display to the user
         min_val: Minimum allowed value (inclusive), optional
         max_val: Maximum allowed value (inclusive), optional
         max_attempts: Maximum number of attempts before raising error
+        timeout: Timeout in seconds (None for no timeout, default: 300s)
         
     Returns:
         Validated float from user input
         
     Raises:
         ValueError: If prompt is empty, min_val > max_val, or max attempts exceeded
+        TimeoutError: If input timeout is exceeded
         EOFError: If user provides EOF (Ctrl+D)
         KeyboardInterrupt: If user cancels with Ctrl+C
         
     Example:
-        >>> temperature = ask_float("Enter temperature (C): ", min_val=-273.15)
+        >>> temperature = ask_float("Enter temperature (C): ", min_val=-273.15, timeout=60)
         >>> price = ask_float("Enter price: ", min_val=0)
     """
-    # Валидация параметров
-    if not prompt or not prompt.strip():
-        raise ValueError("Prompt cannot be empty")
-    
-    if min_val is not None and max_val is not None and min_val > max_val:
-        raise ValueError(f"min_val ({min_val}) cannot be greater than max_val ({max_val})")
-    
-    if max_attempts < 1:
-        raise ValueError("max_attempts must be at least 1")
-    
-    attempts = 0
-    while attempts < max_attempts:
-        attempts += 1
-        try:
-            user_input = input(prompt)
-            value = float(user_input)
-            
-            # Check min constraint
-            if min_val is not None and value < min_val:
-                remaining = max_attempts - attempts
-                print(f"Error: Value must be at least {min_val}. {remaining} attempts remaining.")
-                continue
-            
-            # Check max constraint
-            if max_val is not None and value > max_val:
-                remaining = max_attempts - attempts
-                print(f"Error: Value must be at most {max_val}. {remaining} attempts remaining.")
-                continue
-            
-            return value
-        except ValueError:
-            remaining = max_attempts - attempts
-            print(f"Error: Please enter a valid number. {remaining} attempts remaining.")
-        except (EOFError, KeyboardInterrupt):
-            raise
-    
-    raise ValueError(f"Maximum attempts ({max_attempts}) exceeded")
+    return _ask_numeric(prompt, float, "number", min_val, max_val, max_attempts, timeout)
 
 
 def ask_str(prompt: str, min_length: Optional[int] = None, max_length: Optional[int] = None) -> str:

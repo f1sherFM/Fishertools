@@ -293,8 +293,9 @@ class TestPatternIntegration:
         """Test that explainer correctly uses loaded patterns."""
         explainer = ErrorExplainer()
         
-        # Verify patterns are loaded
-        assert len(explainer.patterns) > 0
+        # Verify patterns are loaded via PatternLoader
+        patterns = explainer.pattern_loader.get_patterns()
+        assert len(patterns) > 0
         
         # Test with a specific exception that should match a pattern
         exception = TypeError("unsupported operand type(s) for +: 'int' and 'str'")

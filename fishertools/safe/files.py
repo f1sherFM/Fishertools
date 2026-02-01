@@ -3,6 +3,11 @@ Safe file operations for beginners.
 
 This module provides safe file handling utilities that prevent common
 file-related errors and provide helpful error messages.
+
+Security features:
+- Path traversal protection
+- Input validation
+- Safe defaults
 """
 
 import os
@@ -10,9 +15,78 @@ from pathlib import Path
 from typing import Union, Optional, List
 
 
+def _validate_safe_path(filepath: Union[str, Path], operation: str = "file operation") -> Path:
+    """
+    Validate that a file path is safe and doesn't contain path traversal attempts.
+    
+    Args:
+        filepath: Path to validate
+        operation: Name of operation for error messages
+        
+    Returns:
+        Resolved Path object
+        
+    Raises:
+        SafeUtilityError: If path is unsafe
+    """
+    from ..errors.exceptions import SafeUtilityError
+    
+    if filepath is None:
+        raise SafeUtilityError(f"Path cannot be None for {operation}", utility_name=operation)
+    
+    if not isinstance(filepath, (str, Path)):
+        raise SafeUtilityError(
+            f"Path must be string or Path object, got {type(filepath).__name__}",
+            utility_name=operation
+        )
+    
+    try:
+        # Convert to Path and resolve
+        path = Path(filepath).resolve()
+        
+        # Security: Check for path traversal attempts
+        # Get the current working directory
+        cwd = Path.cwd().resolve()
+        
+        # Check if resolved path tries to escape current directory
+        # Allow absolute paths but warn about them
+        try:
+            # This will raise ValueError if path is not relative to cwd
+            relative = path.relative_to(cwd)
+            
+            # Check for suspicious patterns in the relative path
+            parts = relative.parts
+            if '..' in parts:
+                raise SafeUtilityError(
+                    f"Path traversal detected: '..' in path {filepath}",
+                    utility_name=operation
+                )
+        except ValueError:
+            # Path is not relative to cwd (absolute path or outside cwd)
+            # This is allowed but we validate it doesn't contain ..
+            if '..' in str(filepath):
+                raise SafeUtilityError(
+                    f"Path traversal detected: '..' in path {filepath}",
+                    utility_name=operation
+                )
+        
+        return path
+        
+    except (OSError, ValueError) as e:
+        raise SafeUtilityError(
+            f"Invalid path for {operation}: {filepath}",
+            utility_name=operation
+        ) from e
+
+
 def safe_read_file(filepath: Union[str, Path], encoding: str = 'utf-8', default: str = '') -> str:
     """
-    Safely read a file with comprehensive error handling.
+    Safely read a file with comprehensive error handling and security checks.
+    
+    Security features:
+    - Path traversal protection
+    - Input validation
+    - Safe error handling
     
     Предотвращает ошибки FileNotFoundError, PermissionError и UnicodeDecodeError,
     возвращая значение по умолчанию вместо исключения.
@@ -26,7 +100,7 @@ def safe_read_file(filepath: Union[str, Path], encoding: str = 'utf-8', default:
         Содержимое файла или значение по умолчанию
         
     Raises:
-        SafeUtilityError: If filepath is None or invalid type
+        SafeUtilityError: If filepath is None, invalid type, or contains path traversal
         
     Examples:
         >>> safe_read_file("example.txt")
@@ -36,12 +110,8 @@ def safe_read_file(filepath: Union[str, Path], encoding: str = 'utf-8', default:
     """
     from ..errors.exceptions import SafeUtilityError
     
-    if filepath is None:
-        raise SafeUtilityError("Путь к файлу не может быть None", utility_name="safe_read_file")
-    
-    if not isinstance(filepath, (str, Path)):
-        raise SafeUtilityError(f"Путь к файлу должен быть строкой или Path объектом, получен {type(filepath).__name__}", 
-                             utility_name="safe_read_file")
+    # Validate path security
+    filepath = _validate_safe_path(filepath, "safe_read_file")
     
     if not isinstance(encoding, str):
         raise SafeUtilityError(f"Кодировка должна быть строкой, получен {type(encoding).__name__}", 
@@ -64,7 +134,12 @@ def safe_read_file(filepath: Union[str, Path], encoding: str = 'utf-8', default:
 def safe_write_file(filepath: Union[str, Path], content: str, encoding: str = 'utf-8', 
                    create_dirs: bool = True) -> bool:
     """
-    Safely write content to a file with error handling.
+    Safely write content to a file with error handling and security checks.
+    
+    Security features:
+    - Path traversal protection
+    - Input validation
+    - Safe directory creation
     
     Предотвращает ошибки при записи файла и может создавать директории.
     
@@ -78,7 +153,7 @@ def safe_write_file(filepath: Union[str, Path], content: str, encoding: str = 'u
         True если запись успешна, False при ошибке
         
     Raises:
-        SafeUtilityError: If arguments have invalid types
+        SafeUtilityError: If arguments have invalid types or path is unsafe
         
     Examples:
         >>> safe_write_file("output.txt", "Hello World")
@@ -88,12 +163,8 @@ def safe_write_file(filepath: Union[str, Path], content: str, encoding: str = 'u
     """
     from ..errors.exceptions import SafeUtilityError
     
-    if filepath is None:
-        raise SafeUtilityError("Путь к файлу не может быть None", utility_name="safe_write_file")
-    
-    if not isinstance(filepath, (str, Path)):
-        raise SafeUtilityError(f"Путь к файлу должен быть строкой или Path объектом, получен {type(filepath).__name__}", 
-                             utility_name="safe_write_file")
+    # Validate path security
+    filepath = _validate_safe_path(filepath, "safe_write_file")
     
     if not isinstance(content, str):
         raise SafeUtilityError(f"Содержимое должно быть строкой, получен {type(content).__name__}", 
@@ -104,8 +175,6 @@ def safe_write_file(filepath: Union[str, Path], content: str, encoding: str = 'u
                              utility_name="safe_write_file")
     
     try:
-        filepath = Path(filepath)
-        
         # Create directories if requested
         if create_dirs and filepath.parent != filepath:
             filepath.parent.mkdir(parents=True, exist_ok=True)

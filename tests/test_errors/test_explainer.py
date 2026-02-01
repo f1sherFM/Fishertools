@@ -162,8 +162,9 @@ class TestExplainerUnitTests:
     def test_explainer_handles_empty_patterns(self):
         """Test that explainer works even with no patterns loaded."""
         explainer = ErrorExplainer()
-        # Patterns list should be empty since no patterns are defined yet
-        assert isinstance(explainer.patterns, list)
+        # Patterns are now loaded via PatternLoader
+        patterns = explainer.pattern_loader.get_patterns()
+        assert isinstance(patterns, list)
         
         # Should still handle exceptions gracefully
         exception = TypeError("test error")

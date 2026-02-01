@@ -3,9 +3,30 @@ Safe collection operations for beginners.
 
 This module provides safe versions of common collection operations
 that prevent typical mistakes and provide helpful error messages.
+
+Type safety: Uses TypeVar and overload for better type checking.
 """
 
-from typing import Any, Optional, Union, List, Dict, Tuple
+from typing import Any, Optional, Union, List, Dict, Tuple, TypeVar, overload
+
+# Type variables for better type safety
+T = TypeVar('T')
+K = TypeVar('K')
+V = TypeVar('V')
+
+
+# Overloaded signatures for safe_get to provide better type hints
+@overload
+def safe_get(collection: Dict[K, V], index: K, default: V) -> V: ...
+
+@overload
+def safe_get(collection: List[T], index: int, default: T) -> T: ...
+
+@overload
+def safe_get(collection: Tuple[T, ...], index: int, default: T) -> T: ...
+
+@overload
+def safe_get(collection: str, index: int, default: str) -> str: ...
 
 
 def safe_get(collection: Union[List, Tuple, Dict, str], 

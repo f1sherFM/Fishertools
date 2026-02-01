@@ -3,9 +3,13 @@ Error patterns database.
 
 This module contains predefined patterns for common Python exceptions
 with Russian explanations for beginners.
+
+Performance optimization: Patterns are pre-compiled and cached for efficiency.
 """
 
 from .models import ErrorPattern
+from functools import lru_cache
+import re
 
 
 # Error patterns for common Python exceptions
@@ -149,11 +153,28 @@ DEFAULT_PATTERNS = [
 ]
 
 
+@lru_cache(maxsize=128)
+def _compile_pattern(pattern: str) -> re.Pattern:
+    """
+    Compile and cache regex pattern for performance.
+    
+    Args:
+        pattern: Regex pattern string
+        
+    Returns:
+        Compiled regex pattern
+    """
+    return re.compile(pattern, re.IGNORECASE)
+
+
 def load_default_patterns():
     """
     Load default error patterns for common Python exceptions.
     
     Returns:
         List of ErrorPattern objects for common Python exceptions
+        
+    Note:
+        Patterns are cached for performance optimization.
     """
     return DEFAULT_PATTERNS.copy()

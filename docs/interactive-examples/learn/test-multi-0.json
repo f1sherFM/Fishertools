@@ -1,7 +1,7 @@
 {
   "id": "test-multi-0",
   "module": "learn",
-  "title": "G",
+  "title": "\u0092\uda91\udc73\u00de\u00ff\ud858\udf265\u00d9",
   "code": "x = 1",
   "expected_output": "output",
   "explanation": "This is a test",
