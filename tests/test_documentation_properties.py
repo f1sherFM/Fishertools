@@ -106,11 +106,6 @@ class TestDocumentationProperties:
                     continue
                 
                 # Check if file exists
-                if link_path.startswith('../'):
-                    # Relative path going up
-                    target_path = Path(filepath.parent) / link_path
-                else:
-                    # Relative path in same directory
                     target_path = Path(filepath.parent) / link_path
                 
                 # Normalize path

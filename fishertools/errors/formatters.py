@@ -281,9 +281,9 @@ class PlainFormatter:
         import re
         # Remove ANSI escape sequences - both complete and incomplete
         # This pattern matches \x1b[ or \033[ followed by any characters until a letter
-        ansi_escape = re.compile(r'(\x1b\[|\033\[)[0-9;]*[a-zA-Z]?')
+        ansi_escape = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]?')
         # Also remove standalone \x1b[ or \033[ sequences
-        standalone_escape = re.compile(r'(\x1b\[|\033\[)')
+        ansi_escape = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]?|\x1b\[|\033\[')
         
         # First remove complete sequences, then standalone ones
         text = ansi_escape.sub('', text)

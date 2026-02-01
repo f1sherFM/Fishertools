@@ -43,8 +43,8 @@ class ConfigError:
 class ValidationResult:
     """Result of configuration validation."""
     is_valid: bool
-    errors: List[ConfigError] = None
-    warnings: List[ConfigError] = None
+    errors: Optional[List[ConfigError]] = None
+    warnings: Optional[List[ConfigError]] = None
     
     def __post_init__(self):
         if self.errors is None:
@@ -80,7 +80,7 @@ class LearningConfig:
     # Content and examples
     suggested_topics_count: int = 3
     max_examples_per_topic: int = 5
-    exercise_difficulty_progression: List[str] = None
+    exercise_difficulty_progression: Optional[List[str]] = None
     
     # Integration
     readthedocs_project: Optional[str] = None

@@ -137,8 +137,25 @@ class ConfigurationParser:
         errors = []
         warnings = []
         
-        # Define expected fields and their types
-        expected_fields = {
+        # Check required fields
+        errors.extend(self._validate_required_fields(config_data))
+        # Check field types and values
+        field_errors = self._validate_field_types_and_values(config_data)
+        errors.extend(field_errors)
+        
+        # Check for unknown fields
+        warnings.extend(self._validate_unknown_fields(config_data))
+        # Validate numeric ranges
+        warnings.extend(self._validate_numeric_ranges(config_data))
+        return ValidationResult(
+            is_valid=len(errors) == 0,
+            errors=errors,
+            warnings=warnings
+        )
+    
+    def _get_expected_fields(self) -> Dict[str, Any]:
+        """Get expected fields and their types."""
+        return {
             'default_level': str,
             'explanation_verbosity': str,
             'visual_aids_enabled': bool,
@@ -155,15 +172,19 @@ class ConfigurationParser:
             'session_timeout_minutes': int,
             'max_hint_count': int
         }
-        
-        # Valid values for enum-like fields
-        valid_values = {
+    
+    def _get_valid_values(self) -> Dict[str, list]:
+        """Get valid values for enum-like fields."""
+        return {
             'default_level': ['beginner', 'intermediate', 'advanced'],
             'explanation_verbosity': ['brief', 'detailed', 'comprehensive']
         }
-        
-        # Check for missing required fields
+    
+    def _validate_required_fields(self, config_data: Dict[str, Any]) -> list:
+        """Validate required fields are present."""
+        errors = []
         required_fields = ['default_level', 'explanation_verbosity']
+        
         for field in required_fields:
             if field not in config_data:
                 errors.append(ConfigError(
@@ -173,39 +194,61 @@ class ConfigurationParser:
                     suggested_fix=f"Add '{field}' field with a valid value"
                 ))
         
-        # Check field types and values
-        for field, expected_type in expected_fields.items():
-            if field in config_data:
-                value = config_data[field]
-                
-                # Handle nullable fields
-                if isinstance(expected_type, tuple):
-                    if value is not None and not isinstance(value, expected_type[0]):
-                        errors.append(ConfigError(
-                            message=f"Field '{field}' has invalid type. Expected {expected_type[0].__name__} or None, got {type(value).__name__}",
-                            field_path=field,
-                            severity=ErrorSeverity.ERROR,
-                            suggested_fix=f"Change '{field}' to a {expected_type[0].__name__} value or null"
-                        ))
-                else:
-                    if not isinstance(value, expected_type):
-                        errors.append(ConfigError(
-                            message=f"Field '{field}' has invalid type. Expected {expected_type.__name__}, got {type(value).__name__}",
-                            field_path=field,
-                            severity=ErrorSeverity.ERROR,
-                            suggested_fix=f"Change '{field}' to a {expected_type.__name__} value"
-                        ))
-                
-                # Check valid values for enum-like fields
-                if field in valid_values and value not in valid_values[field]:
-                    errors.append(ConfigError(
-                        message=f"Field '{field}' has invalid value '{value}'. Valid values: {valid_values[field]}",
-                        field_path=field,
-                        severity=ErrorSeverity.ERROR,
-                        suggested_fix=f"Set '{field}' to one of: {', '.join(valid_values[field])}"
-                    ))
+        return errors
+    
+    def _validate_field_types_and_values(self, config_data: Dict[str, Any]) -> list:
+        """Validate field types and enum values."""
+        errors = []
+        expected_fields = self._get_expected_fields()
+        valid_values = self._get_valid_values()
         
-        # Check for unknown fields (warnings)
+        for field, expected_type in expected_fields.items():
+            if field not in config_data:
+                continue
+                
+            value = config_data[field]
+            
+            # Validate type
+            type_error = self._validate_field_type(field, value, expected_type)
+            if type_error:
+                errors.append(type_error)
+            
+            # Validate enum values
+            if field in valid_values and value not in valid_values[field]:
+                errors.append(ConfigError(
+                    message=f"Field '{field}' has invalid value '{value}'. Valid values: {valid_values[field]}",
+                    field_path=field,
+                    severity=ErrorSeverity.ERROR,
+                    suggested_fix=f"Set '{field}' to one of: {', '.join(valid_values[field])}"
+                ))
+        
+        return errors
+    
+    def _validate_field_type(self, field: str, value: Any, expected_type: Any) -> Optional[ConfigError]:
+        """Validate a single field's type."""
+        if isinstance(expected_type, tuple):
+            if value is not None and not isinstance(value, expected_type[0]):
+                return ConfigError(
+                    message=f"Field '{field}' has invalid type. Expected {expected_type[0].__name__} or None, got {type(value).__name__}",
+                    field_path=field,
+                    severity=ErrorSeverity.ERROR,
+                    suggested_fix=f"Change '{field}' to a {expected_type[0].__name__} value or null"
+                )
+        else:
+            if not isinstance(value, expected_type):
+                return ConfigError(
+                    message=f"Field '{field}' has invalid type. Expected {expected_type.__name__}, got {type(value).__name__}",
+                    field_path=field,
+                    severity=ErrorSeverity.ERROR,
+                    suggested_fix=f"Change '{field}' to a {expected_type.__name__} value"
+                )
+        return None
+    
+    def _validate_unknown_fields(self, config_data: Dict[str, Any]) -> list:
+        """Check for unknown fields."""
+        warnings = []
+        expected_fields = self._get_expected_fields()
+        
         for field in config_data:
             if field not in expected_fields:
                 warnings.append(ConfigError(
@@ -215,7 +258,13 @@ class ConfigurationParser:
                     suggested_fix=f"Remove '{field}' field or check for typos"
                 ))
         
-        # Validate numeric ranges
+        return warnings
+    
+    def _validate_numeric_ranges(self, config_data: Dict[str, Any]) -> list:
+        """Validate numeric field ranges."""
+        warnings = []
+        
+        # Validate suggested_topics_count
         if 'suggested_topics_count' in config_data:
             value = config_data['suggested_topics_count']
             if isinstance(value, int) and (value < 1 or value > 10):
@@ -226,6 +275,7 @@ class ConfigurationParser:
                     suggested_fix="Set 'suggested_topics_count' to a value between 1 and 10"
                 ))
         
+        # Validate max_examples_per_topic
         if 'max_examples_per_topic' in config_data:
             value = config_data['max_examples_per_topic']
             if isinstance(value, int) and (value < 1 or value > 20):
@@ -236,11 +286,7 @@ class ConfigurationParser:
                     suggested_fix="Set 'max_examples_per_topic' to a value between 1 and 20"
                 ))
         
-        return ValidationResult(
-            is_valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings
-        )
+        return warnings
     
     def detect_format(self, file_path: str) -> ConfigFormat:
         """

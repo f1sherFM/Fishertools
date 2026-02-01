@@ -8,7 +8,7 @@ set -e
 echo "🚀 Starting Fishertools publication process..."
 
 # Check if we're in the right directory
-if [ ! -f "setup.py" ]; then
+if [[ ! -f "setup.py" ]]; then
     echo "❌ Error: setup.py not found. Please run this script from the project root."
     exit 1
 fi

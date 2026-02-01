@@ -602,7 +602,7 @@ class ReadmeTransformer:
             IOError: If writing fails
         """
         try:
-            Path(self.readme_path).write_text(content, encoding="utf-8")
+            self.parser.readme_path.write_text(content, encoding="utf-8")
         except IOError as e:
             raise IOError(f"Failed to write transformed README: {e}")
 

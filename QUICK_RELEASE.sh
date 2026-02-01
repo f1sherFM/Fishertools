@@ -10,7 +10,7 @@ echo ""
 
 # Проверка статуса репозитория
 echo "📋 Проверка статуса репозитория..."
-if [ -n "$(git status --porcelain)" ]; then
+if [[ -n "$(git status --porcelain)" ]]; then
     echo "⚠️  В репозитории есть незакоммиченные изменения"
     echo "Пожалуйста, закоммитьте все изменения перед релизом"
     exit 1
@@ -21,7 +21,7 @@ echo "✅ Проверка версии..."
 VERSION=$(grep "__version__" fishertools/__init__.py | grep -oP '"\K[^"]+')
 echo "Текущая версия: $VERSION"
 
-if [ "$VERSION" != "0.3.4" ]; then
+if [[ "$VERSION" != "0.3.4" ]]; then
     echo "❌ Версия не совпадает с 0.3.4"
     exit 1
 fi

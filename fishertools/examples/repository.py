@@ -172,6 +172,147 @@ class ExampleRepository:
         """
         concepts = []
         
+        # Check for variable assignment first
+        if self._is_variable_assignment(line):
+            return self._analyze_assignment(line)
+        
+        # Check for function definitions
+        if line.startswith('def '):
+            concepts.extend(["functions", "function definition"])
+            func_name = line.split('(')[0].replace('def ', '').strip()
+            return f"Defines a function named '{func_name}'", concepts
+        
+        # Check for function calls
+        if '(' in line and ')' in line and not line.startswith('def'):
+            return self._analyze_function_call(line)
+        
+        # Check for control structures
+        control_result = self._analyze_control_structures(line)
+        if control_result:
+            return control_result
+        
+        # Check for exception handling
+        exception_result = self._analyze_exception_handling(line)
+        if exception_result:
+            return exception_result
+        
+        # Check for return statements
+        if line.startswith('return '):
+            concepts.extend(["functions", "return statements"])
+            return "Returns a value from the function", concepts
+        
+        # Check for import statements
+        if line.startswith('import ') or line.startswith('from '):
+            concepts.append("imports")
+            return "Imports code from another module", concepts
+        
+        # Default case
+        return "Executes a Python statement", []
+    
+    def _is_variable_assignment(self, line: str) -> bool:
+        """Check if line is a variable assignment."""
+        return '=' in line and not any(op in line for op in ['==', '!=', '<=', '>='])
+    
+    def _analyze_assignment(self, line: str) -> tuple[str, List[str]]:
+        """Analyze variable assignment lines."""
+        concepts = ["variable assignment"]
+        var_name = line.split('=')[0].strip()
+        
+        if '[' in line and ']' in line:
+            concepts.append("lists")
+            if self._is_list_indexing(line):
+                concepts.extend(["indexing", "list access"])
+                return f"Accesses an element from a list using indexing and assigns it to '{var_name}'", concepts
+            else:
+                return f"Creates a list and assigns it to variable '{var_name}'", concepts
+        
+        if '{' in line and '}' in line:
+            concepts.append("dictionaries")
+            return f"Creates a dictionary and assigns it to variable '{var_name}'", concepts
+        
+        if 'input(' in line:
+            concepts.append("user input")
+            return f"Gets input from user and stores it in variable '{var_name}'", concepts
+        
+        if '(' in line and ')' in line:
+            concepts.append("function calls")
+            return f"Calls a function and assigns the result to '{var_name}'", concepts
+        
+        return f"Assigns a value to variable '{var_name}'", concepts
+    
+    def _is_list_indexing(self, line: str) -> bool:
+        """Check if line contains list indexing rather than list creation."""
+        return line.count('[') == 1 and line.count(']') == 1 and not line.endswith(']')
+    
+    def _analyze_function_call(self, line: str) -> tuple[str, List[str]]:
+        """Analyze function call lines."""
+        concepts = ["function calls"]
+        
+        if 'print(' in line:
+            concepts.append("output")
+            return "Prints output to the console", concepts
+        
+        if 'input(' in line:
+            concepts.append("user input")
+            return "Gets input from the user", concepts
+        
+        if '.append(' in line:
+            concepts.extend(["lists", "list methods"])
+            return "Adds an item to the end of a list", concepts
+        
+        if '.extend(' in line:
+            concepts.extend(["lists", "list methods"])
+            return "Adds multiple items to the end of a list", concepts
+        
+        if '.get(' in line:
+            concepts.extend(["dictionaries", "dict methods"])
+            return "Safely gets a value from a dictionary", concepts
+        
+        if any(func in line for func in ['int(', 'float(', 'str(']):
+            concepts.append("type conversion")
+            return "Converts a value to a different data type", concepts
+        
+        return "Calls a function to perform an operation", concepts
+    
+    def _analyze_control_structures(self, line: str) -> tuple[str, List[str]] | None:
+        """Analyze control structure lines."""
+        if line.startswith('if '):
+            return "Checks a condition and executes code if it's true", ["conditionals", "if statements"]
+        
+        if line.startswith('elif '):
+            return "Checks an alternative condition", ["conditionals", "elif statements"]
+        
+        if line.startswith('else:'):
+            return "Executes when no previous conditions were true", ["conditionals", "else statements"]
+        
+        if line.startswith('while '):
+            return "Repeats code while a condition is true", ["loops", "while loops"]
+        
+        if line.startswith('for '):
+            return "Repeats code for each item in a sequence", ["loops", "for loops"]
+        
+        return None
+    
+    def _analyze_exception_handling(self, line: str) -> tuple[str, List[str]] | None:
+        """Analyze exception handling lines."""
+        if line.startswith('try:'):
+            return "Starts a block that might cause an error", ["error handling", "try-except"]
+        
+        if line.startswith('except'):
+            return "Handles errors that occur in the try block", ["error handling", "try-except"]
+        
+        return None
+        """
+        Analyze a single line of code and generate explanation.
+        
+        Args:
+            line: Code line to analyze
+            
+        Returns:
+            tuple: (explanation, concepts)
+        """
+        concepts = []
+        
         # Variable assignment
         if '=' in line and not any(op in line for op in ['==', '!=', '<=', '>=']):
             if line.count('=') == 1 and '=' not in line.replace('=', ''):

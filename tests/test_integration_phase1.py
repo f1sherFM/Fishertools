@@ -121,7 +121,7 @@ class TestPhase1Integration:
 
         # Valid call
         result = divide(10, 2)
-        assert result == 5.0
+        assert abs(result - 5.0) < 1e-9
 
         # Invalid call
         with pytest.raises(ValidationError):

@@ -28,7 +28,7 @@ class TestAskFloat:
         """Test basic float input."""
         monkeypatch.setattr('builtins.input', lambda _: '3.14')
         result = ask_float("Enter a number: ")
-        assert result == 3.14
+        assert abs(result - 3.14) < 1e-9
         assert isinstance(result, float)
 
 

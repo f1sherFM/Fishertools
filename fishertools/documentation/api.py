@@ -47,42 +47,13 @@ class APIGenerator:
         
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef):
-                # Only include top-level functions (not nested or class methods)
-                if isinstance(node.parent if hasattr(node, 'parent') else None, ast.Module) or not hasattr(node, 'parent'):
-                    func_info = self.extract_function_info(node, module_path)
-                    functions.append(func_info)
-            
+                self._process_function_node(node, functions, module_path)
             elif isinstance(node, ast.ClassDef):
-                class_info = {
-                    'name': node.name,
-                    'docstring': self.extract_docstring(node),
-                    'methods': [],
-                    'line_number': node.lineno
-                }
-                
-                # Extract class methods
-                for item in node.body:
-                    if isinstance(item, ast.FunctionDef):
-                        method_info = self.extract_function_info(item, module_path)
-                        class_info['methods'].append(method_info)
-                
-                classes.append(class_info)
-            
+                self._process_class_node(node, classes, module_path)
             elif isinstance(node, ast.Assign):
-                # Extract module-level constants
-                for target in node.targets:
-                    if isinstance(target, ast.Name) and target.id.isupper():
-                        constants[target.id] = ast.unparse(node.value) if hasattr(ast, 'unparse') else str(node.value)
-            
+                self._process_assignment_node(node, constants)
             elif isinstance(node, (ast.Import, ast.ImportFrom)):
-                if isinstance(node, ast.Import):
-                    for alias in node.names:
-                        imports.append(f"import {alias.name}")
-                else:
-                    module = node.module or ""
-                    for alias in node.names:
-                        imports.append(f"from {module} import {alias.name}")
-        
+                self._process_import_node(node, imports)
         return APIInfo(
             module_name=module_name,
             functions=functions,
@@ -91,6 +62,46 @@ class APIGenerator:
             imports=imports,
             docstring=module_docstring
         )
+    
+    def _process_function_node(self, node: ast.FunctionDef, functions: List[FunctionInfo], module_path: str):
+        """Process a function node and add to functions list if top-level."""
+        # Only include top-level functions (not nested or class methods)
+        if isinstance(node.parent if hasattr(node, 'parent') else None, ast.Module) or not hasattr(node, 'parent'):
+            func_info = self.extract_function_info(node, module_path)
+            functions.append(func_info)
+    
+    def _process_class_node(self, node: ast.ClassDef, classes: List[Dict[str, Any]], module_path: str):
+        """Process a class node and extract class information."""
+        class_info = {
+            'name': node.name,
+            'docstring': self.extract_docstring(node),
+            'methods': [],
+            'line_number': node.lineno
+        }
+        
+        # Extract class methods
+        for item in node.body:
+            if isinstance(item, ast.FunctionDef):
+                method_info = self.extract_function_info(item, module_path)
+                class_info['methods'].append(method_info)
+        
+        classes.append(class_info)
+    
+    def _process_assignment_node(self, node: ast.Assign, constants: Dict[str, str]):
+        """Process an assignment node and extract constants."""
+        for target in node.targets:
+            if isinstance(target, ast.Name) and target.id.isupper():
+                constants[target.id] = ast.unparse(node.value) if hasattr(ast, 'unparse') else str(node.value)
+    
+    def _process_import_node(self, node: ast.AST, imports: List[str]):
+        """Process an import node and extract import statements."""
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                imports.append(f"import {alias.name}")
+        else:
+            module = node.module or ""
+            for alias in node.names:
+                imports.append(f"from {module} import {alias.name}")
     
     def extract_function_info(self, func_node: ast.FunctionDef, module_path: str) -> FunctionInfo:
         """
@@ -147,6 +158,37 @@ class APIGenerator:
         return None
     
     def extract_type_annotations(self, func_node: ast.FunctionDef) -> Dict[str, str]:
+        """
+        Extract type annotations from a function.
+        
+        Args:
+            func_node: Function AST node
+            
+        Returns:
+            Dict[str, str]: Parameter names mapped to type annotations
+        """
+        parameters = {}
+        
+        # Process regular arguments
+        self._process_arguments(func_node.args.args, parameters)
+        
+        # Process keyword-only arguments
+        self._process_arguments(func_node.args.kwonlyargs, parameters)
+        
+        return parameters
+    
+    def _process_arguments(self, args: List[ast.arg], parameters: Dict[str, str]):
+        """Helper method to process a list of arguments and extract type annotations."""
+        for arg in args:
+            param_name = arg.arg
+            if arg.annotation:
+                if hasattr(ast, 'unparse'):
+                    param_type = ast.unparse(arg.annotation)
+                else:
+                    param_type = str(arg.annotation)
+                parameters[param_name] = param_type
+            else:
+                parameters[param_name] = "Any"
         """
         Extract type annotations from a function.
         
