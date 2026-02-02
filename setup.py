@@ -19,6 +19,11 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/f1sherFM/My_1st_library_python",
     packages=find_packages(),
+    include_package_data=True,
+    package_data={
+        "fishertools.learn": ["*.json"],
+        "fishertools.config": ["*.json"],
+    },
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",

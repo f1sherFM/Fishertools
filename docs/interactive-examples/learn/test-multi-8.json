@@ -1,7 +1,7 @@
 {
   "id": "test-multi-8",
   "module": "learn",
-  "title": "\u0097>\ud85d\ude49\u00dcLR\udb89\udd58\ud8e4\udcc9\u47b9\u00cd\u0093\u00e1\u0018\u00a1",
+  "title": "config",
   "code": "x = 1",
   "expected_output": "output",
   "explanation": "This is a test",

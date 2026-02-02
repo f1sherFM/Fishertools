@@ -248,3 +248,58 @@ def safe_sum(collection: Union[List, Tuple], default: Union[int, float] = 0) -> 
         # TypeError: items not numbers
         # ValueError: other calculation errors
         return default
+
+
+def safe_average(numbers: List[Union[int, float]], 
+                 default: Union[int, float] = 0) -> float:
+    """
+    Safely calculate average of a collection with error protection.
+    
+    Filters out non-numeric values and handles empty collections gracefully.
+    Returns default value instead of raising division by zero errors.
+    
+    Args:
+        numbers: List of numbers (may contain non-numeric values)
+        default: Value to return for empty list or when no valid numbers found
+        
+    Returns:
+        Average of numeric values as float, or default value
+        
+    Examples:
+        >>> safe_average([1, 2, 3])
+        2.0
+        >>> safe_average([])
+        0
+        >>> safe_average([], default=0)
+        0
+        >>> safe_average([1, 2, "invalid", 3])
+        2.0
+        >>> safe_average([1.5, 2.5, 3.0])
+        2.3333333333333335
+        >>> safe_average(["a", "b", "c"], default=-1)
+        -1
+        
+    Note:
+        Non-numeric values are silently filtered out. If all values are
+        non-numeric or the list is empty, returns the default value.
+    """
+    # Handle empty collection explicitly
+    if not numbers:
+        return default
+    
+    # Filter out non-numeric values
+    valid_numbers = []
+    for num in numbers:
+        if isinstance(num, (int, float)) and not isinstance(num, bool):
+            valid_numbers.append(num)
+    
+    # If no valid numbers found, return default
+    if not valid_numbers:
+        return default
+    
+    try:
+        # Calculate average
+        return sum(valid_numbers) / len(valid_numbers)
+    except (TypeError, ValueError, ZeroDivisionError):
+        # Fallback for any edge cases
+        return default

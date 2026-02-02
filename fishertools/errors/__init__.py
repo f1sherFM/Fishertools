@@ -22,6 +22,10 @@ from .exception_types import (
     get_exception_type_mapping, get_supported_exception_types, ExceptionTypeInfo,
     EXCEPTION_TYPE_MAPPING
 )
+from .educational_wrapper import (
+    EducationalErrorWrapper, with_educational_errors, 
+    get_educational_wrapper, explain_exception
+)
 
 __all__ = [
     "ErrorExplainer", "explain_error", "ErrorPattern", 
@@ -33,5 +37,7 @@ __all__ = [
     "get_recovery_manager", "handle_error_with_recovery", "with_error_recovery",
     "identify_exception_type", "get_exception_type_info", "is_supported_exception_type",
     "get_exception_type_mapping", "get_supported_exception_types", "ExceptionTypeInfo",
-    "EXCEPTION_TYPE_MAPPING"
+    "EXCEPTION_TYPE_MAPPING",
+    "EducationalErrorWrapper", "with_educational_errors", 
+    "get_educational_wrapper", "explain_exception"
 ]

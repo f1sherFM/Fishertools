@@ -1,7 +1,7 @@
 {
   "id": "test-multi-3",
   "module": "documentation",
-  "title": "\ud84c\udfear\udb0d\udd0e\uda17\udd0e",
+  "title": "\ud9b1\udf7d\u0083ML",
   "code": "x = 1",
   "expected_output": "output",
   "explanation": "This is a test",

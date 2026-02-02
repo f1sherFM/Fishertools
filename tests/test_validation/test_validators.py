@@ -58,9 +58,9 @@ class TestValidateNumber:
 
     def test_valid_number_in_range(self):
         """Test valid numbers in range."""
-        validate_number(50, min_val=0, max_val=100)
-        validate_number(0, min_val=0, max_val=100)
-        validate_number(100, min_val=0, max_val=100)
+        assert validate_number(50, min_val=0, max_val=100) == 50.0
+        assert validate_number(0, min_val=0, max_val=100) == 0.0
+        assert validate_number(100, min_val=0, max_val=100) == 100.0
 
     def test_number_below_minimum(self):
         """Test number below minimum."""
@@ -74,8 +74,93 @@ class TestValidateNumber:
 
     def test_number_without_limits(self):
         """Test number without limits."""
-        validate_number(-1000)
-        validate_number(1000000)
+        assert validate_number(-1000) == -1000.0
+        assert validate_number(1000000) == 1000000.0
+
+    def test_string_input_raises_validation_error(self):
+        """Test that string input raises ValidationError with descriptive message."""
+        with pytest.raises(ValidationError) as exc_info:
+            validate_number("string", 0, 100)
+        
+        error = exc_info.value
+        assert "Expected number, got str" in str(error)
+        assert error.value == "string"
+        assert error.expected_type == "number"
+
+    def test_none_input_raises_validation_error(self):
+        """Test that None input raises ValidationError with specific message."""
+        with pytest.raises(ValidationError) as exc_info:
+            validate_number(None)
+        
+        error = exc_info.value
+        assert "Value cannot be None" in str(error)
+        assert error.value is None
+        assert error.expected_type == "number"
+
+    def test_numeric_string_conversion(self):
+        """Test that numeric strings are converted properly."""
+        assert validate_number("42", min_val=0, max_val=100) == 42.0
+        assert validate_number("3.14") == 3.14
+
+    def test_invalid_string_raises_validation_error(self):
+        """Test that non-numeric strings raise ValidationError."""
+        with pytest.raises(ValidationError) as exc_info:
+            validate_number("not_a_number")
+        
+        error = exc_info.value
+        assert "Expected number, got str" in str(error)
+        assert error.value == "not_a_number"
+        assert error.expected_type == "number"
+
+    def test_list_input_raises_validation_error(self):
+        """Test that list input raises ValidationError with descriptive message."""
+        with pytest.raises(ValidationError) as exc_info:
+            validate_number([1, 2, 3])
+        
+        error = exc_info.value
+        assert "Expected number, got list" in str(error)
+        assert error.value == [1, 2, 3]
+        assert error.expected_type == "number"
+
+    def test_exact_string_case_from_requirements(self):
+        """Test the exact case mentioned in requirements: validate_number('string', 0, 100)."""
+        with pytest.raises(ValidationError) as exc_info:
+            validate_number("string", 0, 100)
+        
+        error = exc_info.value
+        # Verify it returns ValidationError instead of comparison operator errors
+        assert "Expected number, got str" in str(error)
+        assert error.value == "string"
+        assert error.expected_type == "number"
+        # Ensure it's a ValidationError, not a TypeError from comparison operators
+        assert isinstance(error, ValidationError)
+
+    def test_none_with_range_parameters(self):
+        """Test None value handling with range parameters."""
+        with pytest.raises(ValidationError) as exc_info:
+            validate_number(None, min_val=0, max_val=100)
+        
+        error = exc_info.value
+        assert "Value cannot be None" in str(error)
+        assert error.value is None
+        assert error.expected_type == "number"
+
+    def test_dict_input_raises_validation_error(self):
+        """Test that dict input raises ValidationError with descriptive message."""
+        with pytest.raises(ValidationError) as exc_info:
+            validate_number({"key": "value"})
+        
+        error = exc_info.value
+        assert "Expected number, got dict" in str(error)
+        assert error.value == {"key": "value"}
+        assert error.expected_type == "number"
+
+    def test_boolean_input_handling(self):
+        """Test that boolean input is handled properly (bools are numbers in Python)."""
+        # In Python, bool is a subclass of int, so True/False should work
+        assert validate_number(True) == 1.0
+        assert validate_number(False) == 0.0
+        assert validate_number(True, min_val=0, max_val=2) == 1.0
 
 
 class TestValidateString:

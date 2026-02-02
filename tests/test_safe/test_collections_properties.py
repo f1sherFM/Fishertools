@@ -7,7 +7,7 @@ Requirements: 4.1, 4.2
 
 import pytest
 from hypothesis import given, strategies as st, assume
-from fishertools.safe.collections import safe_get, safe_divide, safe_max, safe_min, safe_sum
+from fishertools.safe.collections import safe_get, safe_divide, safe_max, safe_min, safe_sum, safe_average
 from fishertools.errors.exceptions import SafeUtilityError
 
 
@@ -187,3 +187,64 @@ class TestSafeUtilitiesProperties:
             error_message = str(exc_info.value)
             assert len(error_message) > 0
             assert any(word in error_message for word in ["должно", "должен", "получен"])
+    
+    @given(
+        numbers=st.lists(
+            st.one_of(
+                st.integers(),
+                st.floats(allow_nan=False, allow_infinity=False),
+                st.text(),
+                st.booleans(),
+                st.none()
+            )
+        ),
+        default=st.one_of(st.integers(), st.floats(allow_nan=False, allow_infinity=False))
+    )
+    def test_safe_average_filters_non_numeric_values(self, numbers, default):
+        """
+        **Property 5: Safe Average Filtering**
+        **Validates: Requirements 5.2**
+        
+        For any list containing mixed numeric and non-numeric values, safe_average()
+        should filter out non-numeric values and calculate the average of remaining numbers.
+        If no valid numbers remain, it should return the default value.
+        """
+        result = safe_average(numbers, default)
+        
+        # Filter to get valid numeric values (excluding booleans)
+        valid_numbers = [n for n in numbers if isinstance(n, (int, float)) and not isinstance(n, bool)]
+        
+        if not valid_numbers:
+            # If no valid numbers, should return default
+            assert result == default
+        else:
+            # If valid numbers exist, should return their average
+            expected_average = sum(valid_numbers) / len(valid_numbers)
+            assert abs(result - expected_average) < 1e-10
+    
+    @given(
+        numbers=st.lists(st.one_of(st.integers(), st.floats(allow_nan=False, allow_infinity=False)), min_size=1),
+        default=st.one_of(st.integers(), st.floats(allow_nan=False, allow_infinity=False))
+    )
+    def test_safe_average_returns_correct_average_for_valid_numbers(self, numbers, default):
+        """
+        **Property 5: Safe Average Filtering**
+        **Validates: Requirements 5.2**
+        
+        For any list of valid numeric values, safe_average() should return
+        the correct mathematical average.
+        """
+        result = safe_average(numbers, default)
+        expected_average = sum(numbers) / len(numbers)
+        assert abs(result - expected_average) < 1e-10
+    
+    @given(default=st.one_of(st.integers(), st.floats(allow_nan=False, allow_infinity=False)))
+    def test_safe_average_returns_default_for_empty_list(self, default):
+        """
+        **Property 5: Safe Average Filtering**
+        **Validates: Requirements 5.2**
+        
+        For an empty list, safe_average() should always return the default value.
+        """
+        result = safe_average([], default)
+        assert result == default

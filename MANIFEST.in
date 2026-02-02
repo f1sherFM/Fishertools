@@ -1,0 +1,29 @@
+# Include data files for fishertools package
+include fishertools/learn/explanations.json
+include fishertools/learn/topics.json
+include fishertools/config/default_config.json
+
+# Include documentation files
+include README.md
+include LICENSE
+include CHANGELOG.md
+
+# Include requirements files
+include requirements.txt
+include requirements-dev.txt
+
+# Exclude unnecessary files
+exclude *.pyc
+exclude .DS_Store
+exclude .coverage
+exclude .pytest_cache
+exclude __pycache__
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store
+recursive-exclude .git *
+recursive-exclude .hypothesis *
+recursive-exclude .pytest_cache *
+recursive-exclude htmlcov *
+recursive-exclude dist *
+recursive-exclude *.egg-info *

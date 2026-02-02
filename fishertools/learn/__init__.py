@@ -16,12 +16,15 @@ from .knowledge_engine import (
     get_learning_path,
     get_engine
 )
+from .explanation_loader import ExplanationLoader, get_loader
+from .error_explanations import explain_error
 
 __all__ = [
     "generate_example", 
     "list_available_concepts", 
     "get_concept_info",
     "explain",
+    "explain_error",
     "show_best_practice", 
     "list_available_topics", 
     "get_topic_summary",
@@ -31,5 +34,7 @@ __all__ = [
     "search_topics",
     "get_random_topic",
     "get_learning_path",
-    "get_engine"
+    "get_engine",
+    "ExplanationLoader",
+    "get_loader"
 ]

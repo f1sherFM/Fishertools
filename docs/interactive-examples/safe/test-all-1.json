@@ -2,7 +2,7 @@
   "id": "test-all-1",
   "module": "safe",
   "title": "Test Example",
-  "code": "x = 1\nprint(x)",
+  "code": "try:\n    x = 1 / 0\nexcept ZeroDivisionError:\n    print('error')",
   "expected_output": "output",
   "explanation": "This is a test",
   "variations": [],

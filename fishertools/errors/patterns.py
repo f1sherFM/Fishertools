@@ -11,6 +11,13 @@ from .models import ErrorPattern
 from functools import lru_cache
 import re
 
+# Import ValidationError for pattern matching
+try:
+    from ..validation.exceptions import ValidationError
+except ImportError:
+    # Fallback if validation module is not available
+    ValidationError = type('ValidationError', (Exception,), {})
+
 
 # Error patterns for common Python exceptions
 DEFAULT_PATTERNS = [

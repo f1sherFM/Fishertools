@@ -2,7 +2,7 @@
   "id": "test-consistency",
   "module": "errors",
   "title": "Test Example",
-  "code": "items = [1, 2, 3]\nfor item in items:\n    print(item)",
+  "code": "try:\n    x = 1 / 0\nexcept ZeroDivisionError:\n    print('error')",
   "expected_output": "output",
   "explanation": "This is a test",
   "variations": [],
