@@ -4,7 +4,7 @@
 
 Fishertools is a Python library designed specifically for beginner developers. It provides clear error explanations, safe utilities, learning tools, and powerful debugging features to help you master Python.
 
-## 🚀 What's New in v0.4.5?
+## 🚀 What's New in v0.4.5.1?
 
 **Critical Bug Fixes Release** - All major bugs fixed with 100% backward compatibility:
 
@@ -318,7 +318,7 @@ result = analyze_data(data)
 
 ## 📊 Version History
 
-### v0.4.5 (Current)
+### v0.4.5.1 (Current)
 - 🐛 **Critical Bug Fixes** - Fixed learning module FileNotFoundError
 - 🔧 **Better Error Messages** - Clear ValidationError messages for type mismatches
 - 📖 **Contextual Explanations** - New `explain_error()` for educational error messages
@@ -326,6 +326,9 @@ result = analyze_data(data)
 - ➕ **New safe_average()** - Safe average calculation with automatic filtering
 - 🛡️ **Comprehensive Error Handling** - Educational messages for all common Python errors
 - ✅ **100% Backward Compatible** - All existing code continues to work
+
+### v0.4.5
+- Same as v0.4.5.1 (re-release for PyPI)
 
 ### v0.4.4
 - � **Enhanced Type Safety** - Full type hints with TypeVar and ParamSpec
@@ -416,4 +419,4 @@ Fishertools is built with ❤️ for the Python community, especially for beginn
 
 **Fishertools** - Making Python easier, safer, and more fun for everyone! 🐍✨
 
-**Current Version:** 0.4.5 | **Last Updated:** February 2, 2026
+**Current Version:** 0.4.5.1 | **Last Updated:** February 2, 2026
