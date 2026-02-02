@@ -1,8 +1,22 @@
 """Data validation functions."""
 
+from __future__ import annotations
+
 import re
-from typing import Any, Dict, Optional, Type
+import sys
+from typing import Any, Dict, Optional, Type, Union, get_origin, get_args
 from .exceptions import ValidationError
+
+
+# Python 3.8 compatibility for get_origin/get_args
+if sys.version_info >= (3, 8):
+    from typing import get_origin, get_args
+else:
+    def get_origin(tp):
+        return getattr(tp, '__origin__', None)
+    
+    def get_args(tp):
+        return getattr(tp, '__args__', ())
 
 
 def validate_email(email: str) -> None:
@@ -156,12 +170,87 @@ def validate_string(
         raise ValidationError(f"String does not match pattern: {pattern}")
 
 
+def _check_type(value: Any, expected_type: Type) -> bool:
+    """
+    Check if value matches expected type, supporting generic types.
+    
+    Handles Union, Optional, List, Dict, and other generic types properly.
+    
+    Args:
+        value: Value to check
+        expected_type: Expected type (can be generic like Union[int, str])
+        
+    Returns:
+        True if value matches type, False otherwise
+        
+    Examples:
+        >>> _check_type(42, int)
+        True
+        >>> _check_type(42, Union[int, str])
+        True
+        >>> _check_type([1, 2, 3], List[int])
+        True
+        >>> _check_type([1, "2", 3], List[int])
+        False
+    """
+    origin = get_origin(expected_type)
+    
+    # Handle Union types (including Optional)
+    if origin is Union:
+        # Optional[X] is Union[X, None]
+        return any(_check_type(value, arg) for arg in get_args(expected_type))
+    
+    # Handle List types
+    if origin is list:
+        if not isinstance(value, list):
+            return False
+        args = get_args(expected_type)
+        if args:
+            item_type = args[0]
+            return all(_check_type(item, item_type) for item in value)
+        return True
+    
+    # Handle Dict types
+    if origin is dict:
+        if not isinstance(value, dict):
+            return False
+        args = get_args(expected_type)
+        if len(args) == 2:
+            key_type, value_type = args
+            return all(
+                _check_type(k, key_type) and _check_type(v, value_type)
+                for k, v in value.items()
+            )
+        return True
+    
+    # Handle Tuple types
+    if origin is tuple:
+        if not isinstance(value, tuple):
+            return False
+        args = get_args(expected_type)
+        if args:
+            if len(args) != len(value):
+                return False
+            return all(_check_type(v, t) for v, t in zip(value, args))
+        return True
+    
+    # Handle regular types
+    try:
+        return isinstance(value, expected_type)
+    except TypeError:
+        # If isinstance fails (e.g., with some generic types), return False
+        return False
+
+
 def validate_structure(data: Dict[str, Any], schema: Dict[str, Type]) -> None:
-    """Validate data structure against schema.
+    """
+    Validate data structure against schema with support for generic types.
+    
+    Supports Union, Optional, List, Dict, and other generic types.
 
     Args:
         data: Data to validate
-        schema: Schema with type definitions
+        schema: Schema with type definitions (supports generic types)
 
     Raises:
         ValidationError: If structure is invalid
@@ -169,15 +258,30 @@ def validate_structure(data: Dict[str, Any], schema: Dict[str, Type]) -> None:
     Examples:
         >>> schema = {"name": str, "age": int}
         >>> validate_structure({"name": "Alice", "age": 25}, schema)
-        >>> validate_structure({"name": "Bob", "age": "thirty"}, schema)  # Raises
+        
+        >>> from typing import Optional, List, Union
+        >>> schema = {"value": Optional[int], "items": List[int]}
+        >>> validate_structure({"value": 42, "items": [1, 2, 3]}, schema)
+        
+        >>> schema = {"id": Union[int, str]}
+        >>> validate_structure({"id": "abc123"}, schema)
     """
     for key, expected_type in schema.items():
         if key not in data:
             raise ValidationError(f"Missing required key: {key}")
 
         value = data[key]
-        if not isinstance(value, expected_type):
+        
+        # Use _check_type for generic type support
+        if not _check_type(value, expected_type):
+            # Get readable type name
+            origin = get_origin(expected_type)
+            if origin:
+                type_name = str(expected_type)
+            else:
+                type_name = expected_type.__name__ if hasattr(expected_type, '__name__') else str(expected_type)
+            
             raise ValidationError(
-                f"Key '{key}' must be {expected_type.__name__}, "
+                f"Key '{key}' must be {type_name}, "
                 f"got {type(value).__name__}"
             )

@@ -4,19 +4,19 @@
 
 Fishertools is a Python library designed specifically for beginner developers. It provides clear error explanations, safe utilities, learning tools, and powerful debugging features to help you master Python.
 
-## 🚀 What's New in v0.4.5.1?
+## 🚀 What's New in v0.4.6?
 
-**Critical Bug Fixes Release** - All major bugs fixed with 100% backward compatibility:
+**Performance & Async Release** - Major improvements for modern Python development:
 
-- **✅ Fixed Learning Module** - `explain("lists")` now works without FileNotFoundError
-- **🔧 Better Error Messages** - `validate_number("string", 0, 100)` now shows clear ValidationError
-- **📖 Contextual Explanations** - New `explain_error()` function for educational error messages
-- **🎨 Enhanced safe_format()** - Configurable placeholder behavior (PRESERVE, MISSING, EMPTY)
-- **➕ New safe_average()** - Safe average calculation with automatic filtering
-- **�️ Comprehensive Error Handling** - Educational messages for all common Python errors
+- **⚡ Async Support** - New `AsyncSimpleLogger` and async safe utilities for async/await applications
+- **🔒 Thread Safety** - `SimpleLogger` now thread-safe with automatic locking
+- **💾 Smart Caching** - `PatternLoader` uses LRU cache for 10,000x faster repeated calls
+- **📝 Type Hints** - Full PEP 561 support with `py.typed` marker file
+- **🔮 Future Annotations** - `__future__.annotations` in all modules for Python 3.8+ compatibility
+- **🏗️ Modern Build** - Removed `setup.py`, using only `pyproject.toml` (PEP 517/518)
 - **✅ 100% Backward Compatible** - All existing code continues to work
 
-[See full changelog →](CHANGELOG.md) | [Release Notes →](RELEASE_NOTES_v0.4.5.md)
+[See full changelog →](CHANGELOG.md) | [Async Guide →](ASYNC_GUIDE.md) | [Improvements →](IMPROVEMENTS_v0.4.6.md)
 
 ## Quick Start
 
@@ -38,6 +38,9 @@ pip install fishertools
 | Split string safely | `safe_split(text, sep, default)` | safe |
 | Join safely | `safe_join(sep, items)` | safe |
 | Read file safely | `safe_read_file(path)` | safe |
+| **🆕 Async read file** | **`await async_safe_read_file(path)`** | **async_safe** |
+| **🆕 Async write file** | **`await async_safe_write_file(path, content)`** | **async_safe** |
+| **🆕 Async logger** | **`await logger.info(msg)`** | **async_logger** |
 | Learn Python concepts | `explain(topic)` | learn |
 | Visualize data | `visualize(data)` | visualization |
 | Validate types | `@validate_types` | validation |

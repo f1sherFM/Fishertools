@@ -12,6 +12,8 @@ Functions:
     ask_choice() - Prompt user to choose from a list of options
 """
 
+from __future__ import annotations
+
 from typing import List, Optional, Any, Callable, Union, TypeVar
 
 # Security constants

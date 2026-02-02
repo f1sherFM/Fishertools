@@ -12,7 +12,10 @@ Example:
     logger.error("Connection failed")
 """
 
+from __future__ import annotations
+
 import os
+import threading
 from datetime import datetime
 from pathlib import Path
 
@@ -61,6 +64,7 @@ class SimpleLogger:
             file_path (str): Path to the log file.
         """
         self.file_path = file_path
+        self._lock = threading.Lock()  # Thread-safe logging
 
     def info(self, message):
         """
@@ -109,7 +113,7 @@ class SimpleLogger:
 
     def _log(self, level, message):
         """
-        Internal method to write a log message.
+        Internal method to write a log message (thread-safe).
 
         Parameters:
             level (str): The log level (INFO, WARNING, ERROR).
@@ -121,20 +125,21 @@ class SimpleLogger:
         Raises:
             IOError: If file write fails.
         """
-        try:
-            # Create parent directories if they don't exist
-            parent_dir = os.path.dirname(self.file_path)
-            if parent_dir:
-                Path(parent_dir).mkdir(parents=True, exist_ok=True)
-            
-            # Get current timestamp
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            
-            # Format log message
-            log_entry = f"[{timestamp}] [{level}] {message}\n"
-            
-            # Append to log file with UTF-8 encoding
-            with open(self.file_path, 'a', encoding='utf-8') as f:
-                f.write(log_entry)
-        except IOError as e:
-            raise IOError(f"Failed to write to {self.file_path}: {e}")
+        with self._lock:  # Thread-safe file writing
+            try:
+                # Create parent directories if they don't exist
+                parent_dir = os.path.dirname(self.file_path)
+                if parent_dir:
+                    Path(parent_dir).mkdir(parents=True, exist_ok=True)
+                
+                # Get current timestamp
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                
+                # Format log message
+                log_entry = f"[{timestamp}] [{level}] {message}\n"
+                
+                # Append to log file with UTF-8 encoding
+                with open(self.file_path, 'a', encoding='utf-8') as f:
+                    f.write(log_entry)
+            except IOError as e:
+                raise IOError(f"Failed to write to {self.file_path}: {e}")

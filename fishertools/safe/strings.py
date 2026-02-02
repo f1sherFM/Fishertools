@@ -5,9 +5,15 @@ This module provides safe string handling utilities that gracefully
 handle None values and common string operation errors.
 """
 
+from __future__ import annotations
+
 from enum import Enum
 from typing import Optional, List, Any, Dict
 import re
+
+
+# Compiled regex pattern for placeholder matching (module-level for performance)
+_PLACEHOLDER_PATTERN = re.compile(r'\{([^}:!]+)(?:[^}]*)?\}')
 
 
 class PlaceholderBehavior(Enum):
@@ -194,9 +200,7 @@ def safe_format(template: str, values: Optional[Dict[str, Any]] = None,
     except (KeyError, IndexError, ValueError, TypeError) as e:
         # Handle missing placeholders based on behavior
         if isinstance(e, KeyError) and behavior != PlaceholderBehavior.PRESERVE:
-            # Extract placeholder names from the template
-            placeholder_pattern = r'\{([^}:!]+)(?:[^}]*)?\}'
-            
+            # Use pre-compiled pattern for better performance
             def replace_placeholder(match):
                 placeholder_name = match.group(1).strip()
                 
@@ -220,7 +224,7 @@ def safe_format(template: str, values: Optional[Dict[str, Any]] = None,
                 else:  # PRESERVE
                     return match.group(0)
             
-            return re.sub(placeholder_pattern, replace_placeholder, template)
+            return _PLACEHOLDER_PATTERN.sub(replace_placeholder, template)
         
         # For other errors or PRESERVE behavior, return original template
         return template

@@ -5,6 +5,9 @@ This module handles loading and validation of error patterns,
 separating concerns from the main ErrorExplainer class.
 """
 
+from __future__ import annotations
+
+import functools
 from typing import List
 from .models import ErrorPattern
 from .patterns import load_default_patterns
@@ -13,7 +16,7 @@ from .exceptions import ExplanationError
 
 class PatternLoader:
     """
-    Handles loading of error patterns.
+    Handles loading of error patterns with caching.
     
     Responsibilities:
     - Load patterns from various sources
@@ -26,15 +29,19 @@ class PatternLoader:
         self._patterns_cache: List[ErrorPattern] = []
         self._loaded = False
     
+    @functools.lru_cache(maxsize=1)
     def load_patterns(self) -> List[ErrorPattern]:
         """
-        Load error patterns for matching exceptions.
+        Load error patterns for matching exceptions (cached).
         
         Returns:
             List of ErrorPattern objects
             
         Raises:
             ExplanationError: If patterns cannot be loaded
+            
+        Note:
+            Results are cached using functools.lru_cache for performance.
         """
         if self._loaded:
             return self._patterns_cache

@@ -137,16 +137,15 @@ class ErrorExplainer:
             return self.explanation_builder.create_emergency_structured(exception, e)
 
 
-def explain_error(exception: Exception, 
-                 language: str = 'ru',
-                 format_type: str = 'console',
-                 **kwargs) -> None:
+def get_explanation(exception: Exception, 
+                   language: str = 'ru',
+                   format_type: str = 'console',
+                   **kwargs) -> str:
     """
-    Main public API function for explaining Python errors in simple terms.
+    Get error explanation as a string without printing.
     
-    This function takes any Python exception and provides a beginner-friendly
-    explanation in Russian, including what the error means, how to fix it,
-    and a relevant code example.
+    This function returns the explanation text instead of printing it,
+    useful for logging, testing, or custom output handling.
     
     Args:
         exception: The Python exception to explain (required)
@@ -157,21 +156,26 @@ def explain_error(exception: Exception,
             - show_original_error: Whether to show original error message (default: True)
             - show_traceback: Whether to show traceback (default: False)
     
+    Returns:
+        Formatted explanation string
+    
     Raises:
         TypeError: If exception parameter is not an Exception instance
         ValueError: If language or format_type parameters are invalid
+        ExplanationError: If explanation generation fails
     
     Examples:
         >>> try:
         ...     result = 10 / 0
         ... except Exception as e:
-        ...     explain_error(e)
+        ...     explanation = get_explanation(e)
+        ...     print(explanation)
         
-        >>> explain_error(TypeError("'str' object cannot be interpreted as an integer"))
-        
-        >>> explain_error(ValueError("invalid literal"), format_type='json')
+        >>> explanation = get_explanation(TypeError("error"), format_type='plain')
+        >>> with open('error.log', 'w') as f:
+        ...     f.write(explanation)
     """
-    # Parameter validation with custom exceptions
+    # Parameter validation
     if not isinstance(exception, Exception):
         raise TypeError(f"Параметр 'exception' должен быть экземпляром Exception, "
                        f"получен {type(exception).__name__}")
@@ -188,60 +192,146 @@ def explain_error(exception: Exception,
         raise ValueError(f"Параметр 'format_type' должен быть одним из {valid_formats}, "
                         f"получен '{format_type}'")
     
+    from .formatters import get_formatter
+    
+    # Create configuration based on parameters
+    config = ExplainerConfig(
+        language=language,
+        format_type=format_type,
+        use_colors=kwargs.get('use_colors', True),
+        show_original_error=kwargs.get('show_original_error', True),
+        show_traceback=kwargs.get('show_traceback', False)
+    )
+    
+    # Create explainer and get explanation
+    explainer = ErrorExplainer(config)
+    explanation = explainer.explain(exception)
+    
+    # Get appropriate formatter and format output
+    formatter = get_formatter(format_type, use_colors=config.use_colors)
+    formatted_output = formatter.format(explanation)
+    
+    return formatted_output
+
+
+def explain_error(exception: Exception, 
+                 language: str = 'ru',
+                 format_type: str = 'console',
+                 return_text: bool = False,
+                 **kwargs) -> Optional[str]:
+    """
+    Main public API function for explaining Python errors in simple terms.
+    
+    This function takes any Python exception and provides a beginner-friendly
+    explanation in Russian, including what the error means, how to fix it,
+    and a relevant code example.
+    
+    Args:
+        exception: The Python exception to explain (required)
+        language: Language for explanations ('ru' or 'en', default: 'ru')
+        format_type: Output format ('console', 'plain', 'json', default: 'console')
+        return_text: If True, return explanation as string instead of printing (default: False)
+        **kwargs: Additional formatting parameters:
+            - use_colors: Whether to use colors in console output (default: True)
+            - show_original_error: Whether to show original error message (default: True)
+            - show_traceback: Whether to show traceback (default: False)
+    
+    Returns:
+        None if return_text=False (prints to console)
+        str if return_text=True (returns formatted explanation)
+    
+    Raises:
+        TypeError: If exception parameter is not an Exception instance
+        ValueError: If language or format_type parameters are invalid
+    
+    Examples:
+        >>> try:
+        ...     result = 10 / 0
+        ... except Exception as e:
+        ...     explain_error(e)
+        
+        >>> explain_error(TypeError("'str' object cannot be interpreted as an integer"))
+        
+        >>> # Get explanation as string
+        >>> explanation = explain_error(ValueError("invalid literal"), return_text=True)
+        >>> print(explanation)
+        
+        >>> # Save to file
+        >>> with open('error.log', 'w') as f:
+        ...     f.write(explain_error(e, return_text=True))
+    """
     try:
-        from .formatters import get_formatter
+        # Get explanation text
+        formatted_output = get_explanation(exception, language, format_type, **kwargs)
         
-        # Create configuration based on parameters
-        config = ExplainerConfig(
-            language=language,
-            format_type=format_type,
-            use_colors=kwargs.get('use_colors', True),
-            show_original_error=kwargs.get('show_original_error', True),
-            show_traceback=kwargs.get('show_traceback', False)
-        )
-        
-        # Create explainer and get explanation
-        explainer = ErrorExplainer(config)
-        explanation = explainer.explain(exception)
-        
-        # Get appropriate formatter and format output
-        formatter = get_formatter(format_type, use_colors=config.use_colors)
-        formatted_output = formatter.format(explanation)
-        
-        # Output to console by default
-        print(formatted_output)
+        # Return or print based on return_text parameter
+        if return_text:
+            return formatted_output
+        else:
+            print(formatted_output)
+            return None
         
     except ExplanationError as e:
         # Handle explanation-specific errors gracefully
-        print(f"Ошибка при объяснении исключения: {e.get_full_message()}")
-        print(f"Оригинальная ошибка: {type(exception).__name__}: {exception}")
+        error_msg = f"Ошибка при объяснении исключения: {e.get_full_message()}\n"
+        error_msg += f"Оригинальная ошибка: {type(exception).__name__}: {exception}\n"
         if e.original_error:
-            print(f"Техническая информация: {e.original_error}")
+            error_msg += f"Техническая информация: {e.original_error}\n"
+        
+        if return_text:
+            return error_msg
+        else:
+            print(error_msg)
+            return None
         
     except FormattingError as e:
         # Handle formatting errors - try to show basic explanation
-        print(f"Ошибка форматирования: {e.get_full_message()}")
+        error_msg = f"Ошибка форматирования: {e.get_full_message()}\n"
         try:
             # Try to create a basic explanation without formatting
             explainer = ErrorExplainer()
             explanation = explainer.explain(exception)
-            print(f"Простое объяснение: {explanation.simple_explanation}")
-            print(f"Совет: {explanation.fix_tip}")
+            error_msg += f"Простое объяснение: {explanation.simple_explanation}\n"
+            error_msg += f"Совет: {explanation.fix_tip}\n"
         except Exception:
-            print(f"Оригинальная ошибка: {type(exception).__name__}: {exception}")
+            error_msg += f"Оригинальная ошибка: {type(exception).__name__}: {exception}\n"
+        
+        if return_text:
+            return error_msg
+        else:
+            print(error_msg)
+            return None
         
     except ConfigurationError as e:
         # Handle configuration errors
-        print(f"Ошибка конфигурации: {e.get_full_message()}")
-        print(f"Оригинальная ошибка: {type(exception).__name__}: {exception}")
+        error_msg = f"Ошибка конфигурации: {e.get_full_message()}\n"
+        error_msg += f"Оригинальная ошибка: {type(exception).__name__}: {exception}\n"
+        
+        if return_text:
+            return error_msg
+        else:
+            print(error_msg)
+            return None
         
     except FishertoolsError as e:
         # Handle any other fishertools-specific errors
-        print(f"Ошибка fishertools: {e.get_full_message()}")
-        print(f"Оригинальная ошибка: {type(exception).__name__}: {exception}")
+        error_msg = f"Ошибка fishertools: {e.get_full_message()}\n"
+        error_msg += f"Оригинальная ошибка: {type(exception).__name__}: {exception}\n"
+        
+        if return_text:
+            return error_msg
+        else:
+            print(error_msg)
+            return None
         
     except Exception as e:
         # Ultimate fallback for any unexpected errors
-        print(f"Неожиданная ошибка в fishertools: {e}")
-        print(f"Оригинальная ошибка: {type(exception).__name__}: {exception}")
-        print("Пожалуйста, сообщите об этой проблеме разработчикам fishertools.")
+        error_msg = f"Неожиданная ошибка в fishertools: {e}\n"
+        error_msg += f"Оригинальная ошибка: {type(exception).__name__}: {exception}\n"
+        error_msg += "Пожалуйста, сообщите об этой проблеме разработчикам fishertools.\n"
+        
+        if return_text:
+            return error_msg
+        else:
+            print(error_msg)
+            return None

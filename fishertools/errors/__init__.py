@@ -5,7 +5,7 @@ This module provides tools to explain Python errors in simple, understandable te
 for beginners learning Python.
 """
 
-from .explainer import ErrorExplainer, explain_error
+from .explainer import ErrorExplainer, explain_error, get_explanation
 from .patterns import ErrorPattern
 from .formatters import ConsoleFormatter, PlainFormatter, JsonFormatter, get_formatter
 from .models import ErrorExplanation, ExplainerConfig, ExceptionExplanation
@@ -28,7 +28,7 @@ from .educational_wrapper import (
 )
 
 __all__ = [
-    "ErrorExplainer", "explain_error", "ErrorPattern", 
+    "ErrorExplainer", "explain_error", "get_explanation", "ErrorPattern", 
     "ConsoleFormatter", "PlainFormatter", "JsonFormatter", "get_formatter",
     "ErrorExplanation", "ExceptionExplanation", "ExplainerConfig",
     "FishertoolsError", "ExplanationError", "FormattingError", 

@@ -2,6 +2,8 @@
 Утилиты для работы с файлами, данными и другими частыми задачами
 """
 
+from __future__ import annotations
+
 import json
 import os
 import time

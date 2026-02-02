@@ -1,3 +1,5 @@
 """Version information for fishertools."""
 
-__version__ = "0.4.5.1"
+from __future__ import annotations
+
+__version__ = "0.4.6"

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fishertools"
-version = "0.4.5.1"
+version = "0.4.6"
 description = "Fishertools - инструменты, которые делают Python удобнее и безопаснее для новичков"
 readme = "README.md"
 license = {text = "MIT"}
@@ -56,6 +56,7 @@ where = ["."]
 include = ["fishertools*"]
 
 [tool.setuptools.package-data]
+"fishertools" = ["py.typed"]
 "fishertools.learn" = ["*.json"]
 "fishertools.config" = ["*.json"]
 
