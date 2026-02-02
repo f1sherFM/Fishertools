@@ -4,18 +4,19 @@
 
 Fishertools is a Python library designed specifically for beginner developers. It provides clear error explanations, safe utilities, learning tools, and powerful debugging features to help you master Python.
 
-## 🚀 What's New in v0.4.4?
+## 🚀 What's New in v0.4.5?
 
-**Professional Code Quality Improvements** - Major refactoring based on comprehensive Code Review:
+**Critical Bug Fixes Release** - All major bugs fixed with 100% backward compatibility:
 
-- **🔒 Enhanced Type Safety** - Full type hints with `TypeVar` and `ParamSpec` in decorators
-- **✅ Better Input Validation** - `ask_int()` and `ask_float()` now validate parameters and limit attempts
-- **⚡ Performance Optimizations** - Pre-compiled regex patterns for faster string operations
-- **📦 Improved Dependency Management** - Fixed version pinning and optional dependencies
-- **🛡️ Security Enhancements** - Protection against infinite loops and DoS attacks
-- **📚 Centralized Versioning** - Single source of truth in `_version.py`
+- **✅ Fixed Learning Module** - `explain("lists")` now works without FileNotFoundError
+- **🔧 Better Error Messages** - `validate_number("string", 0, 100)` now shows clear ValidationError
+- **📖 Contextual Explanations** - New `explain_error()` function for educational error messages
+- **🎨 Enhanced safe_format()** - Configurable placeholder behavior (PRESERVE, MISSING, EMPTY)
+- **➕ New safe_average()** - Safe average calculation with automatic filtering
+- **�️ Comprehensive Error Handling** - Educational messages for all common Python errors
+- **✅ 100% Backward Compatible** - All existing code continues to work
 
-[See full changelog →](CHANGELOG.md) | [v0.4.3 Features →](CHANGELOG.md#0433---2026-02-01)
+[See full changelog →](CHANGELOG.md) | [Release Notes →](RELEASE_NOTES_v0.4.5.md)
 
 ## Quick Start
 
@@ -28,11 +29,14 @@ pip install fishertools
 | Task | Function | Module |
 |------|----------|--------|
 | Explain an error | `explain_error(e)` | errors |
+| **Explain validation error** | **`explain_error(error_msg)`** | **learn** |
 | Get element safely | `safe_get(list, index, default)` | safe |
 | Divide safely | `safe_divide(a, b, default)` | safe |
-| **Strip string safely** | **`safe_strip(text, default)`** | **safe** |
-| **Split string safely** | **`safe_split(text, sep, default)`** | **safe** |
-| **Join safely** | **`safe_join(sep, items)`** | **safe** |
+| **Calculate average safely** | **`safe_average(numbers, default)`** | **safe** |
+| **Format string safely** | **`safe_format(template, values, behavior)`** | **safe** |
+| Strip string safely | `safe_strip(text, default)` | safe |
+| Split string safely | `safe_split(text, sep, default)` | safe |
+| Join safely | `safe_join(sep, items)` | safe |
 | Read file safely | `safe_read_file(path)` | safe |
 | Learn Python concepts | `explain(topic)` | learn |
 | Visualize data | `visualize(data)` | visualization |
@@ -54,11 +58,11 @@ except Exception as e:
 ```
 
 ### 🛡️ Safe Utilities
-Functions like `safe_get()`, `safe_divide()`, `safe_read_file()` that prevent typical beginner errors.
+Functions like `safe_get()`, `safe_divide()`, `safe_average()`, `safe_format()` that prevent typical beginner errors.
 
 ```python
 from fishertools import safe_get, safe_divide
-from fishertools.safe import safe_strip, safe_split, safe_join
+from fishertools.safe import safe_strip, safe_split, safe_join, safe_average, safe_format, PlaceholderBehavior
 
 # Safe dictionary access
 value = safe_get(my_dict, "key", default="not found")
@@ -67,11 +71,28 @@ value = safe_get(my_dict, "key", default="not found")
 result = safe_divide(10, 0)  # Returns None (undefined, not 0!)
 result = safe_divide(10, 0, default=0)  # Explicitly set to 0
 
-# Safe string operations (NEW in v0.4.3!)
+# Safe average calculation (NEW in v0.4.5!)
+avg = safe_average([1, 2, 3])  # Returns 2.0
+avg = safe_average([], default=0)  # Returns 0 for empty list
+avg = safe_average([1, "text", 3, None, 2])  # Returns 2.0 (filters non-numeric)
+
+# Safe string formatting with configurable behavior (NEW in v0.4.5!)
+result = safe_format("Hello, {name}!", {})  
+# Returns "Hello, [MISSING: name]!" (default behavior)
+
+result = safe_format("Hello, {name}!", {}, behavior=PlaceholderBehavior.PRESERVE)
+# Returns "Hello, {name}!" (preserves placeholder)
+
+result = safe_format("Hello, {name}!", {}, behavior=PlaceholderBehavior.EMPTY)
+# Returns "Hello, !" (replaces with empty string)
+
+result = safe_format("Hello, {name}!", {"name": "World"})
+# Returns "Hello, World!" (normal formatting)
+
+# Safe string operations
 text = safe_strip(None)  # Returns '' instead of error
 items = safe_split("a,b,c", ",")  # Returns ['a', 'b', 'c']
 joined = safe_join(", ", ["a", None, "b"])  # Returns 'a, b' (skips None)
-formatted = safe_format("Hello, {name}!", name="World")  # Safe formatting
 ```
 
 ### 📚 Learning Tools
@@ -297,12 +318,21 @@ result = analyze_data(data)
 
 ## 📊 Version History
 
-### v0.4.4 (Current)
+### v0.4.5 (Current)
+- 🐛 **Critical Bug Fixes** - Fixed learning module FileNotFoundError
+- 🔧 **Better Error Messages** - Clear ValidationError messages for type mismatches
+- 📖 **Contextual Explanations** - New `explain_error()` for educational error messages
+- 🎨 **Enhanced safe_format()** - Configurable placeholder behavior (PRESERVE, MISSING, EMPTY)
+- ➕ **New safe_average()** - Safe average calculation with automatic filtering
+- 🛡️ **Comprehensive Error Handling** - Educational messages for all common Python errors
+- ✅ **100% Backward Compatible** - All existing code continues to work
+
+### v0.4.4
 - � **Enhanced Type Safety** - Full type hints with TypeVar and ParamSpec
 - ✅ **Better Input Validation** - Parameter validation and attempt limiting
 - ⚡ **Performance Optimizations** - Pre-compiled regex patterns
-- � **Improved Dependencies** - Fixed version pinning and optional extras
-- �️ **Security Enhancements** - DoS protection and better error handling
+- 📦 **Improved Dependencies** - Fixed version pinning and optional extras
+- 🛡️ **Security Enhancements** - DoS protection and better error handling
 - 📚 **Centralized Versioning** - Single source of truth in _version.py
 
 ### v0.4.3
@@ -386,4 +416,4 @@ Fishertools is built with ❤️ for the Python community, especially for beginn
 
 **Fishertools** - Making Python easier, safer, and more fun for everyone! 🐍✨
 
-**Current Version:** 0.4.4 | **Last Updated:** February 1, 2026
+**Current Version:** 0.4.5 | **Last Updated:** February 2, 2026
