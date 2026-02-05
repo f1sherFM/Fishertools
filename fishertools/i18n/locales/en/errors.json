@@ -1,0 +1,90 @@
+{
+  "ValueError": {
+    "explanation": "A ValueError occurs when a function receives an argument of the correct type but an inappropriate value.",
+    "suggestions": [
+      "Check that the value you're passing is in the expected range or format",
+      "Verify that string-to-number conversions use valid numeric strings",
+      "Ensure that the value matches the function's requirements"
+    ]
+  },
+  "TypeError": {
+    "explanation": "A TypeError occurs when an operation is performed on an object of an inappropriate type.",
+    "suggestions": [
+      "Check that you're using the correct data type for the operation",
+      "Verify that all function arguments are of the expected types",
+      "Make sure you're not mixing incompatible types (e.g., string + integer)"
+    ]
+  },
+  "KeyError": {
+    "explanation": "A KeyError occurs when you try to access a dictionary key that doesn't exist.",
+    "suggestions": [
+      "Check that the key exists in the dictionary before accessing it",
+      "Use the .get() method with a default value instead of direct access",
+      "Verify that you're using the correct key name (check for typos)"
+    ]
+  },
+  "IndexError": {
+    "explanation": "An IndexError occurs when you try to access a list index that is out of range.",
+    "suggestions": [
+      "Check that the index is within the valid range (0 to len(list)-1)",
+      "Verify that the list is not empty before accessing elements",
+      "Use len() to check the list size before accessing indices"
+    ]
+  },
+  "AttributeError": {
+    "explanation": "An AttributeError occurs when you try to access an attribute or method that doesn't exist on an object.",
+    "suggestions": [
+      "Check that the attribute or method name is spelled correctly",
+      "Verify that the object has the attribute you're trying to access",
+      "Make sure the object is of the expected type"
+    ]
+  },
+  "ZeroDivisionError": {
+    "explanation": "A ZeroDivisionError occurs when you try to divide a number by zero.",
+    "suggestions": [
+      "Check that the divisor is not zero before performing division",
+      "Add a condition to handle the zero case separately",
+      "Validate input values to ensure they're not zero when used as divisors"
+    ]
+  },
+  "FileNotFoundError": {
+    "explanation": "A FileNotFoundError occurs when you try to open or access a file that doesn't exist.",
+    "suggestions": [
+      "Check that the file path is correct and the file exists",
+      "Verify that you're using the correct relative or absolute path",
+      "Make sure the file hasn't been moved or deleted"
+    ]
+  },
+  "ImportError": {
+    "explanation": "An ImportError occurs when Python cannot import a module or package.",
+    "suggestions": [
+      "Check that the module name is spelled correctly",
+      "Verify that the module is installed (use pip install if needed)",
+      "Make sure the module is in Python's search path"
+    ]
+  },
+  "NameError": {
+    "explanation": "A NameError occurs when you try to use a variable or function that hasn't been defined.",
+    "suggestions": [
+      "Check that the variable or function name is spelled correctly",
+      "Make sure the variable is defined before you try to use it",
+      "Verify that the variable is in the correct scope"
+    ]
+  },
+  "SyntaxError": {
+    "explanation": "A SyntaxError occurs when Python cannot parse your code due to incorrect syntax.",
+    "suggestions": [
+      "Check for missing or extra parentheses, brackets, or quotes",
+      "Verify that indentation is consistent (use spaces or tabs, not both)",
+      "Look for typos in keywords or operators"
+    ]
+  },
+  "generic": {
+    "explanation": "An error occurred during program execution. Error type: {error_type}",
+    "suggestions": [
+      "Read the error message carefully to understand what went wrong",
+      "Check the line number indicated in the traceback",
+      "Review the code around where the error occurred"
+    ]
+  }
+}

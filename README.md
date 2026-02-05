@@ -4,19 +4,19 @@
 
 Fishertools is a Python library designed specifically for beginner developers. It provides clear error explanations, safe utilities, learning tools, and powerful debugging features to help you master Python.
 
-## 🚀 What's New in v0.4.6?
+## 🚀 What's New in v0.4.7?
 
-**Performance & Async Release** - Major improvements for modern Python development:
+**Network, Visualization & Internationalization Release** - Major feature expansion:
 
-- **⚡ Async Support** - New `AsyncSimpleLogger` and async safe utilities for async/await applications
-- **🔒 Thread Safety** - `SimpleLogger` now thread-safe with automatic locking
-- **💾 Smart Caching** - `PatternLoader` uses LRU cache for 10,000x faster repeated calls
-- **📝 Type Hints** - Full PEP 561 support with `py.typed` marker file
-- **🔮 Future Annotations** - `__future__.annotations` in all modules for Python 3.8+ compatibility
-- **🏗️ Modern Build** - Removed `setup.py`, using only `pyproject.toml` (PEP 517/518)
-- **✅ 100% Backward Compatible** - All existing code continues to work
+- **🌐 Safe Network Operations** - New `safe_request()` and `safe_download()` with timeout handling and progress tracking
+- **🎨 Enhanced Visualization** - Tree-style rendering, color highlighting, and export to JSON/HTML
+- **� Algorithm Visualization** - Step-by-step visualization of sorting and searching algorithms
+- **🌍 Multilingual Support** - Error explanations in Russian and English with automatic language detection
+- **⚙️ Configuration Management** - Persistent settings for network, visualization, and i18n preferences
+- **📊 Version Information** - New `get_version_info()` function for detailed version and feature reporting
+- **✅ 100% Backward Compatible** - All existing code continues to work seamlessly
 
-[See full changelog →](CHANGELOG.md) | [Async Guide →](ASYNC_GUIDE.md) | [Improvements →](IMPROVEMENTS_v0.4.6.md)
+[See full changelog →](CHANGELOG.md)
 
 ## Quick Start
 
@@ -28,25 +28,149 @@ pip install fishertools
 
 | Task | Function | Module |
 |------|----------|--------|
-| Explain an error | `explain_error(e)` | errors |
-| **Explain validation error** | **`explain_error(error_msg)`** | **learn** |
+| Explain an error | `explain_error(e, language='ru')` | errors |
+| **🆕 Translate error** | **`translate_error(e, lang='en')`** | **i18n** |
+| **🆕 Detect language** | **`detect_language()`** | **i18n** |
+| **🆕 HTTP request** | **`safe_request(url, timeout=10)`** | **network** |
+| **🆕 Download file** | **`safe_download(url, path)`** | **network** |
 | Get element safely | `safe_get(list, index, default)` | safe |
 | Divide safely | `safe_divide(a, b, default)` | safe |
-| **Calculate average safely** | **`safe_average(numbers, default)`** | **safe** |
-| **Format string safely** | **`safe_format(template, values, behavior)`** | **safe** |
+| Calculate average safely | `safe_average(numbers, default)` | safe |
+| Format string safely | `safe_format(template, values, behavior)` | safe |
 | Strip string safely | `safe_strip(text, default)` | safe |
 | Split string safely | `safe_split(text, sep, default)` | safe |
 | Join safely | `safe_join(sep, items)` | safe |
 | Read file safely | `safe_read_file(path)` | safe |
-| **🆕 Async read file** | **`await async_safe_read_file(path)`** | **async_safe** |
-| **🆕 Async write file** | **`await async_safe_write_file(path, content)`** | **async_safe** |
-| **🆕 Async logger** | **`await logger.info(msg)`** | **async_logger** |
+| Async read file | `await async_safe_read_file(path)` | async_safe |
+| Async write file | `await async_safe_write_file(path, content)` | async_safe |
+| Async logger | `await logger.info(msg)` | async_logger |
 | Learn Python concepts | `explain(topic)` | learn |
-| Visualize data | `visualize(data)` | visualization |
+| Visualize data | `visualize(data, style='tree', colors=True)` | visualization |
+| **🆕 Visualize algorithm** | **`visualize_sorting(array, 'bubble_sort')`** | **visualization** |
 | Validate types | `@validate_types` | validation |
 | Debug step-by-step | `@debug_step_by_step` | debug |
+| **🆕 Get version info** | **`get_version_info()`** | **main** |
 
 ## Core Features
+
+### 🌐 Safe Network Operations (NEW in v0.4.7!)
+Make HTTP requests and download files safely with proper timeout handling and error management.
+
+```python
+from fishertools import safe_request, safe_download
+
+# Safe HTTP request with timeout
+response = safe_request('https://api.example.com/data', timeout=10)
+if response.success:
+    print(response.data)
+else:
+    print(f"Error: {response.error}")
+
+# Safe file download with progress tracking
+def progress_callback(progress):
+    print(f"Downloaded: {progress.percentage:.1f}%")
+
+response = safe_download(
+    'https://example.com/file.zip',
+    'downloads/file.zip',
+    progress_callback=progress_callback
+)
+
+if response.success:
+    print(f"File saved to: {response.file_path}")
+```
+
+**Features:**
+- Automatic timeout handling (default 10 seconds)
+- Structured error responses (never raises exceptions)
+- Progress tracking for downloads
+- File conflict handling
+- Cleanup on failure
+- Disk space checking
+
+### 🌍 Multilingual Error Explanations (NEW in v0.4.7!)
+Get error explanations in your preferred language with automatic detection.
+
+```python
+from fishertools import explain_error, translate_error, detect_language
+
+# Detect system language
+lang = detect_language()  # Returns 'ru' or 'en'
+
+try:
+    result = 10 / 0
+except ZeroDivisionError as e:
+    # Explain in Russian (default)
+    explain_error(e, language='ru')
+    
+    # Explain in English
+    explain_error(e, language='en')
+    
+    # Auto-detect language
+    explain_error(e, language='auto')
+    
+    # Get structured explanation
+    explanation = translate_error(e, lang='en')
+    print(explanation.explanation)
+    print(explanation.suggestions)
+```
+
+**Supported Languages:**
+- Russian (ru) - default
+- English (en)
+- Auto-detection based on system locale
+
+### 🎨 Enhanced Visualization (NEW in v0.4.7!)
+Visualize data with multiple styles, colors, and export options.
+
+```python
+from fishertools import visualize, EnhancedVisualizer, AlgorithmVisualizer
+
+# Basic visualization (existing)
+data = {"name": "Alice", "scores": [90, 85, 92]}
+visualize(data)
+
+# Enhanced visualization with tree style
+enhanced_viz = EnhancedVisualizer()
+result = enhanced_viz.visualize(
+    data,
+    style='tree',      # Tree-like hierarchical format
+    colors=True,       # Color highlighting by data type
+    max_depth=3,       # Limit nesting depth
+    export='json'      # Export to JSON file
+)
+
+# Algorithm visualization - Sorting
+algo_viz = AlgorithmVisualizer()
+array = [3, 1, 4, 1, 5, 9, 2, 6]
+result = algo_viz.visualize_sorting(
+    array,
+    algorithm='bubble_sort',
+    step_delay=0.5  # Delay between steps
+)
+
+print(f"Comparisons: {result.statistics['comparisons']}")
+print(f"Swaps: {result.statistics['swaps']}")
+
+# Algorithm visualization - Searching
+sorted_array = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+result = algo_viz.visualize_search(
+    sorted_array,
+    target=5,
+    algorithm='binary_search'
+)
+
+for step in result.steps:
+    print(f"Step {step.step_number}: {step.description}")
+```
+
+**Features:**
+- Tree-style hierarchical rendering
+- Color highlighting by data type
+- Depth limiting for nested structures
+- Export to JSON and HTML formats
+- Algorithm step-by-step visualization
+- Statistics tracking (comparisons, swaps, etc.)
 
 ### 🔴 Error Explanation
 Get clear explanations of Python errors with suggestions for fixing them.
@@ -111,7 +235,7 @@ best_practice = show_best_practice("error handling")
 ### 🎯 Ready-made Patterns
 Templates for common tasks like menus, file storage, logging, and CLI applications.
 
-### 📊 Data Visualization (v0.4.1+)
+### 📊 Data Visualization
 Visualize data structures in a human-readable format with proper formatting and indentation.
 
 ```python
@@ -144,12 +268,19 @@ data = {"users": [{"name": "Alice"}, {"name": "Bob"}]}
 visualize(data, max_depth=3)
 ```
 
-**Features:**
+**Basic Features:**
 - List visualization with indices
 - Dictionary visualization with keys
 - Nested structure support with depth control
 - Item limiting for large datasets
 - Clean formatting with arrows and indentation
+
+**Enhanced Features (v0.4.7):**
+- Tree-style hierarchical rendering
+- Color highlighting by data type
+- Export to JSON and HTML
+- Algorithm visualization (sorting, searching)
+- Step-by-step execution tracking
 
 ### ✅ Type Validation (v0.4.1+)
 Validate function arguments and data structures with clear error messages.
@@ -257,6 +388,60 @@ Complete documentation is available in the `docs/` folder:
 
 ## 🔄 Integration Examples
 
+### Network + Visualization + I18n (v0.4.7)
+
+```python
+from fishertools import safe_request, visualize, explain_error
+
+# Fetch data from API
+response = safe_request('https://api.example.com/users', timeout=5)
+
+# Visualize the response
+visualize(response.__dict__, title="API Response")
+
+# Handle errors with multilingual explanations
+if not response.success:
+    try:
+        raise ConnectionError(response.error)
+    except Exception as e:
+        explain_error(e, language='en')
+```
+
+### Algorithm Visualization + Debug
+
+```python
+from fishertools.visualization import AlgorithmVisualizer
+from fishertools.debug import debug_step_by_step
+
+@debug_step_by_step
+def sort_and_analyze(numbers):
+    visualizer = AlgorithmVisualizer()
+    result = visualizer.visualize_sorting(numbers, 'bubble_sort')
+    return result.statistics
+
+stats = sort_and_analyze([5, 2, 8, 1, 9])
+print(f"Comparisons: {stats['comparisons']}")
+```
+
+### Multilingual Error Handling
+
+```python
+from fishertools import explain_error, detect_language, safe_divide
+
+# Detect user's language
+user_lang = detect_language()
+
+# Perform operation
+result = safe_divide(10, 0)
+
+if result is None:
+    try:
+        raise ZeroDivisionError("Division by zero")
+    except Exception as e:
+        # Explain in user's language
+        explain_error(e, language=user_lang)
+```
+
 ### Visualization + Validation
 
 ```python
@@ -321,7 +506,23 @@ result = analyze_data(data)
 
 ## 📊 Version History
 
-### v0.4.5.1 (Current)
+### v0.4.7 (Current - February 2026)
+- 🌐 **Safe Network Operations** - HTTP requests and file downloads with timeout handling
+- 🎨 **Enhanced Visualization** - Tree-style rendering, colors, and export to JSON/HTML
+- � **Algorithm Visualization** - Step-by-step sorting and searching visualization
+- � **Multilingual Support** - Error explanations in Russian and English
+- ⚙️ **Configuration Management** - Persistent settings for all modules
+- � **Version Information** - New `get_verscion_info()` function
+- ✅ **56 Integration Tests** - Comprehensive testing of all new features
+- ✅ **100% Backward Compatible** - All existing code continues to work
+
+### v0.4.6
+- ⚡ **Async Support** - AsyncSimpleLogger and async safe utilities
+- 🔒 **Thread Safety** - Thread-safe SimpleLogger with automatic locking
+- 💾 **Smart Caching** - LRU cache for 10,000x faster repeated calls
+- 📝 **Type Hints** - Full PEP 561 support with py.typed marker
+
+### v0.4.5.1
 - 🐛 **Critical Bug Fixes** - Fixed learning module FileNotFoundError
 - 🔧 **Better Error Messages** - Clear ValidationError messages for type mismatches
 - 📖 **Contextual Explanations** - New `explain_error()` for educational error messages
@@ -422,4 +623,4 @@ Fishertools is built with ❤️ for the Python community, especially for beginn
 
 **Fishertools** - Making Python easier, safer, and more fun for everyone! 🐍✨
 
-**Current Version:** 0.4.5.1 | **Last Updated:** February 2, 2026
+**Current Version:** 0.4.7 | **Last Updated:** February 5, 2026

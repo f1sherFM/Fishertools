@@ -94,3 +94,53 @@ class LearningConfig:
     def __post_init__(self):
         if self.exercise_difficulty_progression is None:
             self.exercise_difficulty_progression = ["beginner", "intermediate", "advanced"]
+
+
+
+@dataclass
+class NetworkConfig:
+    """
+    Configuration for network operations.
+    
+    Attributes:
+        default_timeout: Default timeout for HTTP requests in seconds
+        max_retries: Maximum number of retry attempts for failed requests
+        retry_delay: Delay between retry attempts in seconds
+        chunk_size: Size of chunks for file downloads in bytes
+    """
+    default_timeout: float = 10.0
+    max_retries: int = 3
+    retry_delay: float = 1.0
+    chunk_size: int = 8192
+
+
+@dataclass
+class VisualizationConfig:
+    """
+    Configuration for visualization operations.
+    
+    Attributes:
+        default_style: Default visualization style
+        default_colors: Whether to use colors by default
+        color_scheme: Default color scheme
+        export_directory: Default directory for exported visualizations
+    """
+    default_style: str = 'default'
+    default_colors: bool = False
+    color_scheme: str = 'default'
+    export_directory: str = './exports'
+
+
+@dataclass
+class I18nConfig:
+    """
+    Configuration for internationalization.
+    
+    Attributes:
+        default_language: Default language for error messages
+        fallback_language: Fallback language when translation is missing
+        auto_detect: Whether to automatically detect system language
+    """
+    default_language: str = 'ru'
+    fallback_language: str = 'en'
+    auto_detect: bool = True

@@ -17,6 +17,45 @@ from ._version import __version__
 
 __author__ = "f1sherFM"
 
+
+def get_version_info() -> dict:
+    """
+    Get detailed version information about fishertools
+    
+    Returns:
+        dict: Dictionary containing version, author, and feature information
+        
+    Example:
+        >>> info = get_version_info()
+        >>> print(f"Fishertools v{info['version']}")
+        >>> print(f"Features: {', '.join(info['features'])}")
+    """
+    return {
+        "version": __version__,
+        "author": __author__,
+        "features": [
+            "error_explanations",
+            "safe_utilities",
+            "visualization",
+            "learning_tools",
+            "input_validation",
+            "network_operations",  # New in v0.4.7
+            "internationalization",  # New in v0.4.7
+            "algorithm_visualization",  # New in v0.4.7
+        ],
+        "enhancements": {
+            "v0.4.7": [
+                "Safe HTTP request operations with timeout handling",
+                "Safe file download with progress tracking",
+                "Enhanced visualization with colors and export",
+                "Algorithm visualization (sorting, searching)",
+                "Multilingual error explanations (Russian, English)",
+                "Configuration management system",
+            ]
+        }
+    }
+
+
 # Primary API - main interface for users
 from .errors import explain_error, get_explanation
 
@@ -32,6 +71,15 @@ from .safe import (
     safe_read_file, safe_write_file, safe_file_exists, 
     safe_get_file_size, safe_list_files,
     safe_open, find_file, project_root
+)
+
+# Visualization functions (existing + enhanced)
+from .visualization import (
+    visualize,  # Existing function
+    EnhancedVisualizer,  # New enhanced visualizer
+    AlgorithmVisualizer,  # New algorithm visualizer
+    VisualizationConfig,  # Configuration model
+    VisualizationResult,  # Result model
 )
 
 # Learning tools - educational functions
@@ -73,7 +121,33 @@ from . import visualization
 from . import validation
 from . import debug
 
+# Enhancement modules for safe network operations and i18n (v0.4.7+)
+from . import network
+from . import i18n
+
+# Network operations - convenience functions
+from .network import (
+    safe_request,  # Safe HTTP requests
+    safe_download,  # Safe file downloads
+    SafeHTTPClient,  # HTTP client class
+    SafeFileDownloader,  # File downloader class
+    NetworkResponse,  # Response model
+    DownloadResponse,  # Download response model
+)
+
+# Internationalization - multilingual support
+from .i18n import (
+    translate_error,  # Translate error messages
+    detect_language,  # Detect system language
+    ErrorTranslator,  # Error translator class
+    LanguageDetector,  # Language detector class
+    ErrorExplanation,  # Error explanation model
+)
+
 __all__ = [
+    # Version information
+    "get_version_info",
+    
     # Primary API - the main function users should import
     "explain_error",
     "get_explanation",  # New in v0.4.7
@@ -87,6 +161,13 @@ __all__ = [
     "safe_read_file", "safe_write_file", "safe_file_exists", 
     "safe_get_file_size", "safe_list_files",
     "safe_open", "find_file", "project_root",
+    
+    # Visualization functions (existing + enhanced)
+    "visualize",
+    "EnhancedVisualizer",
+    "AlgorithmVisualizer",
+    "VisualizationConfig",
+    "VisualizationResult",
     
     # Input validation functions
     "ask_int", "ask_float", "ask_str", "ask_choice",
@@ -108,5 +189,18 @@ __all__ = [
     "learning", "documentation", "examples", "config", "integration",
     
     # Phase 1 modules (v0.4.1+)
-    "visualization", "validation", "debug"
+    "visualization", "validation", "debug",
+    
+    # Enhancement modules for safe network operations and i18n (v0.4.7+)
+    "network", "i18n",
+    
+    # Network operations - convenience functions
+    "safe_request", "safe_download",
+    "SafeHTTPClient", "SafeFileDownloader",
+    "NetworkResponse", "DownloadResponse",
+    
+    # Internationalization - multilingual support
+    "translate_error", "detect_language",
+    "ErrorTranslator", "LanguageDetector",
+    "ErrorExplanation",
 ]

@@ -8,6 +8,10 @@ Architecture improvements (v0.4.4.2):
 - Separated pattern matching into PatternMatcher
 - Separated explanation building into ExplanationBuilder
 - Improved Single Responsibility Principle compliance
+
+Enhancements (v0.5.0+):
+- Added multilingual support via i18n module
+- Support for 'auto' language detection
 """
 
 from typing import Optional
@@ -149,7 +153,7 @@ def get_explanation(exception: Exception,
     
     Args:
         exception: The Python exception to explain (required)
-        language: Language for explanations ('ru' or 'en', default: 'ru')
+        language: Language for explanations ('ru', 'en', or 'auto' for detection, default: 'ru')
         format_type: Output format ('console', 'plain', 'json', default: 'console')
         **kwargs: Additional formatting parameters:
             - use_colors: Whether to use colors in console output (default: True)
@@ -180,8 +184,8 @@ def get_explanation(exception: Exception,
         raise TypeError(f"Параметр 'exception' должен быть экземпляром Exception, "
                        f"получен {type(exception).__name__}")
     
-    # Validate language parameter
-    valid_languages = ['ru', 'en']
+    # Validate language parameter (now supports 'auto')
+    valid_languages = ['ru', 'en', 'auto']
     if language not in valid_languages:
         raise ValueError(f"Параметр 'language' должен быть одним из {valid_languages}, "
                         f"получен '{language}'")
@@ -192,11 +196,23 @@ def get_explanation(exception: Exception,
         raise ValueError(f"Параметр 'format_type' должен быть одним из {valid_formats}, "
                         f"получен '{format_type}'")
     
+    # Handle language detection and i18n integration
+    actual_language = language
+    if language == 'auto':
+        # Use i18n module for auto-detection
+        try:
+            from ..i18n import LanguageDetector
+            detector = LanguageDetector()
+            actual_language = detector.detect_system_language()
+        except ImportError:
+            # Fall back to Russian if i18n module not available
+            actual_language = 'ru'
+    
     from .formatters import get_formatter
     
     # Create configuration based on parameters
     config = ExplainerConfig(
-        language=language,
+        language=actual_language,
         format_type=format_type,
         use_colors=kwargs.get('use_colors', True),
         show_original_error=kwargs.get('show_original_error', True),
@@ -228,7 +244,7 @@ def explain_error(exception: Exception,
     
     Args:
         exception: The Python exception to explain (required)
-        language: Language for explanations ('ru' or 'en', default: 'ru')
+        language: Language for explanations ('ru', 'en', or 'auto' for detection, default: 'ru')
         format_type: Output format ('console', 'plain', 'json', default: 'console')
         return_text: If True, return explanation as string instead of printing (default: False)
         **kwargs: Additional formatting parameters:

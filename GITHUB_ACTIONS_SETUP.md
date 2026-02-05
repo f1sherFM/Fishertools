@@ -3,7 +3,7 @@
 ## ✅ Что уже сделано:
 
 1. ✅ Создан workflow файл `.github/workflows/publish-to-pypi.yml`
-2. ✅ Код опубликован на GitHub с тегом v0.4.5
+2. ✅ Код опубликован на GitHub с тегом v0.4.7
 3. ✅ Пакет собран и готов к публикации
 
 ## 📋 Что нужно сделать:
@@ -34,9 +34,9 @@
 2. Нажмите **Draft a new release**
 
 3. Заполните:
-   - **Tag**: `v0.4.5` (уже существует)
-   - **Release title**: `v0.4.5 - Critical Bug Fixes`
-   - **Description**: Скопируйте содержимое из `RELEASE_NOTES_v0.4.5.md`
+   - **Tag**: `v0.4.7` (уже существует)
+   - **Release title**: `v0.4.7 - Network, Visualization & Internationalization Release`
+   - **Description**: Скопируйте содержимое из `RELEASE_NOTES_v0.4.7.md`
 
 4. Нажмите **Publish release**
 
@@ -78,8 +78,8 @@
 
 1. Обновите версию в `fishertools/_version.py` и `pyproject.toml`
 2. Закоммитьте изменения
-3. Создайте тег: `git tag -a v0.4.6 -m "Version 0.4.6"`
-4. Отправьте на GitHub: `git push origin v0.4.6`
+3. Создайте тег: `git tag -a v0.4.8 -m "Version 0.4.8"`
+4. Отправьте на GitHub: `git push origin v0.4.8`
 5. Создайте Release на GitHub
 6. Пакет автоматически опубликуется на PyPI! 🚀
 
