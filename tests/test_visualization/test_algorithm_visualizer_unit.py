@@ -37,10 +37,10 @@ class TestUnsupportedAlgorithmHandling:
         visualizer = AlgorithmVisualizer()
         
         with pytest.raises(ValueError) as exc_info:
-            visualizer.visualize_search([1, 2, 3], 2, algorithm='linear_search')
+            visualizer.visualize_search([1, 2, 3], 2, algorithm='interpolation_search')
         
         assert 'Unsupported algorithm' in str(exc_info.value)
-        assert 'linear_search' in str(exc_info.value)
+        assert 'interpolation_search' in str(exc_info.value)
     
     def test_error_message_includes_supported_algorithms(self):
         """Test that error message lists supported algorithms."""

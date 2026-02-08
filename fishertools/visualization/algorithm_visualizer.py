@@ -21,6 +21,10 @@ from .algorithms.sorting import (
     visualize_insertion_sort,
     visualize_selection_sort,
 )
+from .algorithms.searching import (
+    visualize_linear_search,
+    visualize_jump_search,
+)
 
 
 class AlgorithmVisualizer:
@@ -29,10 +33,29 @@ class AlgorithmVisualizer:
     
     This class provides educational visualizations of sorting and searching
     algorithms, showing each step of the algorithm execution with statistics.
+    
+    Supported sorting algorithms:
+    - bubble_sort: Simple comparison-based sorting with adjacent swaps
+    - quick_sort: Divide-and-conquer sorting using partitioning
+    - merge_sort: Divide-and-conquer sorting with merging
+    - insertion_sort: Build sorted array by inserting elements
+    - selection_sort: Repeatedly select minimum element
+    
+    Supported search algorithms:
+    - binary_search: Efficient search in sorted arrays (O(log n))
+    - linear_search: Sequential search in any array (O(n))
+    - jump_search: Block-based search in sorted arrays (O(√n))
     """
     
-    def __init__(self):
-        """Initialize the algorithm visualizer."""
+    def __init__(self, language: str = 'auto'):
+        """
+        Initialize the algorithm visualizer.
+        
+        Args:
+            language: Language for step descriptions ('en', 'ru', 'auto').
+                     Currently stored for future multilingual support.
+        """
+        self.language = language
         self.supported_algorithms = {
             'bubble_sort': self._visualize_bubble_sort,
             'binary_search': self._visualize_binary_search,
@@ -40,6 +63,8 @@ class AlgorithmVisualizer:
             'merge_sort': visualize_merge_sort,
             'insertion_sort': visualize_insertion_sort,
             'selection_sort': visualize_selection_sort,
+            'linear_search': visualize_linear_search,
+            'jump_search': visualize_jump_search,
         }
     
     def visualize_sorting(

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fishertools"
-version = "0.4.8"
+version = "0.4.9"
 description = "Fishertools - инструменты, которые делают Python удобнее и безопаснее для новичков"
 readme = "README.md"
 license = {text = "MIT"}

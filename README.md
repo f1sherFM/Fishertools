@@ -4,24 +4,22 @@
 
 Fishertools is a Python library designed specifically for beginner developers. It provides clear error explanations, safe utilities, learning tools, and powerful debugging features to help you master Python.
 
-## 🚀 What's New in v0.4.8?
+## 🚀 What's New in v0.4.9?
 
-**Algorithm Expansion Release** - New sorting algorithms and enhanced visualization:
+**Search Algorithms Release** - New search algorithms with comprehensive visualization:
 
-- **🔄 Quick Sort** - Fast divide-and-conquer sorting with partition visualization
-- **🔀 Merge Sort** - Stable O(n log n) sorting with merge range tracking
-- **📥 Insertion Sort** - Efficient for small/nearly-sorted arrays with sorted portion highlighting
-- **🔍 Selection Sort** - Simple minimum-finding algorithm with search visualization
-- **📊 Enhanced Algorithm Visualization** - All 4 new algorithms with step-by-step tracking
-- **✅ Comprehensive Testing** - 105+ tests covering all sorting algorithms
-- **🎯 Final Array Attribute** - Direct access to sorted results without manual extraction
+- **🔍 Linear Search** - Sequential search through unsorted arrays with O(n) complexity
+- **⚡ Jump Search** - Block-based search in sorted arrays with O(√n) complexity
+- **📊 Enhanced Search Visualization** - Step-by-step tracking with jump size and block information
+- **✅ Comprehensive Testing** - 166+ tests covering all search algorithms
+- **🎯 Algorithm Correctness** - All 271 visualization tests passing (100% success rate)
+- **🔄 Complete Algorithm Suite** - 5 sorting + 3 search algorithms fully implemented
 - **✅ 100% Backward Compatible** - All existing code continues to work seamlessly
 
-Previous release (v0.4.7):
-- 🌐 Safe Network Operations with timeout handling
-- 🎨 Enhanced Visualization with tree-style rendering
-- 🌍 Multilingual Support (Russian/English)
-- ⚙️ Configuration Management
+Previous releases:
+- v0.4.8: 4 new sorting algorithms (Quick, Merge, Insertion, Selection)
+- v0.4.7: Safe Network Operations, Enhanced Visualization, Multilingual Support
+- v0.4.6: Async support, Performance improvements, PEP 561 compliance
 
 [See full changelog →](CHANGELOG.md)
 
@@ -147,7 +145,7 @@ result = enhanced_viz.visualize(
     export='json'      # Export to JSON file
 )
 
-# Algorithm visualization - Sorting (NEW algorithms in v0.4.8!)
+# Algorithm visualization - Sorting (5 algorithms available!)
 algo_viz = AlgorithmVisualizer()
 array = [3, 1, 4, 1, 5, 9, 2, 6]
 
@@ -163,12 +161,29 @@ for algorithm in ['bubble_sort', 'quick_sort', 'merge_sort', 'insertion_sort', '
     print(f"  Swaps: {result.statistics['swaps']}")
     print(f"  Final array: {result.final_array}")
 
-# Algorithm visualization - Searching
+# Algorithm visualization - Searching (NEW in v0.4.9!)
 sorted_array = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+# Binary search (existing)
 result = algo_viz.visualize_search(
     sorted_array,
     target=5,
     algorithm='binary_search'
+)
+
+# Linear search - works on unsorted arrays (NEW!)
+unsorted_array = [3, 1, 4, 1, 5, 9, 2, 6]
+result = algo_viz.visualize_search(
+    unsorted_array,
+    target=5,
+    algorithm='linear_search'
+)
+
+# Jump search - efficient for sorted arrays (NEW!)
+result = algo_viz.visualize_search(
+    sorted_array,
+    target=5,
+    algorithm='jump_search'
 )
 
 for step in result.steps:
@@ -181,8 +196,9 @@ for step in result.steps:
 - Depth limiting for nested structures
 - Export to JSON and HTML formats
 - Algorithm step-by-step visualization
-- **NEW in v0.4.8:** 4 additional sorting algorithms (quick_sort, merge_sort, insertion_sort, selection_sort)
-- Statistics tracking (comparisons, swaps, etc.)
+- **5 Sorting Algorithms:** bubble_sort, quick_sort, merge_sort, insertion_sort, selection_sort
+- **3 Search Algorithms:** binary_search, linear_search (NEW!), jump_search (NEW!)
+- Statistics tracking (comparisons, swaps, jumps, etc.)
 - Direct access to final sorted array via `final_array` attribute
 
 ### 🔴 Error Explanation
