@@ -338,12 +338,12 @@ class TestVersionInformation:
         assert re.match(version_pattern, fishertools.__version__), \
             f"Version {fishertools.__version__} doesn't follow semantic versioning"
     
-    def test_version_is_047(self):
-        """Test that version is 0.4.7 (enhanced version)."""
+    def test_version_is_050(self):
+        """Test that version is 0.5.0 (algorithm expansion version)."""
         import fishertools
         
-        assert fishertools.__version__ == '0.4.7', \
-            f"Expected version 0.4.7, got {fishertools.__version__}"
+        assert fishertools.__version__ == '0.5.0', \
+            f"Expected version 0.5.0, got {fishertools.__version__}"
     
     def test_get_version_info_function_exists(self):
         """Test that get_version_info function exists."""

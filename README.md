@@ -4,22 +4,31 @@
 
 Fishertools is a Python library designed specifically for beginner developers. It provides clear error explanations, safe utilities, learning tools, and powerful debugging features to help you master Python.
 
-## 🚀 What's New in v0.4.9?
+## 🚀 What's New in v0.5.0?
 
-**Search Algorithms Release** - New search algorithms with comprehensive visualization:
+**Algorithm Expansion & API Unification Release** - Complete algorithm suite with requests-compatible API:
 
-- **🔍 Linear Search** - Sequential search through unsorted arrays with O(n) complexity
-- **⚡ Jump Search** - Block-based search in sorted arrays with O(√n) complexity
-- **📊 Enhanced Search Visualization** - Step-by-step tracking with jump size and block information
-- **✅ Comprehensive Testing** - 166+ tests covering all search algorithms
-- **🎯 Algorithm Correctness** - All 271 visualization tests passing (100% success rate)
-- **🔄 Complete Algorithm Suite** - 5 sorting + 3 search algorithms fully implemented
-- **✅ 100% Backward Compatible** - All existing code continues to work seamlessly
+### 🎯 Network Module Enhancements
+- **🔌 requests-Compatible API** - NetworkResponse now has `.json()`, `.content`, `.text` methods
+- **⏱️ Timeout Support** - `safe_download()` now accepts timeout parameter for better control
+- **� Seamless Migration** - Drop-in replacement for requests library with safe error handling
 
-Previous releases:
-- v0.4.8: 4 new sorting algorithms (Quick, Merge, Insertion, Selection)
-- v0.4.7: Safe Network Operations, Enhanced Visualization, Multilingual Support
-- v0.4.6: Async support, Performance improvements, PEP 561 compliance
+### � Complete Algorithm Suite (8 Algorithms Total!)
+- **5 Sorting Algorithms:** bubble_sort, quick_sort, merge_sort, insertion_sort, selection_sort
+- **3 Search Algorithms:** binary_search, linear_search, jump_search
+- **🎯 Direct Results** - New `final_array` attribute for instant access to sorted results
+- **📈 Enhanced Tracking** - Detailed statistics with partition indices, merge ranges, jump sizes
+
+### 🌍 Enhanced Error Explanations
+- **📝 Context-Aware** - `explain_error()` now accepts context parameter for specific guidance
+- **🎯 Operation-Specific** - Tailored advice for list_access, dict_access, division, etc.
+- **🔍 Variable References** - Include variable names and values in explanations
+
+### ✅ Quality & Testing
+- **1637+ Tests** - Comprehensive test coverage including 306 visualization tests
+- **🧪 Property-Based Testing** - Hypothesis tests validate correctness across all inputs
+- **✅ 100% Backward Compatible** - All v0.4.x code continues to work seamlessly
+- **📊 118 Compatibility Tests** - Ensuring no breaking changes
 
 [See full changelog →](CHANGELOG.md)
 
@@ -34,10 +43,12 @@ pip install fishertools
 | Task | Function | Module |
 |------|----------|--------|
 | Explain an error | `explain_error(e, language='ru')` | errors |
+| **🆕 Explain with context** | **`explain_error(e, context={...})`** | **errors** |
 | **🆕 Translate error** | **`translate_error(e, lang='en')`** | **i18n** |
 | **🆕 Detect language** | **`detect_language()`** | **i18n** |
 | **🆕 HTTP request** | **`safe_request(url, timeout=10)`** | **network** |
-| **🆕 Download file** | **`safe_download(url, path)`** | **network** |
+| **🆕 Get JSON data** | **`response.json()`** | **network** |
+| **🆕 Download file** | **`safe_download(url, path, timeout=60)`** | **network** |
 | Get element safely | `safe_get(list, index, default)` | safe |
 | Divide safely | `safe_divide(a, b, default)` | safe |
 | Calculate average safely | `safe_average(numbers, default)` | safe |
@@ -58,26 +69,37 @@ pip install fishertools
 
 ## Core Features
 
-### 🌐 Safe Network Operations (NEW in v0.4.7!)
-Make HTTP requests and download files safely with proper timeout handling and error management.
+### 🌐 Safe Network Operations (Enhanced in v0.5.0!)
+Make HTTP requests and download files safely with requests-compatible API and timeout control.
 
 ```python
 from fishertools import safe_request, safe_download
 
 # Safe HTTP request with timeout
 response = safe_request('https://api.example.com/data', timeout=10)
+
+# NEW in v0.5.0: requests-compatible API
 if response.success:
-    print(response.data)
+    # Use .json() method like requests library
+    data = response.json()
+    
+    # Or access raw content
+    raw_bytes = response.content
+    text_data = response.text
+    
+    # Original .data attribute still works (backward compatible)
+    same_data = response.data
 else:
     print(f"Error: {response.error}")
 
-# Safe file download with progress tracking
+# Safe file download with timeout control (NEW in v0.5.0!)
 def progress_callback(progress):
     print(f"Downloaded: {progress.percentage:.1f}%")
 
 response = safe_download(
     'https://example.com/file.zip',
     'downloads/file.zip',
+    timeout=60.0,  # NEW: Specify timeout in seconds
     progress_callback=progress_callback
 )
 
@@ -86,6 +108,8 @@ if response.success:
 ```
 
 **Features:**
+- **NEW:** requests-compatible `.json()`, `.content`, `.text` methods
+- **NEW:** Timeout parameter for downloads
 - Automatic timeout handling (default 10 seconds)
 - Structured error responses (never raises exceptions)
 - Progress tracking for downloads
@@ -93,14 +117,29 @@ if response.success:
 - Cleanup on failure
 - Disk space checking
 
-### 🌍 Multilingual Error Explanations (NEW in v0.4.7!)
-Get error explanations in your preferred language with automatic detection.
+### 🌍 Multilingual Error Explanations (Enhanced in v0.5.0!)
+Get error explanations in your preferred language with context-aware details.
 
 ```python
 from fishertools import explain_error, translate_error, detect_language
 
 # Detect system language
 lang = detect_language()  # Returns 'ru' or 'en'
+
+try:
+    my_list = [1, 2, 3]
+    value = my_list[10]
+except IndexError as e:
+    # NEW in v0.5.0: Context-aware explanations
+    explain_error(e, language='en', context={
+        'operation': 'list_access',
+        'variable_name': 'my_list',
+        'index': 10
+    })
+    # Output includes:
+    # - Specific variable name mentioned
+    # - Valid index range (0 to 2)
+    # - Operation-specific guidance
 
 try:
     result = 10 / 0
@@ -120,13 +159,15 @@ except ZeroDivisionError as e:
     print(explanation.suggestions)
 ```
 
-**Supported Languages:**
-- Russian (ru) - default
-- English (en)
+**Features:**
+- **NEW:** Context-aware explanations with variable names and values
+- **NEW:** Operation-specific guidance (list_access, dict_access, division, etc.)
+- Russian (ru) and English (en) support
 - Auto-detection based on system locale
+- Structured error information
 
-### 🎨 Enhanced Visualization (NEW in v0.4.7!)
-Visualize data with multiple styles, colors, and export options.
+### 🎨 Enhanced Visualization (Complete in v0.5.0!)
+Visualize data and algorithms with comprehensive suite of 8 algorithms.
 
 ```python
 from fishertools import visualize, EnhancedVisualizer, AlgorithmVisualizer
@@ -145,11 +186,11 @@ result = enhanced_viz.visualize(
     export='json'      # Export to JSON file
 )
 
-# Algorithm visualization - Sorting (5 algorithms available!)
+# Algorithm visualization - Complete Suite (v0.5.0)
 algo_viz = AlgorithmVisualizer()
 array = [3, 1, 4, 1, 5, 9, 2, 6]
 
-# Try different sorting algorithms
+# All 5 sorting algorithms available!
 for algorithm in ['bubble_sort', 'quick_sort', 'merge_sort', 'insertion_sort', 'selection_sort']:
     result = algo_viz.visualize_sorting(
         array.copy(),
@@ -159,19 +200,21 @@ for algorithm in ['bubble_sort', 'quick_sort', 'merge_sort', 'insertion_sort', '
     print(f"\n{algorithm}:")
     print(f"  Comparisons: {result.statistics['comparisons']}")
     print(f"  Swaps: {result.statistics['swaps']}")
+    
+    # NEW in v0.5.0: Direct access to final sorted array
     print(f"  Final array: {result.final_array}")
 
-# Algorithm visualization - Searching (NEW in v0.4.9!)
+# Algorithm visualization - All 3 search algorithms
 sorted_array = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-# Binary search (existing)
+# Binary search (existing) - O(log n)
 result = algo_viz.visualize_search(
     sorted_array,
     target=5,
     algorithm='binary_search'
 )
 
-# Linear search - works on unsorted arrays (NEW!)
+# Linear search - works on unsorted arrays - O(n)
 unsorted_array = [3, 1, 4, 1, 5, 9, 2, 6]
 result = algo_viz.visualize_search(
     unsorted_array,
@@ -179,12 +222,17 @@ result = algo_viz.visualize_search(
     algorithm='linear_search'
 )
 
-# Jump search - efficient for sorted arrays (NEW!)
+# Jump search - efficient for sorted arrays - O(√n)
 result = algo_viz.visualize_search(
     sorted_array,
     target=5,
     algorithm='jump_search'
 )
+
+# Access results
+print(f"Found: {result.statistics['found']}")
+print(f"Comparisons: {result.statistics['comparisons']}")
+print(f"Final array: {result.final_array}")  # NEW in v0.5.0!
 
 for step in result.steps:
     print(f"Step {step.step_number}: {step.description}")
@@ -195,11 +243,13 @@ for step in result.steps:
 - Color highlighting by data type
 - Depth limiting for nested structures
 - Export to JSON and HTML formats
-- Algorithm step-by-step visualization
-- **5 Sorting Algorithms:** bubble_sort, quick_sort, merge_sort, insertion_sort, selection_sort
-- **3 Search Algorithms:** binary_search, linear_search (NEW!), jump_search (NEW!)
+- **Complete Algorithm Suite (v0.5.0):**
+  - **5 Sorting Algorithms:** bubble_sort, quick_sort, merge_sort, insertion_sort, selection_sort
+  - **3 Search Algorithms:** binary_search, linear_search, jump_search
+- **NEW:** Direct access to final sorted array via `final_array` attribute
+- **NEW:** Enhanced statistics with partition indices, merge ranges, jump sizes
+- Step-by-step visualization with detailed tracking
 - Statistics tracking (comparisons, swaps, jumps, etc.)
-- Direct access to final sorted array via `final_array` attribute
 
 ### 🔴 Error Explanation
 Get clear explanations of Python errors with suggestions for fixing them.
@@ -535,7 +585,23 @@ result = analyze_data(data)
 
 ## 📊 Version History
 
-### v0.4.8 (Current - February 2026)
+### v0.5.0 (Current - February 2026)
+- 🔌 **requests-Compatible API** - NetworkResponse with `.json()`, `.content`, `.text` methods
+- ⏱️ **Download Timeout Support** - `safe_download()` now accepts timeout parameter
+- 🎯 **Final Array Attribute** - Direct access to sorted results via `result.final_array`
+- 📝 **Context-Aware Errors** - `explain_error()` with context parameter for specific guidance
+- 🎨 **Complete Algorithm Suite** - 5 sorting + 3 search algorithms fully implemented
+- 📊 **Enhanced Statistics** - Partition indices, merge ranges, jump sizes tracking
+- ✅ **1637+ Tests** - Including 306 visualization tests and 118 compatibility tests
+- ✅ **100% Backward Compatible** - All v0.4.x code continues to work seamlessly
+
+### v0.4.9 (February 2026)
+- 🔍 **Linear Search** - Sequential search through unsorted arrays
+- ⚡ **Jump Search** - Block-based search in sorted arrays
+- 📊 **Enhanced Search Visualization** - Jump size and block information tracking
+- ✅ **166+ Tests** - Comprehensive coverage for all search algorithms
+
+### v0.4.8 (February 2026)
 - 🔄 **Quick Sort Algorithm** - Fast divide-and-conquer sorting with partition visualization
 - 🔀 **Merge Sort Algorithm** - Stable O(n log n) sorting with merge range tracking
 - 📥 **Insertion Sort Algorithm** - Efficient for small arrays with sorted portion highlighting
@@ -662,4 +728,4 @@ Fishertools is built with ❤️ for the Python community, especially for beginn
 
 **Fishertools** - Making Python easier, safer, and more fun for everyone! 🐍✨
 
-**Current Version:** 0.4.8 | **Last Updated:** February 8, 2026
+**Current Version:** 0.5.0 | **Last Updated:** February 8, 2026
