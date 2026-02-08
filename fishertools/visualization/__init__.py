@@ -16,6 +16,16 @@ from .models import (
 from .enhanced_visualizer import EnhancedVisualizer
 from .algorithm_visualizer import AlgorithmVisualizer
 
+# Algorithm implementations
+from .algorithms import (
+    visualize_quick_sort,
+    visualize_merge_sort,
+    visualize_insertion_sort,
+    visualize_selection_sort,
+    visualize_linear_search,
+    visualize_jump_search,
+)
+
 __all__ = [
     # Core visualization (existing)
     "Visualizer",
@@ -32,4 +42,12 @@ __all__ = [
     "SortingStep",
     "SearchStep",
     "AlgorithmVisualization",
+    
+    # Algorithm implementations (v0.5.0)
+    "visualize_quick_sort",
+    "visualize_merge_sort",
+    "visualize_insertion_sort",
+    "visualize_selection_sort",
+    "visualize_linear_search",
+    "visualize_jump_search",
 ]

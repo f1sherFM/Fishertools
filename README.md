@@ -4,17 +4,24 @@
 
 Fishertools is a Python library designed specifically for beginner developers. It provides clear error explanations, safe utilities, learning tools, and powerful debugging features to help you master Python.
 
-## 🚀 What's New in v0.4.7?
+## 🚀 What's New in v0.4.8?
 
-**Network, Visualization & Internationalization Release** - Major feature expansion:
+**Algorithm Expansion Release** - New sorting algorithms and enhanced visualization:
 
-- **🌐 Safe Network Operations** - New `safe_request()` and `safe_download()` with timeout handling and progress tracking
-- **🎨 Enhanced Visualization** - Tree-style rendering, color highlighting, and export to JSON/HTML
-- **� Algorithm Visualization** - Step-by-step visualization of sorting and searching algorithms
-- **🌍 Multilingual Support** - Error explanations in Russian and English with automatic language detection
-- **⚙️ Configuration Management** - Persistent settings for network, visualization, and i18n preferences
-- **📊 Version Information** - New `get_version_info()` function for detailed version and feature reporting
+- **🔄 Quick Sort** - Fast divide-and-conquer sorting with partition visualization
+- **🔀 Merge Sort** - Stable O(n log n) sorting with merge range tracking
+- **📥 Insertion Sort** - Efficient for small/nearly-sorted arrays with sorted portion highlighting
+- **🔍 Selection Sort** - Simple minimum-finding algorithm with search visualization
+- **📊 Enhanced Algorithm Visualization** - All 4 new algorithms with step-by-step tracking
+- **✅ Comprehensive Testing** - 105+ tests covering all sorting algorithms
+- **🎯 Final Array Attribute** - Direct access to sorted results without manual extraction
 - **✅ 100% Backward Compatible** - All existing code continues to work seamlessly
+
+Previous release (v0.4.7):
+- 🌐 Safe Network Operations with timeout handling
+- 🎨 Enhanced Visualization with tree-style rendering
+- 🌍 Multilingual Support (Russian/English)
+- ⚙️ Configuration Management
 
 [See full changelog →](CHANGELOG.md)
 
@@ -46,7 +53,7 @@ pip install fishertools
 | Async logger | `await logger.info(msg)` | async_logger |
 | Learn Python concepts | `explain(topic)` | learn |
 | Visualize data | `visualize(data, style='tree', colors=True)` | visualization |
-| **🆕 Visualize algorithm** | **`visualize_sorting(array, 'bubble_sort')`** | **visualization** |
+| **🆕 Visualize algorithm** | **`visualize_sorting(array, 'quick_sort')`** | **visualization** |
 | Validate types | `@validate_types` | validation |
 | Debug step-by-step | `@debug_step_by_step` | debug |
 | **🆕 Get version info** | **`get_version_info()`** | **main** |
@@ -140,17 +147,21 @@ result = enhanced_viz.visualize(
     export='json'      # Export to JSON file
 )
 
-# Algorithm visualization - Sorting
+# Algorithm visualization - Sorting (NEW algorithms in v0.4.8!)
 algo_viz = AlgorithmVisualizer()
 array = [3, 1, 4, 1, 5, 9, 2, 6]
-result = algo_viz.visualize_sorting(
-    array,
-    algorithm='bubble_sort',
-    step_delay=0.5  # Delay between steps
-)
 
-print(f"Comparisons: {result.statistics['comparisons']}")
-print(f"Swaps: {result.statistics['swaps']}")
+# Try different sorting algorithms
+for algorithm in ['bubble_sort', 'quick_sort', 'merge_sort', 'insertion_sort', 'selection_sort']:
+    result = algo_viz.visualize_sorting(
+        array.copy(),
+        algorithm=algorithm,
+        step_delay=0.5  # Delay between steps
+    )
+    print(f"\n{algorithm}:")
+    print(f"  Comparisons: {result.statistics['comparisons']}")
+    print(f"  Swaps: {result.statistics['swaps']}")
+    print(f"  Final array: {result.final_array}")
 
 # Algorithm visualization - Searching
 sorted_array = [1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -170,7 +181,9 @@ for step in result.steps:
 - Depth limiting for nested structures
 - Export to JSON and HTML formats
 - Algorithm step-by-step visualization
+- **NEW in v0.4.8:** 4 additional sorting algorithms (quick_sort, merge_sort, insertion_sort, selection_sort)
 - Statistics tracking (comparisons, swaps, etc.)
+- Direct access to final sorted array via `final_array` attribute
 
 ### 🔴 Error Explanation
 Get clear explanations of Python errors with suggestions for fixing them.
@@ -506,13 +519,23 @@ result = analyze_data(data)
 
 ## 📊 Version History
 
-### v0.4.7 (Current - February 2026)
+### v0.4.8 (Current - February 2026)
+- 🔄 **Quick Sort Algorithm** - Fast divide-and-conquer sorting with partition visualization
+- 🔀 **Merge Sort Algorithm** - Stable O(n log n) sorting with merge range tracking
+- 📥 **Insertion Sort Algorithm** - Efficient for small arrays with sorted portion highlighting
+- 🔍 **Selection Sort Algorithm** - Simple minimum-finding with search visualization
+- 🎯 **Final Array Attribute** - Direct access to sorted results via `result.final_array`
+- ✅ **105+ Tests** - Comprehensive property-based and unit tests for all algorithms
+- 📊 **Enhanced Statistics** - Detailed tracking of comparisons, swaps, and steps
+- ✅ **100% Backward Compatible** - All existing code continues to work
+
+### v0.4.7 (February 2026)
 - 🌐 **Safe Network Operations** - HTTP requests and file downloads with timeout handling
 - 🎨 **Enhanced Visualization** - Tree-style rendering, colors, and export to JSON/HTML
-- � **Algorithm Visualization** - Step-by-step sorting and searching visualization
-- � **Multilingual Support** - Error explanations in Russian and English
+- 📊 **Algorithm Visualization** - Step-by-step sorting and searching visualization
+- 🌍 **Multilingual Support** - Error explanations in Russian and English
 - ⚙️ **Configuration Management** - Persistent settings for all modules
-- � **Version Information** - New `get_verscion_info()` function
+- 📊 **Version Information** - New `get_version_info()` function
 - ✅ **56 Integration Tests** - Comprehensive testing of all new features
 - ✅ **100% Backward Compatible** - All existing code continues to work
 
@@ -623,4 +646,4 @@ Fishertools is built with ❤️ for the Python community, especially for beginn
 
 **Fishertools** - Making Python easier, safer, and more fun for everyone! 🐍✨
 
-**Current Version:** 0.4.7 | **Last Updated:** February 5, 2026
+**Current Version:** 0.4.8 | **Last Updated:** February 8, 2026

@@ -15,6 +15,12 @@ from .models import (
     SortingStep,
     SearchStep,
 )
+from .algorithms.sorting import (
+    visualize_quick_sort,
+    visualize_merge_sort,
+    visualize_insertion_sort,
+    visualize_selection_sort,
+)
 
 
 class AlgorithmVisualizer:
@@ -30,6 +36,10 @@ class AlgorithmVisualizer:
         self.supported_algorithms = {
             'bubble_sort': self._visualize_bubble_sort,
             'binary_search': self._visualize_binary_search,
+            'quick_sort': visualize_quick_sort,
+            'merge_sort': visualize_merge_sort,
+            'insertion_sort': visualize_insertion_sort,
+            'selection_sort': visualize_selection_sort,
         }
     
     def visualize_sorting(

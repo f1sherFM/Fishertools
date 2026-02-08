@@ -27,10 +27,10 @@ class TestUnsupportedAlgorithmHandling:
         visualizer = AlgorithmVisualizer()
         
         with pytest.raises(ValueError) as exc_info:
-            visualizer.visualize_sorting([3, 1, 2], algorithm='quick_sort')
+            visualizer.visualize_sorting([3, 1, 2], algorithm='heap_sort')
         
         assert 'Unsupported algorithm' in str(exc_info.value)
-        assert 'quick_sort' in str(exc_info.value)
+        assert 'heap_sort' in str(exc_info.value)
     
     def test_visualize_search_with_unsupported_algorithm_raises_error(self):
         """Test that unsupported search algorithm raises ValueError."""
@@ -58,8 +58,9 @@ class TestUnsupportedAlgorithmHandling:
         visualizer = AlgorithmVisualizer()
         
         assert 'bubble_sort' in visualizer.supported_algorithms
+        assert 'quick_sort' in visualizer.supported_algorithms
         assert 'binary_search' in visualizer.supported_algorithms
-        assert len(visualizer.supported_algorithms) >= 2
+        assert len(visualizer.supported_algorithms) >= 3
 
 
 class TestEdgeCases:
@@ -216,3 +217,97 @@ class TestVisualizationDetails:
         result = visualizer.visualize_sorting(original)
         
         assert result.input_data == original
+
+
+
+class TestMergeSortEdgeCases:
+    """
+    Unit tests for merge_sort edge cases.
+    
+    Feature: fishertools-v0.5.0
+    Validates: Requirements 4.1, 4.2, 4.3
+    """
+    
+    def test_merge_sort_empty_array(self):
+        """Test merge sort with empty array."""
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting([], 'merge_sort')
+        
+        assert isinstance(result, AlgorithmVisualization)
+        assert result.final_array == []
+        assert result.statistics['comparisons'] == 0
+    
+    def test_merge_sort_single_element(self):
+        """Test merge sort with single element array."""
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting([42], 'merge_sort')
+        
+        assert result.final_array == [42]
+        assert result.statistics['comparisons'] == 0
+    
+    def test_merge_sort_already_sorted(self):
+        """Test merge sort with already sorted array."""
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting([1, 2, 3, 4, 5], 'merge_sort')
+        
+        assert result.final_array == [1, 2, 3, 4, 5]
+        # Merge sort still does comparisons even if sorted
+        assert result.statistics['comparisons'] > 0
+    
+    def test_merge_sort_reverse_sorted(self):
+        """Test merge sort with reverse sorted array."""
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting([5, 4, 3, 2, 1], 'merge_sort')
+        
+        assert result.final_array == [1, 2, 3, 4, 5]
+        assert result.statistics['comparisons'] > 0
+    
+    def test_merge_sort_with_duplicates(self):
+        """Test merge sort with duplicate elements."""
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting([3, 1, 2, 1, 3, 2], 'merge_sort')
+        
+        assert result.final_array == [1, 1, 2, 2, 3, 3]
+        # Verify all elements preserved
+        assert sorted(result.final_array) == sorted([3, 1, 2, 1, 3, 2])
+    
+    def test_merge_sort_two_elements_sorted(self):
+        """Test merge sort with two already sorted elements."""
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting([1, 2], 'merge_sort')
+        
+        assert result.final_array == [1, 2]
+    
+    def test_merge_sort_two_elements_unsorted(self):
+        """Test merge sort with two unsorted elements."""
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting([2, 1], 'merge_sort')
+        
+        assert result.final_array == [1, 2]
+    
+    def test_merge_sort_negative_numbers(self):
+        """Test merge sort with negative numbers."""
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting([-5, 3, -1, 0, 2], 'merge_sort')
+        
+        assert result.final_array == [-5, -1, 0, 2, 3]
+    
+    def test_merge_sort_all_same_elements(self):
+        """Test merge sort with all identical elements."""
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting([5, 5, 5, 5], 'merge_sort')
+        
+        assert result.final_array == [5, 5, 5, 5]
+    
+    def test_merge_sort_statistics_accuracy(self):
+        """Test that merge sort statistics are accurate."""
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting([3, 1, 2], 'merge_sort')
+        
+        # Verify statistics exist
+        assert 'comparisons' in result.statistics
+        assert 'steps' in result.statistics
+        assert result.statistics['steps'] == len(result.steps)
+        
+        # Merge sort should have no swaps (it uses merging, not swapping)
+        assert result.statistics['swaps'] == 0

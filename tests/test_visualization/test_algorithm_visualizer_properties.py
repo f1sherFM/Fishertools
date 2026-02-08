@@ -329,3 +329,67 @@ class TestAlgorithmStatisticsAccuracy:
         if n > 1:
             assert result.statistics['comparisons'] >= n - 1, \
                 "Too few comparisons for bubble sort"
+
+
+
+class TestMergeSortProperties:
+    """
+    Property tests for merge_sort algorithm.
+    
+    Feature: fishertools-v0.5.0
+    Validates: Requirements 4.1, 4.2, 4.3, 4.4
+    """
+    
+    @given(st.lists(st.integers(min_value=-100, max_value=100), min_size=0, max_size=20))
+    def test_merge_sort_produces_sorted_output(self, array):
+        """
+        Property 6: All sorting algorithms produce sorted output (merge_sort)
+        
+        For any list of integers, merge_sort should produce a sorted array.
+        Validates: Requirements 4.3
+        """
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting(array, 'merge_sort')
+        
+        # Property: output is sorted
+        assert result.final_array == sorted(array), \
+            f"Merge sort output {result.final_array} != sorted {sorted(array)}"
+    
+    @given(st.lists(st.integers(min_value=-100, max_value=100), min_size=0, max_size=20))
+    def test_merge_sort_preserves_elements(self, array):
+        """
+        Property 7: Sorting preserves elements (merge_sort)
+        
+        For any list, merge_sort should preserve all elements (no additions/deletions).
+        Validates: Requirements 4.3
+        """
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting(array, 'merge_sort')
+        
+        # Property: all elements preserved
+        assert sorted(result.final_array) == sorted(array), \
+            "Merge sort changed array elements"
+        assert len(result.final_array) == len(array), \
+            "Merge sort changed array length"
+    
+    @given(st.lists(st.integers(min_value=-100, max_value=100), min_size=2, max_size=20))
+    def test_merge_sort_includes_merge_range_information(self, array):
+        """
+        Property 11: Merge sort includes merge range information
+        
+        For any array with 2+ elements, merge_sort steps should include merge_range 
+        information showing division and merge boundaries.
+        Validates: Requirements 4.4
+        """
+        visualizer = AlgorithmVisualizer()
+        result = visualizer.visualize_sorting(array, 'merge_sort')
+        
+        # Property: merge_range is present in steps
+        merge_steps = [step for step in result.steps if step.merge_range is not None]
+        assert len(merge_steps) > 0, "No merge_range information found in steps"
+        
+        # Property: merge_range values are valid
+        for step in merge_steps:
+            left, right = step.merge_range
+            assert 0 <= left <= right < len(array), \
+                f"Invalid merge_range ({left}, {right}) for array of length {len(array)}"

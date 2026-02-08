@@ -54,6 +54,74 @@ class NetworkResponse:
     def __bool__(self) -> bool:
         """Allow using response in boolean context."""
         return self.success
+    
+    def json(self) -> Any:
+        """
+        Get JSON data (requests library compatibility).
+        
+        Returns:
+            Parsed JSON data (same as .data attribute)
+        
+        Raises:
+            ValueError: If request failed or data is not available
+        
+        Example:
+            >>> response = safe_request("https://api.github.com/users/octocat")
+            >>> user_data = response.json()  # Compatible with requests
+            >>> assert user_data == response.data  # Same result
+        """
+        if not self.success:
+            raise ValueError(f"Cannot parse JSON from failed request: {self.error}")
+        return self.data
+    
+    @property
+    def content(self) -> bytes:
+        """
+        Get raw content as bytes (requests library compatibility).
+        
+        Returns:
+            Response data encoded as UTF-8 bytes
+        
+        Example:
+            >>> response = safe_request("https://example.com/data")
+            >>> raw_bytes = response.content
+            >>> text = raw_bytes.decode('utf-8')
+        """
+        if self.data is None:
+            return b''
+        if isinstance(self.data, bytes):
+            return self.data
+        if isinstance(self.data, str):
+            return self.data.encode('utf-8')
+        # For JSON data, serialize it
+        import json
+        return json.dumps(self.data).encode('utf-8')
+    
+    @property
+    def text(self) -> str:
+        """
+        Get text content as string (requests library compatibility).
+        
+        Returns:
+            Response data as string
+        
+        Example:
+            >>> response = safe_request("https://example.com/page")
+            >>> html = response.text
+        """
+        if self.data is None:
+            return ''
+        if isinstance(self.data, str):
+            return self.data
+        if isinstance(self.data, bytes):
+            try:
+                return self.data.decode('utf-8')
+            except UnicodeDecodeError:
+                # Fall back to latin-1 for non-UTF-8 bytes (like requests does)
+                return self.data.decode('latin-1')
+        # For JSON data, serialize it
+        import json
+        return json.dumps(self.data)
 
 
 @dataclass

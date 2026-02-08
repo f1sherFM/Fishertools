@@ -67,6 +67,92 @@ class TestNetworkResponse:
         assert response.error == "Connection timeout"
         assert response.status_code == 408
         assert bool(response) is False
+    
+    # New tests for v0.5.0 enhancements
+    
+    def test_json_method_on_successful_response(self):
+        """Test .json() method returns data on successful response."""
+        data = {"user": "test", "id": 123}
+        response = NetworkResponse(success=True, data=data)
+        assert response.json() == data
+        assert response.json() == response.data
+    
+    def test_json_method_raises_on_failed_response(self):
+        """Test .json() raises ValueError on failed requests."""
+        response = NetworkResponse(success=False, error="Network error")
+        with pytest.raises(ValueError) as exc_info:
+            response.json()
+        assert "Cannot parse JSON from failed request" in str(exc_info.value)
+        assert "Network error" in str(exc_info.value)
+    
+    def test_content_property_with_none(self):
+        """Test .content handles None data."""
+        response = NetworkResponse(success=True, data=None)
+        assert response.content == b''
+    
+    def test_content_property_with_string(self):
+        """Test .content handles string data."""
+        response = NetworkResponse(success=True, data="Hello World")
+        assert response.content == b'Hello World'
+    
+    def test_content_property_with_bytes(self):
+        """Test .content handles bytes data."""
+        response = NetworkResponse(success=True, data=b'Binary data')
+        assert response.content == b'Binary data'
+    
+    def test_content_property_with_dict(self):
+        """Test .content handles dict data (JSON serialization)."""
+        data = {"key": "value", "number": 42}
+        response = NetworkResponse(success=True, data=data)
+        content = response.content
+        assert isinstance(content, bytes)
+        # Verify it's valid JSON
+        import json
+        decoded = json.loads(content.decode('utf-8'))
+        assert decoded == data
+    
+    def test_text_property_with_none(self):
+        """Test .text handles None data."""
+        response = NetworkResponse(success=True, data=None)
+        assert response.text == ''
+    
+    def test_text_property_with_string(self):
+        """Test .text handles string data."""
+        response = NetworkResponse(success=True, data="Hello World")
+        assert response.text == "Hello World"
+    
+    def test_text_property_with_bytes_utf8(self):
+        """Test .text handles UTF-8 bytes data."""
+        response = NetworkResponse(success=True, data=b'Hello World')
+        assert response.text == "Hello World"
+    
+    def test_text_property_with_bytes_non_utf8(self):
+        """Test .text handles non-UTF-8 bytes data (falls back to latin-1)."""
+        response = NetworkResponse(success=True, data=b'\x80\x81\x82')
+        # Should not raise, should decode with latin-1
+        text = response.text
+        assert isinstance(text, str)
+        assert len(text) == 3
+    
+    def test_text_property_with_dict(self):
+        """Test .text handles dict data (JSON serialization)."""
+        data = {"key": "value", "number": 42}
+        response = NetworkResponse(success=True, data=data)
+        text = response.text
+        assert isinstance(text, str)
+        # Verify it's valid JSON
+        import json
+        decoded = json.loads(text)
+        assert decoded == data
+    
+    def test_backward_compatibility_data_attribute(self):
+        """Test backward compatibility - .data attribute still works."""
+        data = {"test": "data"}
+        response = NetworkResponse(success=True, data=data)
+        # Direct access to .data should work
+        assert response.data == data
+        # Should be the same object
+        assert response.data is data
 
 
 class TestDownloadProgress:

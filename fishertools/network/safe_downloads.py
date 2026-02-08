@@ -87,6 +87,7 @@ class SafeFileDownloader:
         url: str,
         local_path: str,
         overwrite: bool = False,
+        timeout: Optional[float] = None,
         progress_callback: Optional[Callable[[DownloadProgress], None]] = None
     ) -> DownloadResponse:
         """
@@ -97,11 +98,13 @@ class SafeFileDownloader:
         - Automatic cleanup on failure
         - File conflict handling
         - Disk space validation
+        - Timeout control
         
         Args:
             url: URL of the file to download
             local_path: Local path where the file should be saved
             overwrite: Whether to overwrite existing files
+            timeout: Request timeout in seconds (uses client default if None)
             progress_callback: Optional callback for progress updates
         
         Returns:
@@ -114,10 +117,16 @@ class SafeFileDownloader:
             ...     'data/data.json',
             ...     overwrite=True
             ... )
+            >>> # With timeout
+            >>> response = downloader.safe_download(
+            ...     'https://example.com/large-file.zip',
+            ...     'downloads/file.zip',
+            ...     timeout=60.0  # 60 second timeout
+            ... )
         """
         # Validate inputs
-        validation_error = self._validate_download_params(url, local_path)
-        if validation_error:
+        validation_error = self._validate_download_params(url, local_path, timeout)
+        if validation_error is not None:
             return validation_error
         
         # Check for file conflicts
@@ -139,7 +148,8 @@ class SafeFileDownloader:
                 )
         
         # Make HEAD request to get file size
-        head_response = self.http_client.safe_request(url, method='HEAD')
+        request_timeout = timeout if timeout is not None else self.http_client.default_timeout
+        head_response = self.http_client.safe_request(url, method='HEAD', timeout=request_timeout)
         total_bytes = None
         if head_response.success and head_response.headers:
             content_length = head_response.headers.get('content-length')
@@ -165,7 +175,7 @@ class SafeFileDownloader:
             response = self.http_client.session.get(
                 url,
                 stream=True,
-                timeout=self.http_client.default_timeout
+                timeout=request_timeout
             )
             response.raise_for_status()
             
@@ -218,7 +228,8 @@ class SafeFileDownloader:
     def _validate_download_params(
         self,
         url: str,
-        local_path: str
+        local_path: str,
+        timeout: Optional[float] = None
     ) -> Optional[DownloadResponse]:
         """
         Validate download parameters
@@ -226,6 +237,7 @@ class SafeFileDownloader:
         Args:
             url: URL to validate
             local_path: Local path to validate
+            timeout: Timeout value to validate
         
         Returns:
             DownloadResponse with error if validation fails, None otherwise
@@ -255,6 +267,13 @@ class SafeFileDownloader:
             return DownloadResponse(
                 success=False,
                 error=f"Invalid path: {local_path} is a directory, not a file path"
+            )
+        
+        # Validate timeout
+        if timeout is not None and timeout <= 0:
+            return DownloadResponse(
+                success=False,
+                error=f"Invalid timeout: {timeout}. Timeout must be positive"
             )
         
         return None
