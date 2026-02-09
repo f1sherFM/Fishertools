@@ -1,4 +1,4 @@
-"""Integration tests for Phase 1 modules (v0.5.0)."""
+"""Integration tests for Phase 1 modules (v0.5.1)."""
 
 import pytest
 from fishertools.visualization import visualize
@@ -189,3 +189,4 @@ class TestPhase1Integration:
         result = safe_process({"name": "Bob", "age": "thirty"})
         assert result["status"] == "error"
         assert "age" in result["message"]
+

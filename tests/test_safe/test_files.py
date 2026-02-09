@@ -6,10 +6,31 @@ import pytest
 import tempfile
 import os
 from pathlib import Path
+from hypothesis import given, strategies as st, settings
 from fishertools.safe.files import (
     safe_read_file, safe_write_file, safe_file_exists, 
-    safe_get_file_size, safe_list_files
+    safe_get_file_size, safe_list_files,
+    safe_read_json, safe_write_json,
+    safe_read_yaml, safe_write_yaml,
+    safe_read_toml, safe_write_toml
 )
+
+# Windows reserved device names should not be used as file or directory names
+_RESERVED_DEVICE_NAMES = {
+    "CON", "PRN", "AUX", "NUL",
+    "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+    "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+}
+
+_SAFE_DIRNAME_STRATEGY = st.text(
+    min_size=1,
+    max_size=50,
+    alphabet=st.characters(
+        blacklist_characters='/\\\x00:<>"|?*\x01\x02\x03\x04\x05\x06\x07\x08\x09'
+                             '\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15'
+                             '\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f'
+    ),
+).filter(lambda name: name.upper() not in _RESERVED_DEVICE_NAMES)
 
 
 class TestSafeFileOperations:
@@ -105,6 +126,105 @@ class TestSafeFileOperations:
 
 
 
+class TestSafeStructuredFiles:
+    """Unit tests for safe structured file operations."""
+    
+    def test_safe_read_json_valid(self):
+        """Test reading valid JSON file."""
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as f:
+            f.write('{"name": "Alice", "age": 30}')
+            temp_path = f.name
+        
+        try:
+            result = safe_read_json(temp_path)
+            assert result == {"name": "Alice", "age": 30}
+        finally:
+            os.unlink(temp_path)
+    
+    def test_safe_read_json_invalid_returns_default(self):
+        """Test reading invalid JSON returns default."""
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as f:
+            f.write("{invalid json}")
+            temp_path = f.name
+        
+        try:
+            result = safe_read_json(temp_path, default={})
+            assert result == {}
+        finally:
+            os.unlink(temp_path)
+    
+    def test_safe_write_json_success(self):
+        """Test writing JSON successfully."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = Path(temp_dir) / "data.json"
+            result = safe_write_json(file_path, {"ok": True})
+            assert result is True
+            assert file_path.exists()
+            assert safe_read_json(file_path) == {"ok": True}
+    
+    def test_safe_read_yaml_valid(self):
+        """Test reading valid YAML file."""
+        from fishertools.safe import files as files_module
+        
+        if not files_module._YAML_AVAILABLE:
+            pytest.skip("PyYAML not available")
+        
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as f:
+            f.write("name: Alice\nage: 30\n")
+            temp_path = f.name
+        
+        try:
+            result = safe_read_yaml(temp_path)
+            assert result == {"name": "Alice", "age": 30}
+        finally:
+            os.unlink(temp_path)
+    
+    def test_safe_write_yaml_success(self):
+        """Test writing YAML successfully."""
+        from fishertools.safe import files as files_module
+        
+        if not files_module._YAML_AVAILABLE:
+            pytest.skip("PyYAML not available")
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = Path(temp_dir) / "data.yaml"
+            result = safe_write_yaml(file_path, {"ok": True})
+            assert result is True
+            assert file_path.exists()
+            assert safe_read_yaml(file_path) == {"ok": True}
+    
+    def test_safe_read_toml_valid_or_default(self):
+        """Test reading TOML returns parsed data or default when unavailable."""
+        from fishertools.safe import files as files_module
+        
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, encoding="utf-8") as f:
+            f.write("name = \"Alice\"\nage = 30\n")
+            temp_path = f.name
+        
+        try:
+            result = safe_read_toml(temp_path, default={})
+            if files_module._TOML_AVAILABLE:
+                assert result == {"name": "Alice", "age": 30}
+            else:
+                assert result == {}
+        finally:
+            os.unlink(temp_path)
+    
+    def test_safe_write_toml_support(self):
+        """Test TOML writing respects availability of writer."""
+        from fishertools.safe import files as files_module
+        
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = Path(temp_dir) / "data.toml"
+            result = safe_write_toml(file_path, {"ok": True})
+            if files_module._TOML_WRITE_AVAILABLE:
+                assert result is True
+                assert file_path.exists()
+                assert safe_read_toml(file_path, default={}) == {"ok": True}
+            else:
+                assert result is False
+
+
 class TestProjectRoot:
     """Tests for project_root function."""
     
@@ -149,11 +269,11 @@ class TestFindFile:
         """Test finding an existing file."""
         from fishertools.safe.files import find_file
         
-        # Find setup.py which should exist in project root
-        path = find_file("setup.py")
+        # Find pyproject.toml which should exist in project root
+        path = find_file("pyproject.toml")
         assert path is not None
         assert Path(path).exists()
-        assert Path(path).name == "setup.py"
+        assert Path(path).name == "pyproject.toml"
     
     def test_find_file_nonexistent_file(self):
         """Test finding a non-existent file returns None."""
@@ -227,7 +347,6 @@ class TestSafeOpen:
 # Tests for fishertools-file-utils spec functions
 # ============================================================================
 
-from hypothesis import given, strategies as st, settings
 import hashlib
 
 
@@ -592,7 +711,7 @@ class TestReadLastLines:
 class TestEnsureDirProperties:
     """Property-based tests for ensure_dir function."""
     
-    @given(st.text(min_size=1, max_size=50, alphabet=st.characters(blacklist_characters='/\x00:<>"|?*\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f')))
+    @given(_SAFE_DIRNAME_STRATEGY)
     @settings(max_examples=100)
     def test_ensure_dir_returns_path_object(self, dirname):
         """Property 1: ensure_dir returns Path object
@@ -606,7 +725,7 @@ class TestEnsureDirProperties:
             result = ensure_dir(test_path)
             assert isinstance(result, Path)
     
-    @given(st.text(min_size=1, max_size=50, alphabet=st.characters(blacklist_characters='/\x00:<>"|?*\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f')))
+    @given(_SAFE_DIRNAME_STRATEGY)
     @settings(max_examples=100)
     def test_ensure_dir_creates_directory(self, dirname):
         """Property 2: ensure_dir creates directory
@@ -621,7 +740,7 @@ class TestEnsureDirProperties:
             assert test_path.exists()
             assert test_path.is_dir()
     
-    @given(st.text(min_size=1, max_size=50, alphabet=st.characters(blacklist_characters='/\x00:<>"|?*\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f')))
+    @given(_SAFE_DIRNAME_STRATEGY)
     @settings(max_examples=100)
     def test_ensure_dir_idempotent(self, dirname):
         """Property 3: ensure_dir is idempotent
@@ -710,7 +829,15 @@ class TestReadLastLinesProperties:
     """Property-based tests for read_last_lines function."""
     
     @given(
-        st.lists(st.text(min_size=0, max_size=100, alphabet=st.characters(blacklist_characters='\n\r')), min_size=0, max_size=100),
+        st.lists(
+            st.text(
+                min_size=0,
+                max_size=100,
+                alphabet=st.characters(blacklist_characters='\n\r', codec='utf-8')
+            ),
+            min_size=0,
+            max_size=100
+        ),
         st.integers(min_value=1, max_value=50)
     )
     @settings(max_examples=100)
@@ -815,15 +942,32 @@ class TestModuleExports:
         from fishertools.safe import files
         
         assert hasattr(files, '__all__')
-        assert 'ensure_dir' in files.__all__
-        assert 'get_file_hash' in files.__all__
-        assert 'read_last_lines' in files.__all__
-        assert len(files.__all__) == 3
+        for name in [
+            "safe_read_file", "safe_write_file", "safe_file_exists",
+            "safe_get_file_size", "safe_list_files",
+            "safe_read_json", "safe_write_json",
+            "safe_read_yaml", "safe_write_yaml",
+            "safe_read_toml", "safe_write_toml",
+            "project_root", "find_file", "safe_open",
+            "ensure_dir", "get_file_hash", "read_last_lines",
+        ]:
+            assert name in files.__all__
     
     def test_module_functions_importable(self):
         """Test that all functions can be imported."""
-        from fishertools.safe.files import ensure_dir, get_file_hash, read_last_lines
+        from fishertools.safe.files import (
+            safe_read_json, safe_write_json,
+            safe_read_yaml, safe_write_yaml,
+            safe_read_toml, safe_write_toml,
+            ensure_dir, get_file_hash, read_last_lines
+        )
         
+        assert callable(safe_read_json)
+        assert callable(safe_write_json)
+        assert callable(safe_read_yaml)
+        assert callable(safe_write_yaml)
+        assert callable(safe_read_toml)
+        assert callable(safe_write_toml)
         assert callable(ensure_dir)
         assert callable(get_file_hash)
         assert callable(read_last_lines)

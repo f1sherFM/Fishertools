@@ -336,7 +336,7 @@ class TestMergeSortProperties:
     """
     Property tests for merge_sort algorithm.
     
-    Feature: fishertools-v0.5.0
+    Feature: fishertools-v0.5.1
     Validates: Requirements 4.1, 4.2, 4.3, 4.4
     """
     
@@ -393,3 +393,4 @@ class TestMergeSortProperties:
             left, right = step.merge_range
             assert 0 <= left <= right < len(array), \
                 f"Invalid merge_range ({left}, {right}) for array of length {len(array)}"
+

@@ -297,9 +297,14 @@ def safe_average(numbers: List[Union[int, float]],
     if not valid_numbers:
         return default
     
+    import math
+    
     try:
-        # Calculate average
-        return sum(valid_numbers) / len(valid_numbers)
-    except (TypeError, ValueError, ZeroDivisionError):
+        total = sum(valid_numbers)
+        avg = total / len(valid_numbers)
+        if not math.isfinite(avg):
+            return default
+        return avg
+    except (TypeError, ValueError, ZeroDivisionError, OverflowError):
         # Fallback for any edge cases
         return default

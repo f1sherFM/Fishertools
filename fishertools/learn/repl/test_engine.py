@@ -48,11 +48,6 @@ class TestREPLEngineInitialization:
 
 
 class TestREPLEngineTopicDisplay:
-        assert engine.engine is not None
-        assert engine.session_manager is not None
-
-
-class TestREPLEngineTopicDisplay:
     """Test topic display functionality."""
     
     def test_display_topic_sets_current_topic(self, repl_engine, engine):

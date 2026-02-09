@@ -106,7 +106,7 @@ class TestDocumentationProperties:
                     continue
                 
                 # Check if file exists
-                    target_path = Path(filepath.parent) / link_path
+                target_path = Path(filepath.parent) / link_path
                 
                 # Normalize path
                 target_path = target_path.resolve()

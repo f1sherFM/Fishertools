@@ -68,7 +68,7 @@ class TestNetworkResponse:
         assert response.status_code == 408
         assert bool(response) is False
     
-    # New tests for v0.5.0 enhancements
+    # New tests for v0.5.1 enhancements
     
     def test_json_method_on_successful_response(self):
         """Test .json() method returns data on successful response."""
@@ -207,3 +207,4 @@ class TestDownloadResponse:
         assert response.error == "Disk full"
         assert response.bytes_downloaded == 512
         assert bool(response) is False
+

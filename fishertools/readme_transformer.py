@@ -71,14 +71,17 @@ class ReadmeParser:
         Returns:
             The first sentence of the README content
         """
+        import re
+
         lines = self.content.strip().split("\n")
         for line in lines:
             line = line.strip()
             if line and not line.startswith("#"):
-                # Extract just the first sentence (up to period, exclamation, or question mark)
-                sentence = line.split(".")[0].split("!")[0].split("?")[0]
-                if sentence.strip():
-                    return sentence.strip()
+                # Extract the first sentence if possible; otherwise use the whole line
+                match = re.search(r"[^.!?]+[.!?]", line)
+                if match:
+                    return match.group(0).strip()
+                return line.strip()
         return ""
 
     def parse_sections(self) -> List[ReadmeSection]:

@@ -1,7 +1,10 @@
 """Unit tests for the input_utils module."""
 
 import pytest
-from fishertools.input_utils import ask_int, ask_float, ask_str, ask_choice
+from fishertools.input_utils import (
+    ask_int, ask_float, ask_str, ask_choice,
+    ask_yes_no, ask_int_range, ask_float_range, ask_regex
+)
 
 
 class TestAskInt:
@@ -63,3 +66,39 @@ class TestAskChoice:
         monkeypatch.setattr('builtins.input', lambda _: '1')
         result = ask_choice("Choose a color: ", ['red', 'green', 'blue'])
         assert result == 'red'
+
+
+class TestAskYesNo:
+    """Tests for ask_yes_no function."""
+    
+    def test_ask_yes_no_yes(self, monkeypatch):
+        monkeypatch.setattr('builtins.input', lambda _: 'yes')
+        assert ask_yes_no("Continue? ") is True
+    
+    def test_ask_yes_no_no(self, monkeypatch):
+        monkeypatch.setattr('builtins.input', lambda _: 'n')
+        assert ask_yes_no("Continue? ") is False
+    
+    def test_ask_yes_no_default(self, monkeypatch):
+        monkeypatch.setattr('builtins.input', lambda _: '')
+        assert ask_yes_no("Continue? ", default=True) is True
+
+
+class TestAskRange:
+    """Tests for range input helpers."""
+    
+    def test_ask_int_range(self, monkeypatch):
+        monkeypatch.setattr('builtins.input', lambda _: '5')
+        assert ask_int_range("Number: ", 1, 10) == 5
+    
+    def test_ask_float_range(self, monkeypatch):
+        monkeypatch.setattr('builtins.input', lambda _: '2.5')
+        assert abs(ask_float_range("Number: ", 1.0, 5.0) - 2.5) < 1e-9
+
+
+class TestAskRegex:
+    """Tests for ask_regex function."""
+    
+    def test_ask_regex_valid(self, monkeypatch):
+        monkeypatch.setattr('builtins.input', lambda _: 'ABC-123')
+        assert ask_regex("Code: ", r"[A-Z]{3}-\d{3}") == 'ABC-123'

@@ -2,7 +2,7 @@
   "id": "test-all-1",
   "module": "errors",
   "title": "Test Example",
-  "code": "data = {'key': 'value'}\nprint(data['key'])",
+  "code": "result = 2 + 2",
   "expected_output": "output",
   "explanation": "This is a test",
   "variations": [],

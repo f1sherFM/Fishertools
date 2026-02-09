@@ -1,7 +1,7 @@
 """
 Property-based tests for quick_sort algorithm.
 
-Feature: fishertools-v0.5.0
+Feature: fishertools-v0.5.1
 These tests validate the correctness properties of the quick_sort algorithm.
 """
 
@@ -156,3 +156,4 @@ class TestQuickSortPartitionInformation:
             assert step.swaps_count >= prev_swaps, \
                 f"Swap count decreased at step {step.step_number}"
             prev_swaps = step.swaps_count
+

@@ -224,7 +224,7 @@ class TestMergeSortEdgeCases:
     """
     Unit tests for merge_sort edge cases.
     
-    Feature: fishertools-v0.5.0
+    Feature: fishertools-v0.5.1
     Validates: Requirements 4.1, 4.2, 4.3
     """
     
@@ -311,3 +311,4 @@ class TestMergeSortEdgeCases:
         
         # Merge sort should have no swaps (it uses merging, not swapping)
         assert result.statistics['swaps'] == 0
+

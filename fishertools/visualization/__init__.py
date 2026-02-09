@@ -43,7 +43,7 @@ __all__ = [
     "SearchStep",
     "AlgorithmVisualization",
     
-    # Algorithm implementations (v0.5.0)
+    # Algorithm implementations (v0.5.1)
     "visualize_quick_sort",
     "visualize_merge_sort",
     "visualize_insertion_sort",
@@ -51,3 +51,4 @@ __all__ = [
     "visualize_linear_search",
     "visualize_jump_search",
 ]
+

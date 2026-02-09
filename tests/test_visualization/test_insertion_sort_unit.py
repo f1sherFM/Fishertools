@@ -1,7 +1,7 @@
 """
 Unit tests for insertion_sort algorithm edge cases.
 
-Feature: fishertools-v0.5.0
+Feature: fishertools-v0.5.1
 These tests validate specific behaviors and edge cases of the insertion_sort algorithm.
 """
 
@@ -210,3 +210,4 @@ class TestInsertionSortStatistics:
         # Worst case should have more comparisons and swaps
         assert worst_result.statistics['comparisons'] > best_result.statistics['comparisons']
         assert worst_result.statistics['swaps'] > best_result.statistics['swaps']
+

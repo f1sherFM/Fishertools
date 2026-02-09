@@ -1,7 +1,7 @@
 """
 Property-based tests for NetworkResponse enhancements.
 
-Feature: fishertools-v0.5.0
+Feature: fishertools-v0.5.1
 Tests the requests-compatible API additions to NetworkResponse.
 """
 
@@ -97,3 +97,4 @@ class TestNetworkResponseProperties:
         # Property: .data is accessible without calling methods
         direct_access = response.data
         assert direct_access == data
+

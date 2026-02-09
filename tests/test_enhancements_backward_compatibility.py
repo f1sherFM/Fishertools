@@ -339,11 +339,11 @@ class TestVersionInformation:
             f"Version {fishertools.__version__} doesn't follow semantic versioning"
     
     def test_version_is_050(self):
-        """Test that version is 0.5.0 (algorithm expansion version)."""
+        """Test that version is 0.5.1 (algorithm expansion version)."""
         import fishertools
         
-        assert fishertools.__version__ == '0.5.0', \
-            f"Expected version 0.5.0, got {fishertools.__version__}"
+        assert fishertools.__version__ == '0.5.1', \
+            f"Expected version 0.5.1, got {fishertools.__version__}"
     
     def test_get_version_info_function_exists(self):
         """Test that get_version_info function exists."""
@@ -410,3 +410,4 @@ class TestVersionInformation:
         assert hasattr(fishertools, '__author__')
         assert isinstance(fishertools.__author__, str)
         assert len(fishertools.__author__) > 0
+

@@ -1,7 +1,7 @@
 {
   "id": "test-multi-9",
   "module": "safe",
-  "title": "\u0091v>\u00e2\u00a9\ud810\udf87",
+  "title": "\uda3a\udeabi\u008f\u00c0\u008c\ud953\udef3",
   "code": "x = 1",
   "expected_output": "output",
   "explanation": "This is a test",

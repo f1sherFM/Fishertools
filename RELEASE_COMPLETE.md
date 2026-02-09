@@ -152,7 +152,7 @@ except TypeError:
 
 ### Future Releases
 - **v0.4.4** - Additional string utilities
-- **v0.5.0** - Enhanced learning tools
+- **v0.5.1** - Enhanced learning tools
 - **v0.6.0** - Performance optimizations
 
 ## 🙏 Thank You
@@ -199,3 +199,4 @@ Special thanks to everyone who uses Fishertools and provides feedback!
 **Fishertools v0.4.3** is ready for production use! 🚀
 
 *Making Python easier and safer for beginners* 🐍✨
+

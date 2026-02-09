@@ -194,6 +194,12 @@ class SafeHTTPClient:
             )
         
         # Validate method
+        if not isinstance(method, str):
+            return NetworkResponse(
+                success=False,
+                error=f"Invalid HTTP method: {method}. Method must be a string"
+            )
+
         valid_methods = {'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'}
         if method.upper() not in valid_methods:
             return NetworkResponse(

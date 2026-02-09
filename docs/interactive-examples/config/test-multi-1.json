@@ -1,7 +1,7 @@
 {
   "id": "test-multi-1",
   "module": "config",
-  "title": "\u001cO\udbe1\udc52O\u00cdc\u0012",
+  "title": "\u00ae\u00f9kK\u0007\u009d\u00bb\u00a2",
   "code": "x = 1",
   "expected_output": "output",
   "explanation": "This is a test",

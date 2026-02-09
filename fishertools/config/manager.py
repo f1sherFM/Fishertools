@@ -91,6 +91,8 @@ class ConfigurationManager:
                 content = self.parser.format_to_json(config)
             elif format_type.value == 'yaml':
                 content = self.parser.format_to_yaml(config)
+            elif format_type.value == 'toml':
+                content = self.parser.format_to_toml(config)
             else:
                 raise ValueError(f"Unsupported format for saving: {format_type}")
             

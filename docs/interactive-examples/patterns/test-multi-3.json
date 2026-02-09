@@ -1,7 +1,7 @@
 {
   "id": "test-multi-3",
   "module": "patterns",
-  "title": "(|",
+  "title": "\u008d\u00c8|\f\u00ec\udb6d\udcc3\ud8a0\udd3c",
   "code": "x = 1",
   "expected_output": "output",
   "explanation": "This is a test",

@@ -14,7 +14,8 @@ Functions:
 
 from __future__ import annotations
 
-from typing import List, Optional, Any, Callable, Union, TypeVar
+from typing import List, Optional, Any, Callable, Union, TypeVar, Iterable
+import re
 
 # Security constants
 MAX_INPUT_LENGTH = 10000  # Maximum input length to prevent DoS
@@ -288,3 +289,162 @@ def ask_choice(prompt: str, options: List[str]) -> str:
                     continue
         except EOFError:
             raise
+
+
+__all__ = [
+    "ask_int",
+    "ask_float",
+    "ask_str",
+    "ask_choice",
+    "ask_yes_no",
+    "ask_int_range",
+    "ask_float_range",
+    "ask_regex",
+]
+
+
+def ask_yes_no(
+    prompt: str,
+    default: Optional[bool] = None,
+    yes_values: Optional[Iterable[str]] = None,
+    no_values: Optional[Iterable[str]] = None,
+    max_attempts: int = 10
+) -> bool:
+    """
+    Prompt user for a yes/no answer.
+    
+    Args:
+        prompt: The prompt to display to the user
+        default: Default value if user presses Enter (True/False or None)
+        yes_values: Iterable of strings treated as "yes" (case-insensitive)
+        no_values: Iterable of strings treated as "no" (case-insensitive)
+        max_attempts: Maximum attempts before raising error
+        
+    Returns:
+        True for yes, False for no
+        
+    Raises:
+        ValueError: If prompt is empty or max attempts exceeded
+        EOFError: If user provides EOF (Ctrl+D)
+        KeyboardInterrupt: If user cancels with Ctrl+C
+    """
+    if not prompt or not prompt.strip():
+        raise ValueError("Prompt cannot be empty")
+    
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be at least 1")
+    
+    yes_values = [v.lower() for v in (yes_values or ["y", "yes", "да", "д"])]
+    no_values = [v.lower() for v in (no_values or ["n", "no", "нет", "н"])]
+    
+    attempts = 0
+    while attempts < max_attempts:
+        attempts += 1
+        try:
+            user_input = input(prompt).strip().lower()
+            
+            if user_input == "" and default is not None:
+                return bool(default)
+            
+            if user_input in yes_values:
+                return True
+            
+            if user_input in no_values:
+                return False
+            
+            remaining = max_attempts - attempts
+            print(f"Error: Please answer yes or no. {remaining} attempts remaining.")
+        except (EOFError, KeyboardInterrupt):
+            raise
+    
+    raise ValueError(f"Maximum attempts ({max_attempts}) exceeded")
+
+
+def ask_int_range(
+    prompt: str,
+    min_val: int,
+    max_val: int,
+    max_attempts: int = 10,
+    timeout: Optional[int] = DEFAULT_TIMEOUT
+) -> int:
+    """
+    Prompt user for an integer within a required range.
+    """
+    if min_val > max_val:
+        raise ValueError("min_val cannot be greater than max_val")
+    return ask_int(
+        prompt,
+        min_val=min_val,
+        max_val=max_val,
+        max_attempts=max_attempts,
+        timeout=timeout
+    )
+
+
+def ask_float_range(
+    prompt: str,
+    min_val: float,
+    max_val: float,
+    max_attempts: int = 10,
+    timeout: Optional[int] = DEFAULT_TIMEOUT
+) -> float:
+    """
+    Prompt user for a float within a required range.
+    """
+    if min_val > max_val:
+        raise ValueError("min_val cannot be greater than max_val")
+    return ask_float(
+        prompt,
+        min_val=min_val,
+        max_val=max_val,
+        max_attempts=max_attempts,
+        timeout=timeout
+    )
+
+
+def ask_regex(
+    prompt: str,
+    pattern: str,
+    flags: int = 0,
+    max_attempts: int = 10
+) -> str:
+    """
+    Prompt user for a string matching a regex pattern.
+    
+    Args:
+        prompt: The prompt to display to the user
+        pattern: Regex pattern to validate
+        flags: Regex flags from re module
+        max_attempts: Maximum attempts before raising error
+        
+    Returns:
+        User input that matches the pattern
+        
+    Raises:
+        ValueError: If prompt is empty, pattern is invalid, or max attempts exceeded
+        EOFError: If user provides EOF (Ctrl+D)
+    """
+    if not prompt or not prompt.strip():
+        raise ValueError("Prompt cannot be empty")
+    
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be at least 1")
+    
+    try:
+        regex = re.compile(pattern, flags=flags)
+    except re.error as e:
+        raise ValueError(f"Invalid regex pattern: {e}") from e
+    
+    attempts = 0
+    while attempts < max_attempts:
+        attempts += 1
+        try:
+            user_input = input(prompt).strip()
+            if regex.fullmatch(user_input):
+                return user_input
+            remaining = max_attempts - attempts
+            print(f"Error: Input does not match required pattern. {remaining} attempts remaining.")
+        except EOFError:
+            raise
+    
+    raise ValueError(f"Maximum attempts ({max_attempts}) exceeded")

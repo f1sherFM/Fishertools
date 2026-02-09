@@ -1,7 +1,7 @@
 """
 Unit tests for linear_search algorithm edge cases.
 
-Feature: fishertools-v0.5.0
+Feature: fishertools-v0.5.1
 These tests validate specific behaviors and edge cases of the linear_search algorithm.
 """
 
@@ -315,3 +315,4 @@ class TestLinearSearchAlgorithmCorrectness:
         
         # Original array should be unchanged
         assert array == original
+

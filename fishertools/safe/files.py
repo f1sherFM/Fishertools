@@ -11,8 +11,37 @@ Security features:
 """
 
 import os
+import json
 from pathlib import Path
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Any
+
+try:
+    import yaml  # type: ignore
+    _YAML_AVAILABLE = True
+except ImportError:
+    _YAML_AVAILABLE = False
+
+try:
+    import tomllib as _toml_reader  # Python 3.11+
+    _TOML_AVAILABLE = True
+except ImportError:
+    try:
+        import tomli as _toml_reader  # type: ignore
+        _TOML_AVAILABLE = True
+    except ImportError:
+        _TOML_AVAILABLE = False
+        _toml_reader = None
+
+try:
+    import tomli_w as _toml_writer  # type: ignore
+    _TOML_WRITE_AVAILABLE = True
+except ImportError:
+    try:
+        import toml as _toml_writer  # type: ignore
+        _TOML_WRITE_AVAILABLE = True
+    except ImportError:
+        _TOML_WRITE_AVAILABLE = False
+        _toml_writer = None
 
 
 def _validate_safe_path(filepath: Union[str, Path], operation: str = "file operation") -> Path:
@@ -32,7 +61,9 @@ def _validate_safe_path(filepath: Union[str, Path], operation: str = "file opera
     from ..errors.exceptions import SafeUtilityError
     
     if filepath is None:
-        raise SafeUtilityError(f"Path cannot be None for {operation}", utility_name=operation)
+        raise SafeUtilityError(
+            f"Путь не может быть None для {operation}", utility_name=operation
+        )
     
     if not isinstance(filepath, (str, Path)):
         raise SafeUtilityError(
@@ -308,6 +339,314 @@ def safe_list_files(directory: Union[str, Path], pattern: str = "*", default: Op
     except (OSError, ValueError):
         return default
 
+
+def safe_read_json(
+    filepath: Union[str, Path],
+    default: Any = None,
+    encoding: str = "utf-8"
+) -> Any:
+    """
+    Safely read and parse a JSON file.
+    
+    Returns default if the file cannot be read or JSON is invalid.
+    
+    Args:
+        filepath: Path to the JSON file
+        default: Value to return on error (default: None)
+        encoding: Text encoding (default: utf-8)
+        
+    Returns:
+        Parsed JSON data or default on error
+        
+    Raises:
+        SafeUtilityError: If filepath/encoding are invalid or unsafe
+    """
+    from ..errors.exceptions import SafeUtilityError
+    
+    filepath = _validate_safe_path(filepath, "safe_read_json")
+    
+    if not isinstance(encoding, str):
+        raise SafeUtilityError(
+            f"Encoding must be a string, got {type(encoding).__name__}",
+            utility_name="safe_read_json"
+        )
+    
+    try:
+        with open(filepath, "r", encoding=encoding) as file:
+            content = file.read()
+    except (FileNotFoundError, PermissionError, OSError, UnicodeDecodeError):
+        return default
+    
+    try:
+        return json.loads(content)
+    except (json.JSONDecodeError, TypeError, ValueError):
+        return default
+
+
+def safe_write_json(
+    filepath: Union[str, Path],
+    data: Any,
+    encoding: str = "utf-8",
+    indent: int = 2,
+    ensure_ascii: bool = False,
+    sort_keys: bool = False,
+    create_dirs: bool = True
+) -> bool:
+    """
+    Safely write data to a JSON file.
+    
+    Args:
+        filepath: Path to the JSON file
+        data: JSON-serializable data
+        encoding: Text encoding (default: utf-8)
+        indent: JSON indentation (default: 2)
+        ensure_ascii: Escape non-ASCII characters if True
+        sort_keys: Sort dict keys if True
+        create_dirs: Create parent directories if needed
+        
+    Returns:
+        True if write succeeded, False otherwise
+        
+    Raises:
+        SafeUtilityError: If filepath/encoding are invalid or unsafe
+    """
+    from ..errors.exceptions import SafeUtilityError
+    
+    filepath = _validate_safe_path(filepath, "safe_write_json")
+    
+    if not isinstance(encoding, str):
+        raise SafeUtilityError(
+            f"Encoding must be a string, got {type(encoding).__name__}",
+            utility_name="safe_write_json"
+        )
+    
+    if not isinstance(indent, int) or indent < 0:
+        raise SafeUtilityError(
+            "indent must be a non-negative integer",
+            utility_name="safe_write_json"
+        )
+    
+    try:
+        content = json.dumps(
+            data,
+            indent=indent,
+            ensure_ascii=ensure_ascii,
+            sort_keys=sort_keys
+        )
+    except (TypeError, ValueError):
+        return False
+    
+    try:
+        if create_dirs and filepath.parent != filepath:
+            filepath.parent.mkdir(parents=True, exist_ok=True)
+        with open(filepath, "w", encoding=encoding) as file:
+            file.write(content)
+        return True
+    except (PermissionError, OSError, UnicodeEncodeError):
+        return False
+
+
+def safe_read_yaml(
+    filepath: Union[str, Path],
+    default: Any = None,
+    encoding: str = "utf-8"
+) -> Any:
+    """
+    Safely read and parse a YAML file.
+    
+    Returns default if YAML support is unavailable, the file cannot be read,
+    or content is invalid.
+    
+    Args:
+        filepath: Path to the YAML file
+        default: Value to return on error (default: None)
+        encoding: Text encoding (default: utf-8)
+        
+    Returns:
+        Parsed YAML data or default on error
+        
+    Raises:
+        SafeUtilityError: If filepath/encoding are invalid or unsafe
+    """
+    from ..errors.exceptions import SafeUtilityError
+    
+    filepath = _validate_safe_path(filepath, "safe_read_yaml")
+    
+    if not isinstance(encoding, str):
+        raise SafeUtilityError(
+            f"Encoding must be a string, got {type(encoding).__name__}",
+            utility_name="safe_read_yaml"
+        )
+    
+    if not _YAML_AVAILABLE:
+        return default
+    
+    try:
+        with open(filepath, "r", encoding=encoding) as file:
+            content = file.read()
+    except (FileNotFoundError, PermissionError, OSError, UnicodeDecodeError):
+        return default
+    
+    try:
+        data = yaml.safe_load(content)
+        return default if data is None else data
+    except Exception:
+        return default
+
+
+def safe_write_yaml(
+    filepath: Union[str, Path],
+    data: Any,
+    encoding: str = "utf-8",
+    create_dirs: bool = True
+) -> bool:
+    """
+    Safely write data to a YAML file.
+    
+    Args:
+        filepath: Path to the YAML file
+        data: YAML-serializable data
+        encoding: Text encoding (default: utf-8)
+        create_dirs: Create parent directories if needed
+        
+    Returns:
+        True if write succeeded, False otherwise
+        
+    Raises:
+        SafeUtilityError: If filepath/encoding are invalid or unsafe
+    """
+    from ..errors.exceptions import SafeUtilityError
+    
+    filepath = _validate_safe_path(filepath, "safe_write_yaml")
+    
+    if not isinstance(encoding, str):
+        raise SafeUtilityError(
+            f"Encoding must be a string, got {type(encoding).__name__}",
+            utility_name="safe_write_yaml"
+        )
+    
+    if not _YAML_AVAILABLE:
+        return False
+    
+    try:
+        content = yaml.safe_dump(
+            data,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False
+        )
+    except Exception:
+        return False
+    
+    try:
+        if create_dirs and filepath.parent != filepath:
+            filepath.parent.mkdir(parents=True, exist_ok=True)
+        with open(filepath, "w", encoding=encoding) as file:
+            file.write(content)
+        return True
+    except (PermissionError, OSError, UnicodeEncodeError):
+        return False
+
+
+def safe_read_toml(
+    filepath: Union[str, Path],
+    default: Any = None,
+    encoding: str = "utf-8"
+) -> Any:
+    """
+    Safely read and parse a TOML file.
+    
+    Returns default if TOML support is unavailable, the file cannot be read,
+    or content is invalid.
+    
+    Args:
+        filepath: Path to the TOML file
+        default: Value to return on error (default: None)
+        encoding: Text encoding (default: utf-8)
+        
+    Returns:
+        Parsed TOML data or default on error
+        
+    Raises:
+        SafeUtilityError: If filepath/encoding are invalid or unsafe
+    """
+    from ..errors.exceptions import SafeUtilityError
+    
+    filepath = _validate_safe_path(filepath, "safe_read_toml")
+    
+    if not isinstance(encoding, str):
+        raise SafeUtilityError(
+            f"Encoding must be a string, got {type(encoding).__name__}",
+            utility_name="safe_read_toml"
+        )
+    
+    if not _TOML_AVAILABLE or _toml_reader is None:
+        return default
+    
+    try:
+        with open(filepath, "r", encoding=encoding) as file:
+            content = file.read()
+    except (FileNotFoundError, PermissionError, OSError, UnicodeDecodeError):
+        return default
+    
+    try:
+        return _toml_reader.loads(content)
+    except Exception:
+        return default
+
+
+def safe_write_toml(
+    filepath: Union[str, Path],
+    data: Any,
+    encoding: str = "utf-8",
+    create_dirs: bool = True
+) -> bool:
+    """
+    Safely write data to a TOML file.
+    
+    Returns False if TOML writer support is unavailable.
+    
+    Args:
+        filepath: Path to the TOML file
+        data: TOML-serializable data
+        encoding: Text encoding (default: utf-8)
+        create_dirs: Create parent directories if needed
+        
+    Returns:
+        True if write succeeded, False otherwise
+        
+    Raises:
+        SafeUtilityError: If filepath/encoding are invalid or unsafe
+    """
+    from ..errors.exceptions import SafeUtilityError
+    
+    filepath = _validate_safe_path(filepath, "safe_write_toml")
+    
+    if not isinstance(encoding, str):
+        raise SafeUtilityError(
+            f"Encoding must be a string, got {type(encoding).__name__}",
+            utility_name="safe_write_toml"
+        )
+    
+    if not _TOML_WRITE_AVAILABLE or _toml_writer is None:
+        return False
+    
+    try:
+        if hasattr(_toml_writer, "dumps"):
+            content = _toml_writer.dumps(data)
+        else:
+            return False
+    except Exception:
+        return False
+    
+    try:
+        if create_dirs and filepath.parent != filepath:
+            filepath.parent.mkdir(parents=True, exist_ok=True)
+        with open(filepath, "w", encoding=encoding) as file:
+            file.write(content)
+        return True
+    except (PermissionError, OSError, UnicodeEncodeError):
+        return False
 
 
 def project_root(start_dir: Optional[Union[str, Path]] = None) -> str:
@@ -634,4 +973,22 @@ def read_last_lines(
         raise OSError(f"Error reading file: {file_path}") from e
 
 
-__all__ = ['ensure_dir', 'get_file_hash', 'read_last_lines']
+__all__ = [
+    "safe_read_file",
+    "safe_write_file",
+    "safe_file_exists",
+    "safe_get_file_size",
+    "safe_list_files",
+    "safe_read_json",
+    "safe_write_json",
+    "safe_read_yaml",
+    "safe_write_yaml",
+    "safe_read_toml",
+    "safe_write_toml",
+    "project_root",
+    "find_file",
+    "safe_open",
+    "ensure_dir",
+    "get_file_hash",
+    "read_last_lines",
+]

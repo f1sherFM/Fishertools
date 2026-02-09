@@ -57,7 +57,7 @@ def get_version_info() -> dict:
 
 
 # Primary API - main interface for users
-from .errors import explain_error, get_explanation
+from .errors import explain_error, explain_last_error, get_explanation
 
 # Exception classes for error handling
 from .errors import (
@@ -70,6 +70,7 @@ from .safe import (
     safe_get, safe_divide, safe_max, safe_min, safe_sum,
     safe_read_file, safe_write_file, safe_file_exists, 
     safe_get_file_size, safe_list_files,
+    safe_read_json, safe_write_json, safe_read_yaml, safe_write_yaml, safe_read_toml, safe_write_toml,
     safe_open, find_file, project_root
 )
 
@@ -90,7 +91,8 @@ from .learn import (
 
 # Input validation functions
 from .input_utils import (
-    ask_int, ask_float, ask_str, ask_choice
+    ask_int, ask_float, ask_str, ask_choice,
+    ask_yes_no, ask_int_range, ask_float_range, ask_regex
 )
 
 # Legacy imports for backward compatibility
@@ -116,7 +118,7 @@ from . import examples
 from . import config
 from . import integration
 
-# Phase 1 modules (v0.5.0+)
+# Phase 1 modules (v0.5.1+)
 from . import visualization
 from . import validation
 from . import debug
@@ -150,6 +152,7 @@ __all__ = [
     
     # Primary API - the main function users should import
     "explain_error",
+    "explain_last_error",
     "get_explanation",  # New in v0.4.7
     
     # Exception classes for error handling
@@ -160,6 +163,7 @@ __all__ = [
     "safe_get", "safe_divide", "safe_max", "safe_min", "safe_sum",
     "safe_read_file", "safe_write_file", "safe_file_exists", 
     "safe_get_file_size", "safe_list_files",
+    "safe_read_json", "safe_write_json", "safe_read_yaml", "safe_write_yaml", "safe_read_toml", "safe_write_toml",
     "safe_open", "find_file", "project_root",
     
     # Visualization functions (existing + enhanced)
@@ -171,6 +175,7 @@ __all__ = [
     
     # Input validation functions
     "ask_int", "ask_float", "ask_str", "ask_choice",
+    "ask_yes_no", "ask_int_range", "ask_float_range", "ask_regex",
     
     # Learning tools - direct access to educational functions
     "generate_example", "show_best_practice", 
@@ -204,3 +209,4 @@ __all__ = [
     "ErrorTranslator", "LanguageDetector",
     "ErrorExplanation",
 ]
+

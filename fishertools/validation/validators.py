@@ -87,35 +87,24 @@ def validate_number(
             expected_type="number"
         )
     
-    # Try to convert to float and validate type
-    try:
-        # Check if it's already a number type
-        if not isinstance(value, (int, float)):
-            # Try to convert string numbers
-            if isinstance(value, str):
-                try:
-                    numeric_value = float(value)
-                except ValueError:
-                    raise ValidationError(
-                        f"Expected number, got {type(value).__name__}",
-                        value=value,
-                        expected_type="number"
-                    )
-            else:
-                raise ValidationError(
-                    f"Expected number, got {type(value).__name__}",
-                    value=value,
-                    expected_type="number"
-                )
-        else:
+    # Accept numeric strings and bools (bool is a subclass of int in Python)
+    if isinstance(value, (int, float, bool)):
+        numeric_value = float(value)
+    elif isinstance(value, str):
+        try:
             numeric_value = float(value)
-    except (TypeError, ValueError) as e:
-        # Catch any other type conversion errors
+        except (TypeError, ValueError) as e:
+            raise ValidationError(
+                f"Expected number, got {type(value).__name__}",
+                value=value,
+                expected_type="number"
+            ) from e
+    else:
         raise ValidationError(
             f"Expected number, got {type(value).__name__}",
             value=value,
             expected_type="number"
-        ) from e
+        )
 
     # Wrap range comparisons in try-catch to handle any comparison errors
     try:

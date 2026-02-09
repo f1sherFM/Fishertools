@@ -1,7 +1,7 @@
 """
 Property-based tests for jump_search algorithm.
 
-Feature: fishertools-v0.5.0
+Feature: fishertools-v0.5.1
 These tests validate the correctness properties of the jump_search algorithm.
 """
 
@@ -16,7 +16,7 @@ class TestJumpSearchProperties:
     """
     Property tests for jump_search algorithm.
     
-    Feature: fishertools-v0.5.0
+    Feature: fishertools-v0.5.1
     Task: 12.1 Write property tests for jump_search
     """
     
@@ -233,3 +233,4 @@ class TestJumpSearchProperties:
         # Jump search should check fewer elements than array size
         assert len(check_steps) <= expected_max_checks + 2, \
             f"Jump search should check at most √n elements, got {len(check_steps)}"
+

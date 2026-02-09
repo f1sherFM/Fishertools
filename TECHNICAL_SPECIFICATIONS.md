@@ -677,7 +677,7 @@ pytest tests/ --benchmark-only
 7. Интегрировать в основной код
 
 ### Версионирование:
-- v0.5.0 - Visualization, Validation, Debug
+- v0.5.1 - Visualization, Validation, Debug
 - v0.6.0 - Performance, Algorithms, Comparison
 - v0.7.0+ - IDE, Git, Profiling, REPL
 
@@ -711,3 +711,4 @@ pytest tests/ --benchmark-only
 - **Масштабируемость** для будущих расширений
 
 Готово к разработке! 🚀
+

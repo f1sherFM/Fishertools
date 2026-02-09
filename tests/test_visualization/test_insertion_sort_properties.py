@@ -1,7 +1,7 @@
 """
 Property-based tests for insertion_sort algorithm.
 
-Feature: fishertools-v0.5.0
+Feature: fishertools-v0.5.1
 These tests validate the correctness properties of the insertion_sort algorithm.
 """
 
@@ -15,7 +15,7 @@ class TestInsertionSortProperties:
     """
     Property tests for insertion_sort algorithm.
     
-    Feature: fishertools-v0.5.0
+    Feature: fishertools-v0.5.1
     Task: 8.1 Write property tests for insertion_sort
     """
     
@@ -152,3 +152,4 @@ class TestInsertionSortProperties:
         for step in result.steps:
             assert step.swaps_count >= prev_swaps
             prev_swaps = step.swaps_count
+

@@ -12,7 +12,7 @@ import sys
 from contextlib import redirect_stdout
 from hypothesis import given, strategies as st
 
-from fishertools.errors import explain_error
+from fishertools.errors import explain_error, explain_last_error
 
 
 # Common Python exception types for testing
@@ -299,3 +299,25 @@ class TestAPIUnitTests:
         assert "list index out of range" in output
         # Should not contain ANSI color codes
         assert '\033[' not in output
+
+    def test_explain_last_error_inside_except(self):
+        """Test explain_last_error uses the active exception."""
+        output_buffer = io.StringIO()
+        try:
+            1 / 0
+        except Exception:
+            with redirect_stdout(output_buffer):
+                explain_last_error()
+        
+        output = output_buffer.getvalue()
+        assert len(output.strip()) > 0
+        assert "ZeroDivisionError" in output
+
+    def test_explain_last_error_without_exception(self):
+        """Test explain_last_error when no exception is active."""
+        output_buffer = io.StringIO()
+        with redirect_stdout(output_buffer):
+            explain_last_error()
+        
+        output = output_buffer.getvalue()
+        assert "Нет активного исключения" in output

@@ -1,7 +1,7 @@
 """
 Property-based and unit tests for SafeFileDownloader timeout support.
 
-Feature: fishertools-v0.5.0
+Feature: fishertools-v0.5.1
 Tests the timeout parameter additions to safe_download() method.
 """
 
@@ -194,3 +194,4 @@ class TestSafeDownloaderTimeoutBehavior:
         assert response.success is False
         # Zero timeout may cause actual timeout or validation error
         assert response.error is not None
+

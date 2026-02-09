@@ -14,6 +14,28 @@ try:
 except ImportError:
     YAML_AVAILABLE = False
 
+try:
+    import tomllib as _toml_reader
+    TOML_AVAILABLE = True
+except ImportError:
+    try:
+        import tomli as _toml_reader  # type: ignore
+        TOML_AVAILABLE = True
+    except ImportError:
+        TOML_AVAILABLE = False
+        _toml_reader = None
+
+try:
+    import tomli_w as _toml_writer  # type: ignore
+    TOML_WRITE_AVAILABLE = True
+except ImportError:
+    try:
+        import toml as _toml_writer  # type: ignore
+        TOML_WRITE_AVAILABLE = True
+    except ImportError:
+        TOML_WRITE_AVAILABLE = False
+        _toml_writer = None
+
 
 class ConfigurationParser:
     """
@@ -53,6 +75,8 @@ class ConfigurationParser:
             return self.parse_json(content)
         elif format_type == ConfigFormat.YAML:
             return self.parse_yaml(content)
+        elif format_type == ConfigFormat.TOML:
+            return self.parse_toml(content)
         else:
             raise ValueError(f"Unsupported configuration format: {format_type}")
     
@@ -94,6 +118,27 @@ class ConfigurationParser:
             return yaml.safe_load(content) or {}
         except yaml.YAMLError as e:
             raise ValueError(f"Invalid YAML configuration: {e}")
+
+    def parse_toml(self, content: str) -> Dict[str, Any]:
+        """
+        Parse TOML configuration content.
+        
+        Args:
+            content: TOML content to parse
+            
+        Returns:
+            Dict[str, Any]: Parsed configuration data
+            
+        Raises:
+            ValueError: If TOML is invalid or TOML support is unavailable
+        """
+        if not TOML_AVAILABLE or _toml_reader is None:
+            raise ValueError("TOML support not available. Install tomli to use TOML configurations.")
+        
+        try:
+            return _toml_reader.loads(content)
+        except Exception as e:
+            raise ValueError(f"Invalid TOML configuration: {e}")
     
     def format_to_json(self, config: LearningConfig) -> str:
         """
@@ -123,6 +168,24 @@ class ConfigurationParser:
         
         config_dict = asdict(config)
         return yaml.dump(config_dict, default_flow_style=False, allow_unicode=True, indent=2)
+
+    def format_to_toml(self, config: LearningConfig) -> str:
+        """
+        Format configuration as TOML string.
+        
+        Args:
+            config: Configuration to format
+            
+        Returns:
+            str: TOML formatted configuration
+        """
+        if not TOML_WRITE_AVAILABLE or _toml_writer is None:
+            raise ValueError("TOML write support not available. Install tomli-w to write TOML configurations.")
+        
+        config_dict = asdict(config)
+        if hasattr(_toml_writer, "dumps"):
+            return _toml_writer.dumps(config_dict)
+        raise ValueError("TOML writer does not support dumps()")
     
     def validate_structure(self, config_data: Dict[str, Any]) -> ValidationResult:
         """

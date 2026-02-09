@@ -8,6 +8,7 @@ that prevent typical mistakes and provide helpful error messages.
 from .collections import safe_get, safe_divide, safe_max, safe_min, safe_sum, safe_average
 from .files import (
     safe_read_file, safe_write_file, safe_file_exists, safe_get_file_size, safe_list_files,
+    safe_read_json, safe_write_json, safe_read_yaml, safe_write_yaml, safe_read_toml, safe_write_toml,
     safe_open, find_file, project_root, ensure_dir, get_file_hash, read_last_lines
 )
 from .strings import (
@@ -20,6 +21,7 @@ __all__ = [
     "safe_get", "safe_divide", "safe_max", "safe_min", "safe_sum", "safe_average",
     # Files
     "safe_read_file", "safe_write_file", "safe_file_exists", "safe_get_file_size", "safe_list_files",
+    "safe_read_json", "safe_write_json", "safe_read_yaml", "safe_write_yaml", "safe_read_toml", "safe_write_toml",
     "safe_open", "find_file", "project_root", "ensure_dir", "get_file_hash", "read_last_lines",
     # Strings
     "safe_strip", "safe_split", "safe_join", "safe_format", "safe_lower", "safe_upper",

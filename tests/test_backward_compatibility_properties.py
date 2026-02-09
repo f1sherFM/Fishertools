@@ -19,6 +19,14 @@ from fishertools.safe import safe_format, PlaceholderBehavior
 from fishertools.debug import debug_step_by_step, trace, set_breakpoint
 
 
+def _is_numeric_string(value: str) -> bool:
+    try:
+        float(value)
+        return True
+    except (TypeError, ValueError):
+        return False
+
+
 class TestBackwardCompatibilityPreservation:
     """
     Property 6: Backward Compatibility Preservation
@@ -53,7 +61,11 @@ class TestBackwardCompatibilityPreservation:
         assert result == float(value)
     
     @given(
-        value=st.one_of(st.text(), st.none(), st.lists(st.integers()))
+        value=st.one_of(
+            st.text().filter(lambda s: not _is_numeric_string(s)),
+            st.none(),
+            st.lists(st.integers())
+        )
     )
     @settings(max_examples=100)
     def test_validate_number_raises_validation_error_for_invalid_types(self, value):

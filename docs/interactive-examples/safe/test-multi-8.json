@@ -1,7 +1,7 @@
 {
   "id": "test-multi-8",
   "module": "safe",
-  "title": "\udb19\udeb2\ud939\udf1d",
+  "title": "d",
   "code": "x = 1",
   "expected_output": "output",
   "explanation": "This is a test",

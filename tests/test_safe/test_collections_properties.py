@@ -219,8 +219,15 @@ class TestSafeUtilitiesProperties:
             assert result == default
         else:
             # If valid numbers exist, should return their average
-            expected_average = sum(valid_numbers) / len(valid_numbers)
-            assert abs(result - expected_average) < 1e-10
+            import math
+            try:
+                expected_average = sum(valid_numbers) / len(valid_numbers)
+            except OverflowError:
+                expected_average = float("inf")
+            if not math.isfinite(expected_average):
+                assert result == default
+            else:
+                assert abs(result - expected_average) < 1e-10
     
     @given(
         numbers=st.lists(st.one_of(st.integers(), st.floats(allow_nan=False, allow_infinity=False)), min_size=1),
@@ -235,8 +242,15 @@ class TestSafeUtilitiesProperties:
         the correct mathematical average.
         """
         result = safe_average(numbers, default)
-        expected_average = sum(numbers) / len(numbers)
-        assert abs(result - expected_average) < 1e-10
+        import math
+        try:
+            expected_average = sum(numbers) / len(numbers)
+        except OverflowError:
+            expected_average = float("inf")
+        if not math.isfinite(expected_average):
+            assert result == default
+        else:
+            assert abs(result - expected_average) < 1e-10
     
     @given(default=st.one_of(st.integers(), st.floats(allow_nan=False, allow_infinity=False)))
     def test_safe_average_returns_default_for_empty_list(self, default):

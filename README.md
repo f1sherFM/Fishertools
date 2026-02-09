@@ -4,7 +4,7 @@
 
 Fishertools is a Python library designed specifically for beginner developers. It provides clear error explanations, safe utilities, learning tools, and powerful debugging features to help you master Python.
 
-## 🚀 What's New in v0.5.0?
+## 🚀 What's New in v0.5.1?
 
 **Algorithm Expansion & API Unification Release** - Complete algorithm suite with requests-compatible API:
 
@@ -43,6 +43,11 @@ pip install fishertools
 | Task | Function | Module |
 |------|----------|--------|
 | Explain an error | `explain_error(e, language='ru')` | errors |
+| Explain last error | `explain_last_error()` | errors |
+| Ask yes/no safely | `ask_yes_no(prompt)` | input_utils |
+| Ask int in range | `ask_int_range(prompt, min, max)` | input_utils |
+| Ask float in range | `ask_float_range(prompt, min, max)` | input_utils |
+| Ask input by regex | `ask_regex(prompt, pattern)` | input_utils |
 | **🆕 Explain with context** | **`explain_error(e, context={...})`** | **errors** |
 | **🆕 Translate error** | **`translate_error(e, lang='en')`** | **i18n** |
 | **🆕 Detect language** | **`detect_language()`** | **i18n** |
@@ -57,6 +62,12 @@ pip install fishertools
 | Split string safely | `safe_split(text, sep, default)` | safe |
 | Join safely | `safe_join(sep, items)` | safe |
 | Read file safely | `safe_read_file(path)` | safe |
+| Read JSON safely | `safe_read_json(path, default)` | safe |
+| Write JSON safely | `safe_write_json(path, data)` | safe |
+| Read YAML safely | `safe_read_yaml(path, default)` | safe |
+| Write YAML safely | `safe_write_yaml(path, data)` | safe |
+| Read TOML safely | `safe_read_toml(path, default)` | safe |
+| Write TOML safely | `safe_write_toml(path, data)` | safe |
 | Async read file | `await async_safe_read_file(path)` | async_safe |
 | Async write file | `await async_safe_write_file(path, content)` | async_safe |
 | Async logger | `await logger.info(msg)` | async_logger |
@@ -69,7 +80,7 @@ pip install fishertools
 
 ## Core Features
 
-### 🌐 Safe Network Operations (Enhanced in v0.5.0!)
+### 🌐 Safe Network Operations (Enhanced in v0.5.1!)
 Make HTTP requests and download files safely with requests-compatible API and timeout control.
 
 ```python
@@ -78,7 +89,7 @@ from fishertools import safe_request, safe_download
 # Safe HTTP request with timeout
 response = safe_request('https://api.example.com/data', timeout=10)
 
-# NEW in v0.5.0: requests-compatible API
+# NEW in v0.5.1: requests-compatible API
 if response.success:
     # Use .json() method like requests library
     data = response.json()
@@ -92,7 +103,7 @@ if response.success:
 else:
     print(f"Error: {response.error}")
 
-# Safe file download with timeout control (NEW in v0.5.0!)
+# Safe file download with timeout control (NEW in v0.5.1!)
 def progress_callback(progress):
     print(f"Downloaded: {progress.percentage:.1f}%")
 
@@ -117,7 +128,7 @@ if response.success:
 - Cleanup on failure
 - Disk space checking
 
-### 🌍 Multilingual Error Explanations (Enhanced in v0.5.0!)
+### 🌍 Multilingual Error Explanations (Enhanced in v0.5.1!)
 Get error explanations in your preferred language with context-aware details.
 
 ```python
@@ -130,7 +141,7 @@ try:
     my_list = [1, 2, 3]
     value = my_list[10]
 except IndexError as e:
-    # NEW in v0.5.0: Context-aware explanations
+    # NEW in v0.5.1: Context-aware explanations
     explain_error(e, language='en', context={
         'operation': 'list_access',
         'variable_name': 'my_list',
@@ -166,7 +177,7 @@ except ZeroDivisionError as e:
 - Auto-detection based on system locale
 - Structured error information
 
-### 🎨 Enhanced Visualization (Complete in v0.5.0!)
+### 🎨 Enhanced Visualization (Complete in v0.5.1!)
 Visualize data and algorithms with comprehensive suite of 8 algorithms.
 
 ```python
@@ -186,7 +197,7 @@ result = enhanced_viz.visualize(
     export='json'      # Export to JSON file
 )
 
-# Algorithm visualization - Complete Suite (v0.5.0)
+# Algorithm visualization - Complete Suite (v0.5.1)
 algo_viz = AlgorithmVisualizer()
 array = [3, 1, 4, 1, 5, 9, 2, 6]
 
@@ -201,7 +212,7 @@ for algorithm in ['bubble_sort', 'quick_sort', 'merge_sort', 'insertion_sort', '
     print(f"  Comparisons: {result.statistics['comparisons']}")
     print(f"  Swaps: {result.statistics['swaps']}")
     
-    # NEW in v0.5.0: Direct access to final sorted array
+    # NEW in v0.5.1: Direct access to final sorted array
     print(f"  Final array: {result.final_array}")
 
 # Algorithm visualization - All 3 search algorithms
@@ -232,7 +243,7 @@ result = algo_viz.visualize_search(
 # Access results
 print(f"Found: {result.statistics['found']}")
 print(f"Comparisons: {result.statistics['comparisons']}")
-print(f"Final array: {result.final_array}")  # NEW in v0.5.0!
+print(f"Final array: {result.final_array}")  # NEW in v0.5.1!
 
 for step in result.steps:
     print(f"Step {step.step_number}: {step.description}")
@@ -243,7 +254,7 @@ for step in result.steps:
 - Color highlighting by data type
 - Depth limiting for nested structures
 - Export to JSON and HTML formats
-- **Complete Algorithm Suite (v0.5.0):**
+- **Complete Algorithm Suite (v0.5.1):**
   - **5 Sorting Algorithms:** bubble_sort, quick_sort, merge_sort, insertion_sort, selection_sort
   - **3 Search Algorithms:** binary_search, linear_search, jump_search
 - **NEW:** Direct access to final sorted array via `final_array` attribute
@@ -255,12 +266,18 @@ for step in result.steps:
 Get clear explanations of Python errors with suggestions for fixing them.
 
 ```python
-from fishertools import explain_error
+from fishertools import explain_error, explain_last_error
 
 try:
     result = 10 / 0
 except Exception as e:
     explain_error(e)
+
+# Or explain the last error directly
+try:
+    value = int("oops")
+except Exception:
+    explain_last_error()
 ```
 
 ### 🛡️ Safe Utilities
@@ -268,7 +285,11 @@ Functions like `safe_get()`, `safe_divide()`, `safe_average()`, `safe_format()` 
 
 ```python
 from fishertools import safe_get, safe_divide
-from fishertools.safe import safe_strip, safe_split, safe_join, safe_average, safe_format, PlaceholderBehavior
+from fishertools.safe import (
+    safe_strip, safe_split, safe_join,
+    safe_average, safe_format, PlaceholderBehavior,
+    safe_read_json, safe_write_json
+)
 
 # Safe dictionary access
 value = safe_get(my_dict, "key", default="not found")
@@ -281,6 +302,10 @@ result = safe_divide(10, 0, default=0)  # Explicitly set to 0
 avg = safe_average([1, 2, 3])  # Returns 2.0
 avg = safe_average([], default=0)  # Returns 0 for empty list
 avg = safe_average([1, "text", 3, None, 2])  # Returns 2.0 (filters non-numeric)
+
+# Safe JSON read/write
+safe_write_json("data.json", {"name": "Alice", "age": 30})
+data = safe_read_json("data.json", default={})
 
 # Safe string formatting with configurable behavior (NEW in v0.4.5!)
 result = safe_format("Hello, {name}!", {})  
@@ -585,7 +610,7 @@ result = analyze_data(data)
 
 ## 📊 Version History
 
-### v0.5.0 (Current - February 2026)
+### v0.5.1 (Current - February 2026)
 - 🔌 **requests-Compatible API** - NetworkResponse with `.json()`, `.content`, `.text` methods
 - ⏱️ **Download Timeout Support** - `safe_download()` now accepts timeout parameter
 - 🎯 **Final Array Attribute** - Direct access to sorted results via `result.final_array`
@@ -728,4 +753,5 @@ Fishertools is built with ❤️ for the Python community, especially for beginn
 
 **Fishertools** - Making Python easier, safer, and more fun for everyone! 🐍✨
 
-**Current Version:** 0.5.0 | **Last Updated:** February 8, 2026
+**Current Version:** 0.5.1 | **Last Updated:** February 9, 2026
+
