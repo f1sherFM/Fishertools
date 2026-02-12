@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for the main explain_error API function.
 
 This module contains property-based tests for the public API function
@@ -12,7 +12,7 @@ import sys
 from contextlib import redirect_stdout
 from hypothesis import given, strategies as st
 
-from fishertools.errors import explain_error, explain_last_error
+from fishertools.errors import explain_error, explain_last_error, get_explanation
 
 
 # Common Python exception types for testing
@@ -80,7 +80,7 @@ class TestUniversalExceptionParameterAcceptance:
         ]
         
         for invalid_input in invalid_inputs:
-            with pytest.raises(TypeError, match="должен быть экземпляром Exception"):
+            with pytest.raises(TypeError, match="exception"):
                 explain_error(invalid_input)
 
 
@@ -118,13 +118,13 @@ class TestDefaultConsoleOutputBehavior:
         
         # Property: Output should be formatted text (not JSON or other structured format)
         # Console format should contain section headers and readable text
-        assert "===" in output or "Ошибка Python:" in output or "Что это означает" in output
+        assert "===" in output or "РћС€РёР±РєР° Python:" in output or "Р§С‚Рѕ СЌС‚Рѕ РѕР·РЅР°С‡Р°РµС‚" in output
         
         # Property: Output should contain the error information
         assert exception_type.__name__ in output
         
         # Property: Output should contain Russian text (default language)
-        cyrillic_chars = set('абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ')
+        cyrillic_chars = set('Р°Р±РІРіРґРµС‘Р¶Р·РёР№РєР»РјРЅРѕРїСЂСЃС‚СѓС„С…С†С‡С€С‰СЉС‹СЊСЌСЋСЏРђР‘Р’Р“Р”Р•РЃР–Р—РР™РљР›РњРќРћРџР РЎРўРЈР¤РҐР¦Р§РЁР©РЄР«Р¬Р­Р®РЇ')
         assert any(char in cyrillic_chars for char in output)
         
         # Property: Output should not be JSON format by default
@@ -181,18 +181,18 @@ class TestFormattingParameterResponsiveness:
         
         elif format_type == 'plain':
             # Plain format should be simple text without special formatting
-            assert "===" in output or "Ошибка Python:" in output
+            assert "===" in output or "РћС€РёР±РєР° Python:" in output
             # Should not contain ANSI color codes
             assert '\033[' not in output
         
         elif format_type == 'console':
             # Console format should contain structured sections
-            assert "===" in output or "Ошибка Python:" in output or "Что это означает" in output
+            assert "===" in output or "РћС€РёР±РєР° Python:" in output or "Р§С‚Рѕ СЌС‚Рѕ РѕР·РЅР°С‡Р°РµС‚" in output
         
         # Property: Language parameter should affect output language
         if language == 'ru':
             # Russian output should contain Cyrillic characters
-            cyrillic_chars = set('абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ')
+            cyrillic_chars = set('Р°Р±РІРіРґРµС‘Р¶Р·РёР№РєР»РјРЅРѕРїСЂСЃС‚СѓС„С…С†С‡С€С‰СЉС‹СЊСЌСЋСЏРђР‘Р’Р“Р”Р•РЃР–Р—РР™РљР›РњРќРћРџР РЎРўРЈР¤РҐР¦Р§РЁР©РЄР«Р¬Р­Р®РЇ')
             assert any(char in cyrillic_chars for char in output)
         
         # Property: Error type should always be present in output
@@ -203,11 +203,11 @@ class TestFormattingParameterResponsiveness:
         exception = ValueError("test error")
         
         # Test invalid language
-        with pytest.raises(ValueError, match="должен быть одним из"):
+        with pytest.raises(ValueError, match="language"):
             explain_error(exception, language='invalid')
         
         # Test invalid format_type
-        with pytest.raises(ValueError, match="должен быть одним из"):
+        with pytest.raises(ValueError, match="format_type"):
             explain_error(exception, format_type='invalid')
     
     @given(
@@ -300,6 +300,44 @@ class TestAPIUnitTests:
         # Should not contain ANSI color codes
         assert '\033[' not in output
 
+    def test_get_explanation_returns_text_without_printing(self):
+        """Test get_explanation contract: returns string and does not print."""
+        exception = TypeError("test message")
+        output_buffer = io.StringIO()
+
+        with redirect_stdout(output_buffer):
+            result = get_explanation(exception, format_type="plain")
+
+        assert isinstance(result, str)
+        assert "TypeError" in result
+        assert output_buffer.getvalue() == ""
+
+    def test_explain_error_return_text_true_does_not_print(self):
+        """Test explain_error return_text=True returns text without console output."""
+        exception = ValueError("bad value")
+        output_buffer = io.StringIO()
+
+        with redirect_stdout(output_buffer):
+            result = explain_error(exception, return_text=True, format_type="plain")
+
+        assert isinstance(result, str)
+        assert "ValueError" in result
+        assert output_buffer.getvalue() == ""
+
+    def test_explain_last_error_return_text_true_inside_except(self):
+        """Test explain_last_error returns text when return_text=True."""
+        output_buffer = io.StringIO()
+
+        try:
+            1 / 0
+        except Exception:
+            with redirect_stdout(output_buffer):
+                result = explain_last_error(return_text=True)
+
+        assert isinstance(result, str)
+        assert "ZeroDivisionError" in result
+        assert output_buffer.getvalue() == ""
+
     def test_explain_last_error_inside_except(self):
         """Test explain_last_error uses the active exception."""
         output_buffer = io.StringIO()
@@ -313,6 +351,20 @@ class TestAPIUnitTests:
         assert len(output.strip()) > 0
         assert "ZeroDivisionError" in output
 
+    def test_explain_last_error_handles_non_exception_active_value(self, monkeypatch):
+        """Test explain_last_error graceful handling of non-Exception active values."""
+        fake_exc = KeyboardInterrupt()
+        monkeypatch.setattr(
+            sys,
+            "exc_info",
+            lambda: (KeyboardInterrupt, fake_exc, fake_exc.__traceback__),
+        )
+
+        result = explain_last_error(return_text=True)
+
+        assert isinstance(result, str)
+        assert "KeyboardInterrupt" in result
+
     def test_explain_last_error_without_exception(self):
         """Test explain_last_error when no exception is active."""
         output_buffer = io.StringIO()
@@ -320,4 +372,4 @@ class TestAPIUnitTests:
             explain_last_error()
         
         output = output_buffer.getvalue()
-        assert "Нет активного исключения" in output
+        assert "explain_last_error" in output

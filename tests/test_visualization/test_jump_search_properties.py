@@ -1,7 +1,7 @@
-"""
+﻿"""
 Property-based tests for jump_search algorithm.
 
-Feature: fishertools-v0.5.1
+Feature: fishertools-v0.4.0
 These tests validate the correctness properties of the jump_search algorithm.
 """
 
@@ -16,7 +16,7 @@ class TestJumpSearchProperties:
     """
     Property tests for jump_search algorithm.
     
-    Feature: fishertools-v0.5.1
+    Feature: fishertools-v0.4.0
     Task: 12.1 Write property tests for jump_search
     """
     
@@ -222,15 +222,16 @@ class TestJumpSearchProperties:
         
         steps = list(visualize_jump_search(sorted_array, target))
         
-        # Property: should use O(√n) steps, not O(n)
+        # Property: should use O(в€љn) steps, not O(n)
         # Count only the checking steps (not initial, jump, or found steps)
         check_steps = [s for s in steps if "Checking" in s.description]
         
         import math
-        # For jump search, we check at most √n elements in the final block
+        # For jump search, we check at most в€љn elements in the final block
         expected_max_checks = int(math.sqrt(len(sorted_array))) + 1
         
         # Jump search should check fewer elements than array size
         assert len(check_steps) <= expected_max_checks + 2, \
-            f"Jump search should check at most √n elements, got {len(check_steps)}"
+            f"Jump search should check at most в€љn elements, got {len(check_steps)}"
+
 

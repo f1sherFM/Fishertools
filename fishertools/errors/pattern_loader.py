@@ -8,7 +8,7 @@ separating concerns from the main ErrorExplainer class.
 from __future__ import annotations
 
 import functools
-from typing import List
+from typing import List, Optional
 from .models import ErrorPattern
 from .patterns import load_default_patterns
 from .exceptions import ExplanationError
@@ -54,8 +54,7 @@ class PatternLoader:
             raise ExplanationError(
                 f"Не удалось загрузить паттерны ошибок: {e}",
                 original_error=e
-            )
-    
+            ) from e
     def get_patterns(self) -> List[ErrorPattern]:
         """
         Get loaded patterns (loads if not already loaded).
@@ -97,7 +96,7 @@ class PatternMatcher:
         """
         self.patterns = patterns
     
-    def find_match(self, exception: Exception) -> ErrorPattern:
+    def find_match(self, exception: Exception) -> Optional[ErrorPattern]:
         """
         Find the best matching pattern for the given exception.
         
@@ -116,7 +115,8 @@ class PatternMatcher:
                     return pattern
             return None
         except Exception:
-            # If pattern matching fails, return None to allow fallback
+            # Pattern matching is explicitly best-effort: callers fall back
+            # to generic explanations when matching fails.
             return None
     
     def find_all_matches(self, exception: Exception) -> List[ErrorPattern]:
@@ -135,6 +135,7 @@ class PatternMatcher:
                 if pattern.matches(exception):
                     matches.append(pattern)
         except Exception:
-            # If pattern matching fails, return empty list
-            pass
+            # Best-effort behavior mirrors find_match() to keep API stable.
+            return []
         return matches
+

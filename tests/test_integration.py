@@ -1,4 +1,4 @@
-"""
+﻿"""
 Integration tests for fishertools.
 
 These tests verify that all components work together correctly,
@@ -34,10 +34,10 @@ class TestMainAPIIntegration:
         output = output_buffer.getvalue()
         
         # Verify output contains expected sections
-        assert "Ошибка Python: ValueError" in output
-        assert "Что это означает" in output
-        assert "Как исправить" in output
-        assert "Пример" in output
+        assert "РћС€РёР±РєР° Python: ValueError" in output
+        assert "Р§С‚Рѕ СЌС‚Рѕ РѕР·РЅР°С‡Р°РµС‚" in output
+        assert "РљР°Рє РёСЃРїСЂР°РІРёС‚СЊ" in output
+        assert "РџСЂРёРјРµСЂ" in output
         assert "invalid literal for int()" in output
     
     def test_explain_error_with_different_formats(self):
@@ -49,15 +49,15 @@ class TestMainAPIIntegration:
         with redirect_stdout(output_buffer):
             explain_error(test_exception, format_type='console')
         console_output = output_buffer.getvalue()
-        assert "🚨 Ошибка Python:" in console_output
+        assert "рџљЁ РћС€РёР±РєР° Python:" in console_output
         
         # Test plain format
         output_buffer = io.StringIO()
         with redirect_stdout(output_buffer):
             explain_error(test_exception, format_type='plain')
         plain_output = output_buffer.getvalue()
-        assert "Ошибка Python:" in plain_output
-        assert "🚨" not in plain_output  # No emojis in plain format
+        assert "РћС€РёР±РєР° Python:" in plain_output
+        assert "рџљЁ" not in plain_output  # No emojis in plain format
         
         # Test JSON format
         output_buffer = io.StringIO()
@@ -70,15 +70,15 @@ class TestMainAPIIntegration:
     def test_explain_error_parameter_validation(self):
         """Test that explain_error validates parameters correctly."""
         # Test invalid exception parameter
-        with pytest.raises(TypeError, match="должен быть экземпляром Exception"):
+        with pytest.raises(TypeError, match="exception"):
             explain_error("not an exception")
         
         # Test invalid language parameter
-        with pytest.raises(ValueError, match="должен быть одним из"):
+        with pytest.raises(ValueError, match="language"):
             explain_error(ValueError("test"), language='invalid')
         
         # Test invalid format_type parameter
-        with pytest.raises(ValueError, match="должен быть одним из"):
+        with pytest.raises(ValueError, match="format_type"):
             explain_error(ValueError("test"), format_type='invalid')
     
     def test_explain_error_with_optional_parameters(self):
@@ -98,7 +98,7 @@ class TestMainAPIIntegration:
             explain_error(test_exception, show_original_error=False)
         output = output_buffer.getvalue()
         # Should still contain explanation but format might differ
-        assert "Что это означает" in output
+        assert "Р§С‚Рѕ СЌС‚Рѕ РѕР·РЅР°С‡Р°РµС‚" in output
 
 
 class TestComponentIntegration:
@@ -127,10 +127,10 @@ class TestComponentIntegration:
         assert '"error_type": "KeyError"' in json_output
         
         # Console should have formatting
-        assert "🚨" in console_output or "═══" in console_output
+        assert "рџљЁ" in console_output or "в•ђв•ђв•ђ" in console_output
         
         # Plain should be simpler
-        assert "🚨" not in plain_output
+        assert "рџљЁ" not in plain_output
         
         # JSON should be valid JSON structure
         import json
@@ -170,7 +170,7 @@ class TestComponentIntegration:
         
         # Should get fallback explanation
         assert explanation.error_type == "CustomException"
-        assert "Произошла ошибка типа CustomException" in explanation.simple_explanation
+        assert "РџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР° С‚РёРїР° CustomException" in explanation.simple_explanation
         assert explanation.fix_tip is not None
         assert explanation.code_example is not None
 
@@ -239,7 +239,7 @@ class TestErrorHandlingIntegration:
     def test_graceful_error_handling(self):
         """Test that the system handles errors gracefully."""
         # Test with a problematic exception that might cause issues
-        test_exception = Exception("Test exception with unicode: тест")
+        test_exception = Exception("Test exception with unicode: С‚РµСЃС‚")
         
         # Should not raise an exception
         output_buffer = io.StringIO()

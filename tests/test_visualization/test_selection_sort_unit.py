@@ -1,7 +1,7 @@
-"""
+﻿"""
 Unit tests for selection_sort algorithm edge cases.
 
-Feature: fishertools-v0.5.1
+Feature: fishertools-v0.4.0
 These tests validate specific behaviors and edge cases of the selection_sort algorithm.
 """
 
@@ -279,4 +279,5 @@ class TestSelectionSortAlgorithmCorrectness:
         
         # Should still produce sorted output
         assert result.final_array == [1, 2, 3, 3]
+
 

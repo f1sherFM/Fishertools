@@ -6,16 +6,18 @@ components: Learning System, Documentation Generator, Example Repository,
 Visual Documentation, and Configuration Manager.
 """
 
-from typing import Optional, Dict, Any, List
 import logging
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Import all enhancement components
 from .learning import LearningSystem, TutorialEngine, ProgressSystem, InteractiveSessionManager
 from .documentation import DocumentationGenerator, VisualDocumentation, APIGenerator
 from .examples import ExampleRepository
-from .config import ConfigurationManager, LearningConfig
+from .config import ConfigurationManager
 from .errors import FishertoolsError, get_recovery_manager, with_error_recovery
+
+logger = logging.getLogger(__name__)
 
 
 class FishertoolsIntegration:
@@ -51,7 +53,8 @@ class FishertoolsIntegration:
             else:
                 self.config = self.config_manager.get_default_config()
         except Exception as e:
-            logging.warning(f"Failed to load configuration: {e}. Using defaults.")
+            # Integration boundary: config load failures should not block startup.
+            logger.warning("Failed to load configuration: %s. Using defaults.", e)
             self.config = self.config_manager.get_default_config()
         
         # Initialize core components
@@ -80,19 +83,19 @@ class FishertoolsIntegration:
             # Example management
             self.example_repository = ExampleRepository()
             
-            logging.info("All fishertools components initialized successfully")
+            logger.info("All fishertools components initialized successfully")
             
         except Exception as e:
-            # Use error recovery for component initialization failures
+            # Integration boundary: initialization is best-effort and may degrade gracefully.
             recovery_action = self.recovery_manager.handle_config_error(e, "integration")
             
             if recovery_action.strategy.value == "graceful_degradation":
                 # Initialize with minimal components
                 self._initialize_minimal_components()
-                logging.warning("Initialized with minimal components due to errors")
+                logger.warning("Initialized with minimal components due to errors")
             else:
-                logging.error(f"Failed to initialize components: {e}")
-                raise FishertoolsError(f"Component initialization failed: {e}")
+                logger.error("Failed to initialize components: %s", e)
+                raise FishertoolsError(f"Component initialization failed: {e}") from e
     
     def _initialize_minimal_components(self) -> None:
         """Initialize minimal components for graceful degradation."""
@@ -110,32 +113,36 @@ class FishertoolsIntegration:
             self.api_generator = None
             
         except Exception as e:
-            logging.critical(f"Failed to initialize even minimal components: {e}")
-            raise FishertoolsError(f"Critical initialization failure: {e}")
+            logger.critical("Failed to initialize even minimal components: %s", e)
+            raise FishertoolsError(f"Critical initialization failure: {e}") from e
     
     def _setup_integrations(self) -> None:
         """Set up integrations between components."""
         try:
             # Connect Learning System with Tutorial Engine
-            self.learning_system._tutorial_engine = self.tutorial_engine
-            self.learning_system._progress_system = self.progress_system
-            self.learning_system._session_manager = self.session_manager
+            if self.learning_system is not None:
+                self.learning_system._tutorial_engine = self.tutorial_engine
+                self.learning_system._progress_system = self.progress_system
+                self.learning_system._session_manager = self.session_manager
             
             # Connect Tutorial Engine with Example Repository
-            self.tutorial_engine._example_repository = self.example_repository
+            if self.tutorial_engine is not None:
+                self.tutorial_engine._example_repository = self.example_repository
             
             # Connect Documentation Generator with Visual Documentation
-            self.doc_generator._visual_docs = self.visual_docs
+            if self.doc_generator is not None:
+                self.doc_generator._visual_docs = self.visual_docs
             
             # Connect Session Manager with Example Repository
-            self.session_manager._example_repository = self.example_repository
-            self.session_manager._tutorial_engine = self.tutorial_engine
+            if self.session_manager is not None:
+                self.session_manager._example_repository = self.example_repository
+                self.session_manager._tutorial_engine = self.tutorial_engine
             
-            logging.info("Component integrations set up successfully")
+            logger.info("Component integrations set up successfully")
             
         except Exception as e:
-            logging.error(f"Failed to set up integrations: {e}")
-            raise FishertoolsError(f"Integration setup failed: {e}")
+            logger.error("Failed to set up integrations: %s", e)
+            raise FishertoolsError(f"Integration setup failed: {e}") from e
     
     @with_error_recovery("integration", "start_learning_session", "session_error")
     def start_learning_session(self, topic: str, level: str = "beginner", user_id: Optional[str] = None):
@@ -173,17 +180,19 @@ class FishertoolsIntegration:
             return tutorial_session
             
         except Exception as e:
-            # Graceful degradation - provide basic tutorial without interactive features
-            logging.warning(f"Failed to create full learning session: {e}")
+            # Integration boundary: fall back to basic tutorial if rich mode fails.
+            logger.warning("Failed to create full learning session: %s", e)
             
             if self.learning_system:
                 try:
                     return self.learning_system.start_tutorial(topic, level)
                 except Exception as basic_error:
-                    logging.error(f"Failed to start even basic tutorial: {basic_error}")
-                    raise FishertoolsError(f"Learning session failed: {basic_error}")
+                    logger.error("Failed to start even basic tutorial: %s", basic_error)
+                    raise FishertoolsError(
+                        f"Learning session failed: {basic_error}"
+                    ) from basic_error
             else:
-                raise FishertoolsError(f"Learning system unavailable: {e}")
+                raise FishertoolsError(f"Learning system unavailable: {e}") from e
     
     @with_error_recovery("integration", "generate_documentation", "documentation_error")
     def generate_comprehensive_documentation(self, module_paths: List[str]) -> Dict[str, Any]:
@@ -224,8 +233,8 @@ class FishertoolsIntegration:
             }
             
         except Exception as e:
-            logging.error(f"Failed to generate documentation: {e}")
-            raise FishertoolsError(f"Documentation generation failed: {e}")
+            logger.error("Failed to generate documentation: %s", e)
+            raise FishertoolsError(f"Documentation generation failed: {e}") from e
     
     def get_learning_recommendations(self, user_id: str, current_topic: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -274,7 +283,8 @@ class FishertoolsIntegration:
             return recommendations
             
         except Exception as e:
-            logging.error(f"Failed to get recommendations: {e}")
+            # Read-only pathway for UX: return empty recommendations instead of failing hard.
+            logger.error("Failed to get recommendations: %s", e)
             return {
                 'next_topics': [],
                 'recommended_examples': [],
@@ -322,13 +332,13 @@ class FishertoolsIntegration:
                     flowchart = self.visual_docs.create_algorithm_flowchart(code)
                     result['flowchart'] = flowchart
                 except Exception as e:
-                    logging.warning(f"Failed to create flowchart: {e}")
+                    logger.warning("Failed to create flowchart: %s", e)
             
             return result
             
         except Exception as e:
-            logging.error(f"Failed to explain code: {e}")
-            raise FishertoolsError(f"Code explanation failed: {e}")
+            logger.error("Failed to explain code: %s", e)
+            raise FishertoolsError(f"Code explanation failed: {e}") from e
     
     def update_configuration(self, new_config: Dict[str, Any]) -> None:
         """
@@ -357,8 +367,8 @@ class FishertoolsIntegration:
             logging.info("Configuration updated successfully")
             
         except Exception as e:
-            logging.error(f"Failed to update configuration: {e}")
-            raise FishertoolsError(f"Configuration update failed: {e}")
+            logger.error("Failed to update configuration: %s", e)
+            raise FishertoolsError(f"Configuration update failed: {e}") from e
     
     def _apply_config_to_components(self) -> None:
         """Apply current configuration to all components."""
@@ -369,13 +379,14 @@ class FishertoolsIntegration:
                 pass  # Implementation depends on specific config options
             
             # Apply configuration to documentation generator
-            if hasattr(self.config, 'docs_output_dir'):
+            if hasattr(self.config, 'docs_output_dir') and self.doc_generator is not None:
                 self.doc_generator.output_dir = self.config.docs_output_dir
             
             # Apply other configuration options as needed
             
         except Exception as e:
-            logging.warning(f"Some configuration options could not be applied: {e}")
+            # Non-critical path: config mismatches should not break a running system.
+            logger.warning("Some configuration options could not be applied: %s", e)
     
     def get_system_status(self) -> Dict[str, Any]:
         """

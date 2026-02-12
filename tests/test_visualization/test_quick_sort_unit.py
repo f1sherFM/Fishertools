@@ -1,7 +1,7 @@
-"""
+﻿"""
 Unit tests for quick_sort algorithm edge cases.
 
-Feature: fishertools-v0.5.1
+Feature: fishertools-v0.4.0
 These tests validate specific behaviors and edge cases of the quick_sort algorithm.
 """
 
@@ -205,4 +205,5 @@ class TestQuickSortStatistics:
             final_step = result.steps[-1]
             assert result.statistics['comparisons'] == final_step.comparisons_count
             assert result.statistics['swaps'] == final_step.swaps_count
+
 

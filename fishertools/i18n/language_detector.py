@@ -37,8 +37,17 @@ class LanguageDetector:
             Language code (e.g., 'en', 'ru')
         """
         try:
-            # Try to get the default locale
-            lang_code, _ = locale.getdefaultlocale()
+            # locale.getdefaultlocale() is deprecated (Python 3.15+),
+            # so we prefer getlocale() and keep a conservative fallback.
+            lang_code = None
+            locale_info = locale.getlocale()
+            if locale_info:
+                lang_code = locale_info[0]
+
+            if not lang_code:
+                current_locale = locale.setlocale(locale.LC_CTYPE, None)
+                if current_locale:
+                    lang_code = current_locale
             
             if lang_code:
                 # Normalize and check if supported

@@ -889,13 +889,12 @@ def invalid_network_config_strategy(draw):
         return NetworkConfig(chunk_size=-1024)
 
 
-@st.composite
-def invalid_visualization_config_strategy(draw):
+def invalid_visualization_config_strategy():
     """Generate invalid VisualizationConfig objects for property testing."""
     from fishertools.config.models import VisualizationConfig
-    
+
     # Empty export directory is invalid
-    return VisualizationConfig(export_directory='')
+    return st.just(VisualizationConfig(export_directory=''))
 
 
 @st.composite

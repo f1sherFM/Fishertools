@@ -44,8 +44,8 @@ class TestLanguageDetection:
         """
         detector = LanguageDetector()
         
-        # Mock the locale.getdefaultlocale to return our test locale
-        with patch('locale.getdefaultlocale', return_value=(locale_code, 'UTF-8')):
+        # Mock the locale.getlocale to return our test locale
+        with patch('locale.getlocale', return_value=(locale_code, 'UTF-8')):
             detected_lang = detector.detect_system_language()
         
         # Verify the result is a valid language code
@@ -76,7 +76,7 @@ class TestLanguageDetection:
         ]
         
         for locale_tuple in test_locales:
-            with patch('locale.getdefaultlocale', return_value=locale_tuple):
+            with patch('locale.getlocale', return_value=locale_tuple):
                 detected_lang = detector.detect_system_language()
                 
                 # Should always return a supported language or default
@@ -92,8 +92,8 @@ class TestLanguageDetection:
         """
         detector = LanguageDetector()
         
-        # Mock locale.getdefaultlocale to raise an exception
-        with patch('locale.getdefaultlocale', side_effect=locale.Error("Test error")):
+        # Mock locale.getlocale to raise an exception
+        with patch('locale.getlocale', side_effect=locale.Error("Test error")):
             detected_lang = detector.detect_system_language()
         
         # Should return default language on error

@@ -1,7 +1,7 @@
-"""
+﻿"""
 Unit tests for jump_search algorithm edge cases.
 
-Feature: fishertools-v0.5.1
+Feature: fishertools-v0.4.0
 These tests validate specific behaviors and edge cases of the jump_search algorithm.
 """
 
@@ -359,8 +359,9 @@ class TestJumpSearchAlgorithmCorrectness:
         
         steps = list(visualize_jump_search(array, target))
         
-        # Should use approximately O(√n) steps
+        # Should use approximately O(в€љn) steps
         # With 100 elements, sqrt(100) = 10
         # Should be much less than 100 steps (linear search)
         assert len(steps) < len(array), "Should be more efficient than linear search"
+
 

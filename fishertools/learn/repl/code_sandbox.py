@@ -5,11 +5,12 @@ This module provides a restricted execution environment that prevents access to
 dangerous operations like file I/O, imports, and other restricted functions.
 """
 
-import sys
 import io
-import signal
+import sys
+import time
+import builtins
 from contextlib import redirect_stdout, redirect_stderr
-from typing import Tuple, Dict, Any, Set
+from typing import Tuple, Dict, Any
 
 
 class CodeSandbox:
@@ -32,22 +33,12 @@ class CodeSandbox:
     # Built-in functions that are allowed in the sandbox
     ALLOWED_BUILTINS = {
         "abs", "all", "any", "ascii", "bin", "bool", "bytearray", "bytes",
-        "chr", "complex", "dict", "dir", "divmod", "enumerate", "filter",
-        "float", "format", "frozenset", "getattr", "hasattr", "hash", "hex",
-        "id", "input", "int", "isinstance", "issubclass", "iter", "len",
-        "list", "locals", "map", "max", "min", "next", "object", "oct",
-        "ord", "pow", "print", "property", "range", "repr", "reversed",
-        "round", "set", "setattr", "slice", "sorted", "staticmethod", "str",
-        "sum", "super", "tuple", "type", "vars", "zip",
-        # Math functions
-        "abs", "divmod", "pow", "round",
-        # Type constructors
-        "bool", "int", "float", "complex", "str", "bytes", "bytearray",
-        "list", "tuple", "dict", "set", "frozenset",
-        # Iteration
-        "enumerate", "filter", "map", "reversed", "sorted", "zip",
-        # Other safe functions
-        "len", "min", "max", "sum", "all", "any",
+        "chr", "complex", "dict", "divmod", "enumerate", "filter",
+        "float", "format", "frozenset", "hash", "hex", "int",
+        "isinstance", "issubclass", "iter", "len", "list", "map",
+        "max", "min", "next", "oct", "ord", "pow", "print", "range",
+        "repr", "reversed", "round", "set", "slice", "sorted", "str",
+        "sum", "tuple", "zip",
     }
     
     # Dangerous built-in functions that should be blocked
@@ -72,14 +63,16 @@ class CodeSandbox:
         "posixfile", "resource", "nis", "syslog", "grp", "pwd",
     }
     
-    def __init__(self, timeout: float = 5.0):
+    def __init__(self, timeout: float = 5.0, max_steps: int = 200_000):
         """
         Initialize the code sandbox.
         
         Args:
             timeout: Maximum execution time in seconds (default: 5.0)
+            max_steps: Max executed source lines before forced stop
         """
         self.timeout = timeout
+        self.max_steps = max_steps
         self.execution_count = 0
     
     def execute(self, code: str, timeout: float = None) -> Tuple[bool, str]:
@@ -109,17 +102,40 @@ class CodeSandbox:
         if validation_error:
             return False, validation_error
         
+        if not isinstance(timeout, (int, float)) or timeout <= 0:
+            return False, "Timeout must be a positive number"
+
         # Create restricted globals
         restricted_globals = self._create_restricted_globals()
         
         # Capture output
         output_buffer = io.StringIO()
         error_buffer = io.StringIO()
-        
+
         try:
+            compiled_code = compile(code, "<sandbox>", "exec")
+
+            start_time = time.perf_counter()
+            executed_steps = 0
+
+            def tracer(frame, event, arg):
+                nonlocal executed_steps
+                if frame.f_code.co_filename == "<sandbox>" and event == "line":
+                    executed_steps += 1
+                    if executed_steps > self.max_steps:
+                        raise TimeoutError("Code execution exceeded step limit")
+                    if time.perf_counter() - start_time > float(timeout):
+                        raise TimeoutError("Code execution timed out")
+                return tracer
+
+            old_trace = sys.gettrace()
             # Execute code with output redirection
             with redirect_stdout(output_buffer), redirect_stderr(error_buffer):
-                exec(code, restricted_globals)
+                sys.settrace(tracer)
+                try:
+                    exec(compiled_code, restricted_globals, restricted_globals)
+                finally:
+                    sys.settrace(old_trace)
             
             output = output_buffer.getvalue()
             return True, output
@@ -182,9 +198,9 @@ class CodeSandbox:
         """
         # Start with safe built-ins
         safe_builtins = {
-            name: __builtins__[name]
+            name: getattr(builtins, name)
             for name in self.ALLOWED_BUILTINS
-            if name in __builtins__
+            if hasattr(builtins, name)
         }
         
         # Add safe modules

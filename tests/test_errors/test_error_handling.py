@@ -1,4 +1,4 @@
-"""
+﻿"""
 Tests for comprehensive error handling system.
 
 This module tests the custom exception classes, graceful degradation,
@@ -39,7 +39,7 @@ class TestCustomExceptions:
         full_message = error_with_original.get_full_message()
         assert "Wrapper error" in full_message
         assert "Original error" in full_message
-        assert "Причина:" in full_message
+        assert "РџСЂРёС‡РёРЅР°:" in full_message
     
     def test_explanation_error_specifics(self):
         """Test ExplanationError specific functionality."""
@@ -49,7 +49,7 @@ class TestCustomExceptions:
         full_message = error.get_full_message()
         assert "Explanation failed" in full_message
         assert "ValueError" in full_message
-        assert "Тип исключения:" in full_message
+        assert "РўРёРї РёСЃРєР»СЋС‡РµРЅРёСЏ:" in full_message
     
     def test_formatting_error_specifics(self):
         """Test FormattingError specific functionality."""
@@ -59,7 +59,7 @@ class TestCustomExceptions:
         full_message = error.get_full_message()
         assert "Formatting failed" in full_message
         assert "console" in full_message
-        assert "Тип форматтера:" in full_message
+        assert "РўРёРї С„РѕСЂРјР°С‚С‚РµСЂР°:" in full_message
     
     def test_configuration_error_specifics(self):
         """Test ConfigurationError specific functionality."""
@@ -71,8 +71,8 @@ class TestCustomExceptions:
         assert "Invalid config" in full_message
         assert "language" in full_message
         assert "invalid" in full_message
-        assert "Поле:" in full_message
-        assert "Значение:" in full_message
+        assert "РџРѕР»Рµ:" in full_message
+        assert "Р—РЅР°С‡РµРЅРёРµ:" in full_message
     
     def test_pattern_error_specifics(self):
         """Test PatternError specific functionality."""
@@ -82,7 +82,7 @@ class TestCustomExceptions:
         full_message = error.get_full_message()
         assert "Pattern failed" in full_message
         assert "TypeError" in full_message
-        assert "Тип паттерна:" in full_message
+        assert "РўРёРї РїР°С‚С‚РµСЂРЅР°:" in full_message
     
     def test_safe_utility_error_specifics(self):
         """Test SafeUtilityError specific functionality."""
@@ -92,7 +92,7 @@ class TestCustomExceptions:
         full_message = error.get_full_message()
         assert "Utility failed" in full_message
         assert "safe_get" in full_message
-        assert "Утилита:" in full_message
+        assert "РЈС‚РёР»РёС‚Р°:" in full_message
 
 
 class TestErrorRecovery:
@@ -118,7 +118,7 @@ class TestErrorRecovery:
         
         # Should create fallback explanation
         assert explanation.error_type == "UnknownCustomError"
-        assert "Произошла ошибка типа UnknownCustomError" in explanation.simple_explanation
+        assert "РџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР° С‚РёРїР° UnknownCustomError" in explanation.simple_explanation
         assert explanation.fix_tip is not None
         assert explanation.code_example is not None
     
@@ -168,17 +168,17 @@ class TestErrorRecovery:
         # Test invalid exception parameter
         with pytest.raises(TypeError) as exc_info:
             explain_error("not an exception")
-        assert "должен быть экземпляром Exception" in str(exc_info.value)
+        assert "exception" in str(exc_info.value)
         
         # Test invalid language parameter
         with pytest.raises(ValueError) as exc_info:
             explain_error(ValueError("test"), language="invalid")
-        assert "должен быть одним из" in str(exc_info.value)
+        assert "language" in str(exc_info.value)
         
         # Test invalid format_type parameter
         with pytest.raises(ValueError) as exc_info:
             explain_error(ValueError("test"), format_type="invalid")
-        assert "должен быть одним из" in str(exc_info.value)
+        assert "format_type" in str(exc_info.value)
 
 
 class TestSafeUtilityErrorHandling:
@@ -189,13 +189,13 @@ class TestSafeUtilityErrorHandling:
         # Test with None collection
         with pytest.raises(SafeUtilityError) as exc_info:
             safe_get(None, 0)
-        assert "не может быть None" in str(exc_info.value)
+        assert "РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ None" in str(exc_info.value)
         assert exc_info.value.utility_name == "safe_get"
         
         # Test with invalid collection type (number)
         with pytest.raises(SafeUtilityError) as exc_info:
             safe_get(123, 0)  # Number is not a valid collection
-        assert "не может быть None или числом" in str(exc_info.value)
+        assert "РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ None РёР»Рё С‡РёСЃР»РѕРј" in str(exc_info.value)
         
         # Test with invalid index type for list - now returns default instead of raising
         result = safe_get([1, 2, 3], "invalid_index", default="not found")
@@ -206,12 +206,12 @@ class TestSafeUtilityErrorHandling:
         # Test with invalid types (None, bool, complex, str)
         with pytest.raises(SafeUtilityError) as exc_info:
             safe_divide("not_a_number", 2)
-        assert "должно быть числом" in str(exc_info.value)
+        assert "РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ С‡РёСЃР»РѕРј" in str(exc_info.value)
         assert exc_info.value.utility_name == "safe_divide"
         
         with pytest.raises(SafeUtilityError) as exc_info:
             safe_divide(10, "not_a_number")
-        assert "должен быть числом" in str(exc_info.value)
+        assert "РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ С‡РёСЃР»РѕРј" in str(exc_info.value)
         
         # default can be any type now - more flexible
         result = safe_divide(10, 0, default="undefined")

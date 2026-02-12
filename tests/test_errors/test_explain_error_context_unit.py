@@ -1,10 +1,10 @@
-"""
-Unit tests for explain_error() context-specific explanations (v0.5.1).
+﻿"""
+Unit tests for explain_error() context-specific explanations (v0.4.0).
 
 This module tests specific edge cases and context scenarios for the new
 context parameter functionality.
 
-Feature: fishertools-v0.5.1
+Feature: fishertools-v0.4.0
 """
 
 import pytest
@@ -163,7 +163,7 @@ class TestZeroDivisionErrorWithContext:
         assert 'denominator' in result
         
         # Should mention zero
-        assert '0' in result or 'ноль' in result
+        assert '0' in result or 'РЅРѕР»СЊ' in result
         
         # Should provide helpful guidance
         assert 'safe_divide' in result or 'if' in result
@@ -179,7 +179,7 @@ class TestZeroDivisionErrorWithContext:
         result = explain_error(exception, context=context, return_text=True, language='ru')
         
         # Should still provide helpful explanation
-        assert '0' in result or 'ноль' in result
+        assert '0' in result or 'РЅРѕР»СЊ' in result
         assert 'ZeroDivisionError' in result
 
 
@@ -359,7 +359,7 @@ class TestLanguageParameterWithContext:
         assert 'data' in result
         
         # Should have Russian text
-        russian_indicators = ['Ошибка', 'ошибка', 'ключ', 'словар']
+        russian_indicators = ['РћС€РёР±РєР°', 'РѕС€РёР±РєР°', 'РєР»СЋС‡', 'СЃР»РѕРІР°СЂ']
         has_russian = any(indicator in result for indicator in russian_indicators)
         assert has_russian or 'KeyError' in result
     
@@ -410,4 +410,5 @@ class TestInvalidContextHandling:
         # Should work
         assert isinstance(result, str)
         assert len(result) > 0
+
 

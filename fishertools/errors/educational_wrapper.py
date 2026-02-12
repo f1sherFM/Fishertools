@@ -9,7 +9,6 @@ import logging
 import traceback
 from typing import Optional, Callable, Any, Dict
 from functools import wraps
-from .exceptions import FishertoolsError
 from .explainer import ErrorExplainer
 from .models import ExplainerConfig
 
@@ -38,6 +37,15 @@ if not debug_logger.handlers:
     debug_handler.setFormatter(debug_formatter)
     debug_logger.addHandler(debug_handler)
     debug_logger.setLevel(logging.DEBUG)
+
+
+def _exception_trace(exc: Exception) -> str:
+    """
+    Render traceback string for a provided exception object.
+
+    This works even when called outside an active except block.
+    """
+    return "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
 
 
 class EducationalErrorWrapper:
@@ -160,7 +168,12 @@ class EducationalErrorWrapper:
 ║  {explanation.code_example}
 ╚══════════════════════════════════════════════════════════════╝
 """
-            except Exception:
+            except Exception as explain_error:
+                debug_logger.debug(
+                    "Explainer fallback activated for %s: %s",
+                    error_type.__name__,
+                    explain_error,
+                )
                 # Fallback to pattern-based explanation
                 educational_msg = f"""
 ╔══════════════════════════════════════════════════════════════╗
@@ -187,14 +200,14 @@ class EducationalErrorWrapper:
             debug_logger.debug(
                 f"Educational error wrapper called for {error_type.__name__}\n"
                 f"Context: {context}\n"
-                f"Traceback: {traceback.format_exc()}"
+                f"Traceback: {_exception_trace(exception)}"
             )
             
             return educational_msg
             
-        except Exception as e:
+        except Exception:
             # Ultimate fallback
-            debug_logger.error(f"Error in wrap_error: {e}\n{traceback.format_exc()}")
+            debug_logger.exception("Error in wrap_error")
             return f"Ошибка: {exception}\nНе удалось создать подробное объяснение."
     
     def enhance_import_error(self, exception: ImportError) -> str:
@@ -301,7 +314,7 @@ class EducationalErrorWrapper:
 - Используйте конструкцию with open() для автоматического закрытия файлов
 """
         
-        debug_logger.debug(f"File error details: {traceback.format_exc()}")
+        debug_logger.debug("File error enhanced for %s", error_type)
         return explanation
 
 
@@ -333,12 +346,8 @@ def with_educational_errors(context: Optional[str] = None):
                 # Log the educational message
                 logger.error(educational_msg)
                 
-                # Re-raise with enhanced message if it's a FishertoolsError
-                if isinstance(e, FishertoolsError):
-                    raise
-                else:
-                    # For other errors, just log and re-raise
-                    raise
+                # Preserve the original exception type and traceback.
+                raise
         
         return wrapper
     return decorator

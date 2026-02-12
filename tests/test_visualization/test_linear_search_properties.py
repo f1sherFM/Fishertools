@@ -1,7 +1,7 @@
-"""
+﻿"""
 Property-based tests for linear_search algorithm.
 
-Feature: fishertools-v0.5.1
+Feature: fishertools-v0.4.0
 These tests validate the correctness properties of the linear_search algorithm.
 """
 
@@ -16,7 +16,7 @@ class TestLinearSearchProperties:
     """
     Property tests for linear_search algorithm.
     
-    Feature: fishertools-v0.5.1
+    Feature: fishertools-v0.4.0
     Task: 11.1 Write property tests for linear_search
     """
     
@@ -201,4 +201,5 @@ class TestLinearSearchProperties:
         # All steps after found should not exist (search stops)
         assert found_step_index is not None, "Should find the target"
         assert found_step_index == len(steps) - 1, "Should stop immediately after finding"
+
 

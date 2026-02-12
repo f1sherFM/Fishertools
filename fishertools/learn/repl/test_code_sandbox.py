@@ -101,6 +101,13 @@ class TestCodeSandboxErrors:
         success, output = sandbox.execute("   \n  \n  ")
         assert success is False
 
+    def test_timeout_infinite_loop(self):
+        """Test that infinite loops are interrupted by timeout."""
+        sandbox = CodeSandbox(timeout=0.05)
+        success, output = sandbox.execute("while True:\n    pass")
+        assert success is False
+        assert "timed out" in output.lower()
+
 
 class TestCodeSandboxRestrictions:
     """Test that dangerous operations are blocked."""

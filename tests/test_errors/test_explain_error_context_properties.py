@@ -1,10 +1,10 @@
-"""
-Property-based tests for explain_error() context enhancements (v0.5.1).
+﻿"""
+Property-based tests for explain_error() context enhancements (v0.4.0).
 
 This module tests the new context parameter functionality using property-based testing
 to ensure correctness across a wide range of inputs.
 
-Feature: fishertools-v0.5.1
+Feature: fishertools-v0.4.0
 """
 
 import pytest
@@ -44,7 +44,7 @@ class TestExplainErrorLanguageProperties:
         # For Russian, should contain Cyrillic characters
         if language == 'ru':
             # Check for common Russian words in error explanations
-            russian_indicators = ['Ошибка', 'ошибка', 'Это', 'это', 'код']
+            russian_indicators = ['РћС€РёР±РєР°', 'РѕС€РёР±РєР°', 'Р­С‚Рѕ', 'СЌС‚Рѕ', 'РєРѕРґ']
             has_russian = any(indicator in result for indicator in russian_indicators)
             # Note: Some technical terms might be in English even in Russian mode
             # So we just check that Russian text is present
@@ -194,7 +194,7 @@ class TestExplainErrorContextProperties:
         assert len(result) > 0
         
         # Should contain error information
-        assert 'ValueError' in result or 'ошибка' in result.lower()
+        assert 'ValueError' in result or 'РѕС€РёР±РєР°' in result.lower()
 
 
 class TestExplainErrorBackwardCompatibility:
@@ -319,4 +319,5 @@ class TestValidateContextFunction:
         result = _validate_context(123)
         assert isinstance(result, dict)
         assert len(result) == 0
+
 

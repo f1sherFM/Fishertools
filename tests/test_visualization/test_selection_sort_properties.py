@@ -1,7 +1,7 @@
-"""
+﻿"""
 Property-based tests for selection_sort algorithm.
 
-Feature: fishertools-v0.5.1
+Feature: fishertools-v0.4.0
 These tests validate the correctness properties of the selection_sort algorithm.
 """
 
@@ -15,7 +15,7 @@ class TestSelectionSortProperties:
     """
     Property tests for selection_sort algorithm.
     
-    Feature: fishertools-v0.5.1
+    Feature: fishertools-v0.4.0
     Task: 9.1 Write property tests for selection_sort
     """
     
@@ -178,4 +178,5 @@ class TestSelectionSortProperties:
             if step.swap_occurred:
                 assert step.swaps_count > prev_swaps, "Swap occurred but count didn't increase"
             prev_swaps = step.swaps_count
+
 

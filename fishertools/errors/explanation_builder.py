@@ -66,8 +66,7 @@ class ExplanationBuilder:
                 f"Не удалось создать объяснение из паттерна: {e}",
                 exception_type=type(exception).__name__,
                 original_error=e
-            )
-    
+            ) from e
     def create_fallback(self, exception: Exception, context: Optional[Dict[str, Any]] = None) -> ErrorExplanation:
         """
         Create a generic explanation for unsupported exceptions.
@@ -299,3 +298,4 @@ class ExplanationBuilder:
                 code_example="# Please contact support",
                 traceback_context="Critical system error"
             )
+

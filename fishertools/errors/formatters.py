@@ -183,7 +183,15 @@ class ConsoleFormatter:
             Wrapped text
         """
         import textwrap
-        return textwrap.fill(text, width=width, subsequent_indent="  ")
+        # Preserve long tokens intact (e.g., IDs, hashes, generated values)
+        # so formatter does not alter semantic content during wrapping.
+        return textwrap.fill(
+            text,
+            width=width,
+            subsequent_indent="  ",
+            break_long_words=False,
+            break_on_hyphens=False,
+        )
     
     def format(self, explanation: ErrorExplanation) -> str:
         """
@@ -381,4 +389,4 @@ def get_formatter(format_type: str, **kwargs) -> Any:
             return formatter_class()
     except Exception as e:
         raise FormattingError(f"Не удалось создать форматтер типа {format_type}: {e}", 
-                            formatter_type=format_type, original_error=e)
+                            formatter_type=format_type, original_error=e) from e

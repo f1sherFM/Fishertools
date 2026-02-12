@@ -6,7 +6,7 @@ Validates: Requirements 3.1, 3.2, 3.3, 3.4, 3.5
 """
 
 import pytest
-from hypothesis import given, strategies as st, assume
+from hypothesis import given, strategies as st
 from fishertools.examples import ExampleRepository
 from fishertools.examples.models import (
     CodeExample, ExampleCategory, ProjectType, Scenario
@@ -121,7 +121,7 @@ class TestExampleRepositoryQuality:
         
         # Get a sample example
         examples = repo.get_examples_by_category(ExampleCategory.COLLECTIONS)
-        assume(len(examples) > 0)
+        assert len(examples) > 0
         
         example = examples[0]
         explanation = repo.explain_example_line_by_line(example)
