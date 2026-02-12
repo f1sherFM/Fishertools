@@ -1,10 +1,10 @@
-﻿"""
-Unit tests for explain_error() context-specific explanations (v0.4.0).
+"""
+Unit tests for explain_error() context-specific explanations (v0.5.2).
 
 This module tests specific edge cases and context scenarios for the new
 context parameter functionality.
 
-Feature: fishertools-v0.4.0
+Feature: fishertools-v0.5.2
 """
 
 import pytest

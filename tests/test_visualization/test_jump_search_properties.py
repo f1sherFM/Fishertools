@@ -1,7 +1,7 @@
-﻿"""
+"""
 Property-based tests for jump_search algorithm.
 
-Feature: fishertools-v0.4.0
+Feature: fishertools-v0.5.2
 These tests validate the correctness properties of the jump_search algorithm.
 """
 
@@ -16,7 +16,7 @@ class TestJumpSearchProperties:
     """
     Property tests for jump_search algorithm.
     
-    Feature: fishertools-v0.4.0
+    Feature: fishertools-v0.5.2
     Task: 12.1 Write property tests for jump_search
     """
     

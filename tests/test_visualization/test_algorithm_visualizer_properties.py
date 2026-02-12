@@ -1,4 +1,4 @@
-﻿"""
+"""
 Property-based tests for algorithm visualizer.
 
 Feature: fishertools-enhancements
@@ -336,7 +336,7 @@ class TestMergeSortProperties:
     """
     Property tests for merge_sort algorithm.
     
-    Feature: fishertools-v0.4.0
+    Feature: fishertools-v0.5.2
     Validates: Requirements 4.1, 4.2, 4.3, 4.4
     """
     

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Fishertools - РёРЅСЃС‚СЂСѓРјРµРЅС‚С‹, РєРѕС‚РѕСЂС‹Рµ РґРµР»Р°СЋС‚ Python СѓРґРѕР±РЅРµРµ Рё Р±РµР·РѕРїР°СЃРЅРµРµ РґР»СЏ РЅРѕРІРёС‡РєРѕРІ
 
 РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ:
@@ -118,7 +118,7 @@ from . import examples
 from . import config
 from . import integration
 
-# Phase 1 modules (v0.4.0+)
+# Phase 1 modules (v0.5.2+)
 from . import visualization
 from . import validation
 from . import debug

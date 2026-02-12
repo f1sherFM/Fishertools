@@ -1,12 +1,43 @@
-﻿# Fishertools
+# Fishertools
 
-РќР°Р±РѕСЂ РїСЂР°РєС‚РёС‡РЅС‹С… РёРЅСЃС‚СЂСѓРјРµРЅС‚РѕРІ РґР»СЏ Р±РµР·РѕРїР°СЃРЅРѕРіРѕ Рё РїРѕРЅСЏС‚РЅРѕРіРѕ Python-РєРѕРґР°.
+Practical tools for writing safer, clearer Python code.
 
-`Fishertools` РїРѕРјРѕРіР°РµС‚ РїРёСЃР°С‚СЊ СѓСЃС‚РѕР№С‡РёРІС‹Рµ СЃРєСЂРёРїС‚С‹ Рё Р±С‹СЃС‚СЂРµРµ СЂР°Р·Р±РёСЂР°С‚СЊСЃСЏ СЃ РѕС€РёР±РєР°РјРё: Р±РµР·РѕРїР°СЃРЅС‹Рµ РѕРїРµСЂР°С†РёРё СЃ РєРѕР»Р»РµРєС†РёСЏРјРё/С„Р°Р№Р»Р°РјРё, РґСЂСѓР¶РµР»СЋР±РЅС‹Рµ РѕР±СЉСЏСЃРЅРµРЅРёСЏ РёСЃРєР»СЋС‡РµРЅРёР№, СѓС‚РёР»РёС‚С‹ РІР°Р»РёРґР°С†РёРё, РІРёР·СѓР°Р»РёР·Р°С†РёСЏ Рё РѕР±СѓС‡Р°СЋС‰РёРµ РёРЅСЃС‚СЂСѓРјРµРЅС‚С‹.
+Fishertools helps you handle common failures, validate inputs, work with files safely, and explain errors in a beginner-friendly way.
 
-## Р’РµСЂСЃРёСЏ
+## Version
 
-**РўРµРєСѓС‰Р°СЏ РІРµСЂСЃРёСЏ: `0.4.0`**
+Current version: `0.5.2`
+
+## Install
+
+```bash
+pip install fishertools==0.5.2
+```
+
+For local development:
+
+```bash
+git clone <YOUR_REPO_URL>
+cd My_1st_library_python
+pip install -e .
+```
+
+## Quick Start
+
+```python
+from fishertools import explain_error, safe_get, safe_divide
+
+value = safe_get([10, 20, 30], 10, default=0)
+print(value)  # 0
+
+result = safe_divide(10, 0, default=None)
+print(result)  # None
+
+try:
+    int("abc")
+except Exception as e:
+    explain_error(e, language="en")
+```
 
 ## Documentation
 
@@ -18,69 +49,39 @@
 - [Limitations](docs/limitations.md)
 - [Contributing](docs/contributing.md)
 
-## РЈСЃС‚Р°РЅРѕРІРєР°
+## Core Capabilities
 
-```bash
-pip install fishertools==0.4.0
-```
+### Error Explanation
 
-Р”Р»СЏ СЂР°Р·СЂР°Р±РѕС‚РєРё РёР· СЂРµРїРѕР·РёС‚РѕСЂРёСЏ:
+- `explain_error(exception, language="ru|en|auto")`
+- `explain_last_error()` inside `except`
+- `get_explanation(exception, format_type="console|plain|json")`
 
-```bash
-git clone <YOUR_REPO_URL>
-cd My_1st_library_python
-pip install -e .
-```
+### Safe Utilities
 
-## Р‘С‹СЃС‚СЂС‹Р№ СЃС‚Р°СЂС‚
+- Collections: `safe_get`, `safe_pop`, `safe_slice`
+- Math: `safe_divide`, `safe_average`
+- Strings: `safe_format`, `safe_split`, `safe_join`
+- Files: `safe_read_file`, `safe_write_file`, `safe_read_json`, `safe_write_json`
 
-```python
-from fishertools import explain_error, safe_get, safe_divide
+### Validation and Debugging
 
-# Р‘РµР·РѕРїР°СЃРЅС‹Р№ РґРѕСЃС‚СѓРї Рє РєРѕР»Р»РµРєС†РёСЏРј
-value = safe_get([10, 20, 30], 10, default=0)
-print(value)  # 0
+- Type validation decorators and helpers
+- Step-by-step debug tools
+- Tracing helpers
 
-# Р‘РµР·РѕРїР°СЃРЅРѕРµ РґРµР»РµРЅРёРµ
-result = safe_divide(10, 0, default=None)
-print(result)  # None
+### Visualization
 
-# РџРѕРЅСЏС‚РЅРѕРµ РѕР±СЉСЏСЃРЅРµРЅРёРµ РѕС€РёР±РєРё
-try:
-    int("abc")
-except Exception as e:
-    explain_error(e, language="ru")
-```
+- Data structure visualization
+- Sorting and searching algorithm visualization
 
-## РљР»СЋС‡РµРІС‹Рµ РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё
+### Learning Helpers
 
-### 1. РћР±СЉСЏСЃРЅРµРЅРёРµ РѕС€РёР±РѕРє
-- `explain_error(e, language='ru' | 'en' | 'auto')`
-- `explain_last_error()` РІРЅСѓС‚СЂРё `except`
-- `get_explanation(e, format_type='console' | 'plain' | 'json')`
+- Interactive helpers for learning Python basics
 
-### 2. Р‘РµР·РѕРїР°СЃРЅС‹Рµ СѓС‚РёР»РёС‚С‹ (`safe`)
-- РєРѕР»Р»РµРєС†РёРё: `safe_get`, `safe_pop`, `safe_slice`
-- РјР°С‚РµРјР°С‚РёРєР°: `safe_divide`, `safe_average`
-- СЃС‚СЂРѕРєРё: `safe_format`, `safe_split`, `safe_join`
-- С„Р°Р№Р»С‹: `safe_read_file`, `safe_write_file`, `safe_read_json`, `safe_write_json`
+## Common Examples
 
-### 3. Р’Р°Р»РёРґР°С†РёСЏ Рё РѕС‚Р»Р°РґРєР°
-- РґРµРєРѕСЂР°С‚РѕСЂС‹ Рё С…РµР»РїРµСЂС‹ РїСЂРѕРІРµСЂРєРё С‚РёРїРѕРІ
-- РёРЅСЃС‚СЂСѓРјРµРЅС‚С‹ РїРѕС€Р°РіРѕРІРѕРіРѕ РґРµР±Р°РіР°
-- СѓС‚РёР»РёС‚С‹ С‚СЂР°СЃСЃРёСЂРѕРІРєРё
-
-### 4. Р’РёР·СѓР°Р»РёР·Р°С†РёСЏ
-- РІРёР·СѓР°Р»РёР·Р°С†РёСЏ СЃС‚СЂСѓРєС‚СѓСЂ РґР°РЅРЅС‹С…
-- РІРёР·СѓР°Р»РёР·Р°С†РёСЏ Р°Р»РіРѕСЂРёС‚РјРѕРІ СЃРѕСЂС‚РёСЂРѕРІРєРё Рё РїРѕРёСЃРєР°
-
-### 5. РћР±СѓС‡Р°СЋС‰РёРµ РјРѕРґСѓР»Рё
-- СѓС‚РёР»РёС‚С‹ РґР»СЏ РёРЅС‚РµСЂР°РєС‚РёРІРЅРѕРіРѕ РѕР±СѓС‡РµРЅРёСЏ
-- РѕР±СЉСЏСЃРЅРµРЅРёРµ Р±Р°Р·РѕРІС‹С… РєРѕРЅС†РµРїС†РёР№ Python
-
-## Р§Р°СЃС‚С‹Рµ СЃС†РµРЅР°СЂРёРё
-
-### JSON-Р»РѕРіРёСЂРѕРІР°РЅРёРµ РѕС€РёР±РєРё
+### JSON error output
 
 ```python
 from fishertools.errors import get_explanation
@@ -93,7 +94,7 @@ except Exception as e:
     print(payload)
 ```
 
-### РљРѕРЅС‚РµРєСЃС‚РЅРѕРµ РѕР±СЉСЏСЃРЅРµРЅРёРµ
+### Context-aware explanation
 
 ```python
 from fishertools.errors import explain_error
@@ -112,44 +113,37 @@ except Exception as e:
     )
 ```
 
-## РЎРѕРІРјРµСЃС‚РёРјРѕСЃС‚СЊ
+## Compatibility
 
 - Python `>=3.8`
-- РџР»Р°С‚С„РѕСЂРјС‹: Linux / macOS / Windows
+- Linux / macOS / Windows
 
-## РљР°С‡РµСЃС‚РІРѕ
+## Quality
 
-- С€РёСЂРѕРєРѕРµ РїРѕРєСЂС‹С‚РёРµ Р°РІС‚РѕС‚РµСЃС‚Р°РјРё
-- property-based С‚РµСЃС‚С‹
-- backward compatibility С‚РµСЃС‚С‹
+- Broad automated test coverage
+- Property-based tests
+- Backward compatibility tests
 
-## РЎС‚СЂСѓРєС‚СѓСЂР° РїСЂРѕРµРєС‚Р°
+## Development
 
-- `fishertools/` вЂ” Р±РёР±Р»РёРѕС‚РµРєР°
-- `tests/` вЂ” Р°РІС‚РѕС‚РµСЃС‚С‹
-- `docs/` вЂ” РґРѕРєСѓРјРµРЅС‚Р°С†РёСЏ
-
-## Р Р°Р·СЂР°Р±РѕС‚РєР°
-
-Р—Р°РїСѓСЃРє С‚РµСЃС‚РѕРІ:
+Run tests:
 
 ```bash
 pytest -q -p no:cacheprovider
 ```
 
-Р›РёРЅС‚РёРЅРі:
+Run linter:
 
 ```bash
 ruff check .
 ```
 
-## Р РµР»РёР· `0.4.0`
+## Release 0.5.2
 
-Р’ СЌС‚РѕРј СЂРµР»РёР·Рµ:
-- Р·Р°С„РёРєСЃРёСЂРѕРІР°РЅР° РІРµСЂСЃРёСЏ РїР°РєРµС‚Р° `0.4.0`
-- РѕР±РЅРѕРІР»РµРЅР° РґРѕРєСѓРјРµРЅС‚Р°С†РёСЏ Рё README
-- СЃРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°РЅС‹ РІРµСЂСЃРёРѕРЅРЅС‹Рµ СѓРїРѕРјРёРЅР°РЅРёСЏ РїРѕ РїСЂРѕРµРєС‚Сѓ
+- Package version set to `0.5.2`
+- README rewritten for clarity
+- Version references aligned across code and tests
 
-## Р›РёС†РµРЅР·РёСЏ
+## License
 
 MIT

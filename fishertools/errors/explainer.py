@@ -1,4 +1,4 @@
-﻿"""
+"""
 Main error explainer implementation.
 
 This module contains the ErrorExplainer class and explain_error function.
@@ -9,7 +9,7 @@ Architecture improvements (v0.4.4.2):
 - Separated explanation building into ExplanationBuilder
 - Improved Single Responsibility Principle compliance
 
-Enhancements (v0.4.0+):
+Enhancements (v0.5.2+):
 - Added multilingual support via i18n module
 - Support for 'auto' language detection
 """

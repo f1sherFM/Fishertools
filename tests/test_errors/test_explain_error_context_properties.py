@@ -1,10 +1,10 @@
-﻿"""
-Property-based tests for explain_error() context enhancements (v0.4.0).
+"""
+Property-based tests for explain_error() context enhancements (v0.5.2).
 
 This module tests the new context parameter functionality using property-based testing
 to ensure correctness across a wide range of inputs.
 
-Feature: fishertools-v0.4.0
+Feature: fishertools-v0.5.2
 """
 
 import pytest

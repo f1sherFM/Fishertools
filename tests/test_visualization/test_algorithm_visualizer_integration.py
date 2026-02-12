@@ -1,7 +1,7 @@
-﻿"""
+"""
 Integration tests for AlgorithmVisualizer with all supported algorithms.
 
-Feature: fishertools-v0.4.0, Task 13.1
+Feature: fishertools-v0.5.2, Task 13.1
 These tests validate that all sorting and search algorithms can be called
 via the AlgorithmVisualizer interface and work correctly together.
 """
@@ -374,7 +374,7 @@ class TestBackwardCompatibility:
         assert hasattr(result, 'statistics')
         assert hasattr(result, 'algorithm_name')
         assert hasattr(result, 'input_data')
-        assert hasattr(result, 'final_array')  # New in v0.4.0
+        assert hasattr(result, 'final_array')  # New in v0.5.2
         
         # Check that statistics structure is unchanged
         assert 'comparisons' in result.statistics

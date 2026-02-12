@@ -1,7 +1,7 @@
-﻿"""
+"""
 Unit tests for selection_sort algorithm edge cases.
 
-Feature: fishertools-v0.4.0
+Feature: fishertools-v0.5.2
 These tests validate specific behaviors and edge cases of the selection_sort algorithm.
 """
 

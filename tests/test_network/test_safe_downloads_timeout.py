@@ -1,7 +1,7 @@
-﻿"""
+"""
 Property-based and unit tests for SafeFileDownloader timeout support.
 
-Feature: fishertools-v0.4.0
+Feature: fishertools-v0.5.2
 Tests the timeout parameter additions to safe_download() method.
 """
 

@@ -1,7 +1,7 @@
-﻿"""
+"""
 Property-based tests for selection_sort algorithm.
 
-Feature: fishertools-v0.4.0
+Feature: fishertools-v0.5.2
 These tests validate the correctness properties of the selection_sort algorithm.
 """
 
@@ -15,7 +15,7 @@ class TestSelectionSortProperties:
     """
     Property tests for selection_sort algorithm.
     
-    Feature: fishertools-v0.4.0
+    Feature: fishertools-v0.5.2
     Task: 9.1 Write property tests for selection_sort
     """
     

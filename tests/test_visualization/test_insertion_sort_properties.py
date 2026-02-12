@@ -1,7 +1,7 @@
-﻿"""
+"""
 Property-based tests for insertion_sort algorithm.
 
-Feature: fishertools-v0.4.0
+Feature: fishertools-v0.5.2
 These tests validate the correctness properties of the insertion_sort algorithm.
 """
 
@@ -15,7 +15,7 @@ class TestInsertionSortProperties:
     """
     Property tests for insertion_sort algorithm.
     
-    Feature: fishertools-v0.4.0
+    Feature: fishertools-v0.5.2
     Task: 8.1 Write property tests for insertion_sort
     """
     

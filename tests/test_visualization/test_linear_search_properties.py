@@ -1,7 +1,7 @@
-﻿"""
+"""
 Property-based tests for linear_search algorithm.
 
-Feature: fishertools-v0.4.0
+Feature: fishertools-v0.5.2
 These tests validate the correctness properties of the linear_search algorithm.
 """
 
@@ -16,7 +16,7 @@ class TestLinearSearchProperties:
     """
     Property tests for linear_search algorithm.
     
-    Feature: fishertools-v0.4.0
+    Feature: fishertools-v0.5.2
     Task: 11.1 Write property tests for linear_search
     """
     

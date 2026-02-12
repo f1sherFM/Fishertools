@@ -1,4 +1,4 @@
-﻿"""
+"""
 Unit tests for algorithm visualizer.
 
 Feature: fishertools-enhancements
@@ -224,7 +224,7 @@ class TestMergeSortEdgeCases:
     """
     Unit tests for merge_sort edge cases.
     
-    Feature: fishertools-v0.4.0
+    Feature: fishertools-v0.5.2
     Validates: Requirements 4.1, 4.2, 4.3
     """
     

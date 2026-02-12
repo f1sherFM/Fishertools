@@ -1,7 +1,7 @@
-﻿"""
+"""
 Property-based tests for quick_sort algorithm.
 
-Feature: fishertools-v0.4.0
+Feature: fishertools-v0.5.2
 These tests validate the correctness properties of the quick_sort algorithm.
 """
 

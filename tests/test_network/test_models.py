@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests for network module data models.
 
 This module tests the core data structures used in network operations.
@@ -68,7 +68,7 @@ class TestNetworkResponse:
         assert response.status_code == 408
         assert bool(response) is False
     
-    # New tests for v0.4.0 enhancements
+    # New tests for v0.5.2 enhancements
     
     def test_json_method_on_successful_response(self):
         """Test .json() method returns data on successful response."""

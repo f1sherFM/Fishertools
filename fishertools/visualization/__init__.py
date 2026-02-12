@@ -1,4 +1,4 @@
-﻿"""Visualization module for fishertools.
+"""Visualization module for fishertools.
 
 Provides tools for visualizing data structures in a human-readable format,
 with enhanced options for styling, colors, and algorithm visualization.
@@ -43,7 +43,7 @@ __all__ = [
     "SearchStep",
     "AlgorithmVisualization",
     
-    # Algorithm implementations (v0.4.0)
+    # Algorithm implementations (v0.5.2)
     "visualize_quick_sort",
     "visualize_merge_sort",
     "visualize_insertion_sort",

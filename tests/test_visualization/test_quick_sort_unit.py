@@ -1,7 +1,7 @@
-﻿"""
+"""
 Unit tests for quick_sort algorithm edge cases.
 
-Feature: fishertools-v0.4.0
+Feature: fishertools-v0.5.2
 These tests validate specific behaviors and edge cases of the quick_sort algorithm.
 """
 

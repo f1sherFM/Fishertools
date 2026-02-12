@@ -1,7 +1,7 @@
-﻿"""
+"""
 Property-based tests for NetworkResponse enhancements.
 
-Feature: fishertools-v0.4.0
+Feature: fishertools-v0.5.2
 Tests the requests-compatible API additions to NetworkResponse.
 """
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests for backward compatibility of fishertools enhancements.
 
 This module ensures that all existing functionality continues to work
@@ -339,11 +339,11 @@ class TestVersionInformation:
             f"Version {fishertools.__version__} doesn't follow semantic versioning"
     
     def test_version_is_050(self):
-        """Test that version is 0.4.0 (algorithm expansion version)."""
+        """Test that version is 0.5.2 (algorithm expansion version)."""
         import fishertools
         
-        assert fishertools.__version__ == '0.4.0', \
-            f"Expected version 0.4.0, got {fishertools.__version__}"
+        assert fishertools.__version__ == '0.5.2', \
+            f"Expected version 0.5.2, got {fishertools.__version__}"
     
     def test_get_version_info_function_exists(self):
         """Test that get_version_info function exists."""

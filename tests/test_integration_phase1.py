@@ -1,4 +1,4 @@
-﻿"""Integration tests for Phase 1 modules (v0.4.0)."""
+"""Integration tests for Phase 1 modules (v0.5.2)."""
 
 import pytest
 from fishertools.visualization import visualize
