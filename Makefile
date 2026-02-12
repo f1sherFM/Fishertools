@@ -11,21 +11,21 @@ install-dev:
 
 # Запуск демонстрации
 demo:
-	python3 examples.py
+	python3 examples/refactored_safe_usage.py
 
 # Форматирование кода
 format:
-	black mydevtools/ examples.py
+	black fishertools/ examples/ tests/
 
 # Проверка стиля
 lint:
-	ruff check mydevtools/ examples.py
-	mypy mydevtools/
+	ruff check fishertools/ examples/ tests/
+	mypy fishertools/
 
 # Проверка стиля (альтернативно через flake8)
 lint-flake8:
-	flake8 mydevtools/
-	mypy mydevtools/
+	flake8 fishertools/
+	mypy fishertools/
 
 # Очистка временных файлов
 clean:

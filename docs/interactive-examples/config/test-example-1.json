@@ -2,7 +2,7 @@
   "id": "test-example-1",
   "module": "config",
   "title": "Test Example",
-  "code": "try:\n    x = 1 / 0\nexcept ZeroDivisionError:\n    print('error')",
+  "code": "result = 2 + 2",
   "expected_output": "output",
   "explanation": "This is a test",
   "variations": [],

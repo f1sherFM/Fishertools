@@ -2,6 +2,15 @@
 
 Все важные изменения в проекте Fishertools будут документированы в этом файле.
 
+## [0.5.2] - 2026-02-12
+
+### Fixes
+
+- Network API aligned with requests-like response helpers (`.json()`, `.text`, `.content`)
+- Removed duplicate network response models by using shared definitions
+- Makefile targets updated to current project structure
+- Changelog aligned with published version
+
 ## [0.5.1] - 2026-02-09
 
 ### 🎯 Algorithm Expansion & API Unification Release

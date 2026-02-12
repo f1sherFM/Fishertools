@@ -1,7 +1,7 @@
 {
   "id": "test-multi-5",
   "module": "errors",
-  "title": "\udbb7\udee2\udb4d\udd50\ud979\udd88\u0083",
+  "title": "\n\u00a3",
   "code": "x = 1",
   "expected_output": "output",
   "explanation": "This is a test",

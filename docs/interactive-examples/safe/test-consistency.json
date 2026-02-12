@@ -2,7 +2,7 @@
   "id": "test-consistency",
   "module": "safe",
   "title": "Test Example",
-  "code": "x = 1\nprint(x)",
+  "code": "def hello():\n    return 'world'",
   "expected_output": "output",
   "explanation": "This is a test",
   "variations": [],

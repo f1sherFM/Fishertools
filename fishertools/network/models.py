@@ -52,6 +52,7 @@ class NetworkResponse:
     data: Any = None
     error: str | None = None
     status_code: int | None = None
+    headers: dict[str, str] | None = None
 
     def __bool__(self) -> bool:
         """Allow using response in boolean context."""

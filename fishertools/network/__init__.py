@@ -19,7 +19,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional, Callable
 
-from .safe_requests import SafeHTTPClient, NetworkResponse, NetworkRequest
+from .safe_requests import SafeHTTPClient
+from .models import NetworkRequest, NetworkResponse
 from .safe_downloads import (
     SafeFileDownloader, 
     DownloadResponse, 

@@ -1,7 +1,7 @@
 {
   "id": "test-multi-1",
   "module": "errors",
-  "title": "\ud83c\udffb\ud83d\udc4d\ud83c\udffb",
+  "title": "\u008a\uda89\ude876z",
   "code": "x = 1",
   "expected_output": "output",
   "explanation": "This is a test",

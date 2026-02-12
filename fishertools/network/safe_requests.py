@@ -7,7 +7,6 @@ with proper timeout handling, error conversion, and structured responses.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import Any, Dict, Optional
 import requests
 from requests.exceptions import (
@@ -19,30 +18,7 @@ from requests.exceptions import (
     InvalidURL,
 )
 
-
-@dataclass
-class NetworkRequest:
-    """Data model for network request parameters"""
-    url: str
-    method: str = 'GET'
-    timeout: float = 10.0
-    headers: Dict[str, str] = field(default_factory=dict)
-    params: Dict[str, Any] = field(default_factory=dict)
-    data: Optional[Any] = None
-
-
-@dataclass
-class NetworkResponse:
-    """Structured response for network operations"""
-    success: bool
-    data: Optional[Any] = None
-    error: Optional[str] = None
-    status_code: Optional[int] = None
-    headers: Optional[Dict[str, str]] = None
-    
-    def __bool__(self) -> bool:
-        """Allow using response in boolean context"""
-        return self.success
+from .models import NetworkRequest, NetworkResponse
 
 
 class SafeHTTPClient:
