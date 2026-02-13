@@ -46,8 +46,8 @@ def safe_get(collection: Union[List, Tuple, Dict, str],
     Returns:
         Element from collection or default value
         
-    Raises:
-        SafeUtilityError: If collection is None or obviously wrong type
+    Note:
+        For invalid collection types, returns default instead of raising.
         
     Examples:
         >>> safe_get([1, 2, 3], 1)
@@ -67,14 +67,9 @@ def safe_get(collection: Union[List, Tuple, Dict, str],
         We check for obviously wrong types (None, bool, numbers) to help beginners.
         For valid collection types, we use EAFP (Easier to Ask Forgiveness than Permission).
     """
-    from ..errors.exceptions import SafeUtilityError
-    
     # Check for obviously wrong types that beginners might pass
     if collection is None or isinstance(collection, (bool, int, float, complex)):
-        raise SafeUtilityError(
-            "Коллекция не может быть None или числом. Передайте список, кортеж, словарь или строку.",
-            utility_name="safe_get"
-        )
+        return default
     
     # For everything else, use EAFP - try and handle exceptions
     try:
@@ -102,8 +97,8 @@ def safe_divide(a: Union[int, float], b: Union[int, float],
     Returns:
         Result of division, or default value if b is zero
         
-    Raises:
-        SafeUtilityError: If arguments are obviously wrong types (None, bool, complex, str)
+    Note:
+        For invalid argument types, returns default instead of raising.
         
     Examples:
         >>> safe_divide(10, 2)
@@ -119,21 +114,14 @@ def safe_divide(a: Union[int, float], b: Union[int, float],
         Division by zero is mathematically undefined. Returning 0 by default
         would be incorrect. Use default parameter if you need specific behavior.
     """
-    from ..errors.exceptions import SafeUtilityError
     import math
     
     # Check for obviously wrong types that beginners might pass
     if a is None or isinstance(a, (bool, complex, str)):
-        raise SafeUtilityError(
-            f"Делимое должно быть числом (int или float), получен {type(a).__name__}",
-            utility_name="safe_divide"
-        )
+        return default
     
     if b is None or isinstance(b, (bool, complex, str)):
-        raise SafeUtilityError(
-            f"Делитель должен быть числом (int или float), получен {type(b).__name__}",
-            utility_name="safe_divide"
-        )
+        return default
     
     # Check for zero division
     if b == 0:
@@ -308,3 +296,4 @@ def safe_average(numbers: List[Union[int, float]],
     except (TypeError, ValueError, ZeroDivisionError, OverflowError):
         # Fallback for any edge cases
         return default
+

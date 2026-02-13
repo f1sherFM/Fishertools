@@ -142,8 +142,14 @@ def safe_read_file(filepath: Union[str, Path], encoding: str = 'utf-8', default:
     from ..errors.exceptions import SafeUtilityError
     
     # Validate path security
-    filepath = _validate_safe_path(filepath, "safe_read_file")
+    try:
+        filepath = _validate_safe_path(filepath, "safe_read_file")
+    except SafeUtilityError:
+        return default
     
+    if not isinstance(encoding, str):
+        return default
+
     if not isinstance(encoding, str):
         raise SafeUtilityError(f"Кодировка должна быть строкой, получен {type(encoding).__name__}", 
                              utility_name="safe_read_file")
@@ -276,7 +282,13 @@ def safe_get_file_size(filepath: Union[str, Path], default: int = 0) -> int:
         0
     """
     from ..errors.exceptions import SafeUtilityError
-    
+
+    if filepath is None:
+        return default
+
+    if not isinstance(filepath, (str, Path)):
+        return default
+
     if filepath is None:
         raise SafeUtilityError("Путь к файлу не может быть None", utility_name="safe_get_file_size")
     
@@ -317,6 +329,15 @@ def safe_list_files(directory: Union[str, Path], pattern: str = "*", default: Op
     
     if default is None:
         default = []
+
+    if directory is None:
+        return default
+
+    if not isinstance(directory, (str, Path)):
+        return default
+
+    if not isinstance(pattern, str):
+        return default
     
     if directory is None:
         raise SafeUtilityError("Путь к директории не может быть None", utility_name="safe_list_files")
@@ -363,8 +384,14 @@ def safe_read_json(
     """
     from ..errors.exceptions import SafeUtilityError
     
-    filepath = _validate_safe_path(filepath, "safe_read_json")
+    try:
+        filepath = _validate_safe_path(filepath, "safe_read_json")
+    except SafeUtilityError:
+        return default
     
+    if not isinstance(encoding, str):
+        return default
+
     if not isinstance(encoding, str):
         raise SafeUtilityError(
             f"Encoding must be a string, got {type(encoding).__name__}",
@@ -470,8 +497,14 @@ def safe_read_yaml(
     """
     from ..errors.exceptions import SafeUtilityError
     
-    filepath = _validate_safe_path(filepath, "safe_read_yaml")
+    try:
+        filepath = _validate_safe_path(filepath, "safe_read_yaml")
+    except SafeUtilityError:
+        return default
     
+    if not isinstance(encoding, str):
+        return default
+
     if not isinstance(encoding, str):
         raise SafeUtilityError(
             f"Encoding must be a string, got {type(encoding).__name__}",
@@ -572,8 +605,14 @@ def safe_read_toml(
     """
     from ..errors.exceptions import SafeUtilityError
     
-    filepath = _validate_safe_path(filepath, "safe_read_toml")
+    try:
+        filepath = _validate_safe_path(filepath, "safe_read_toml")
+    except SafeUtilityError:
+        return default
     
+    if not isinstance(encoding, str):
+        return default
+
     if not isinstance(encoding, str):
         raise SafeUtilityError(
             f"Encoding must be a string, got {type(encoding).__name__}",

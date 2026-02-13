@@ -112,16 +112,13 @@ class TestSafeFileOperations:
         assert files == ["default"]
     
     def test_input_validation_errors(self):
-        """Test that functions raise appropriate errors for invalid inputs."""
+        """Test default-return behavior for reads and strict validation for writes."""
         from fishertools.errors.exceptions import SafeUtilityError
         
-        with pytest.raises(SafeUtilityError, match="не может быть None"):
-            safe_read_file(None)
+        assert safe_read_file(None, default="fallback") == "fallback"
+        assert safe_read_file("test.txt", encoding=123, default="fallback") == "fallback"
         
-        with pytest.raises(SafeUtilityError, match="должна быть строкой"):
-            safe_read_file("test.txt", encoding=123)
-        
-        with pytest.raises(SafeUtilityError, match="должно быть строкой"):
+        with pytest.raises(SafeUtilityError):
             safe_write_file("test.txt", 123)
 
 

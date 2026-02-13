@@ -8,7 +8,6 @@ into different languages with automatic fallback behavior.
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -37,7 +36,9 @@ class ErrorTranslator:
     def explain_error(
         self,
         error: Exception,
-        lang: str = 'ru'
+        lang: str = 'ru',
+        default: Optional[str] = None,
+        language: Optional[str] = None,
     ) -> ErrorExplanation:
         """
         Provide error explanation in the specified language.
@@ -49,33 +50,35 @@ class ErrorTranslator:
         Args:
             error: The exception to explain
             lang: Language code ('en', 'ru', or 'auto' for detection)
+            default: Fallback language code if requested language is unsupported
+            language: Alias for lang (for signature compatibility)
         
         Returns:
             ErrorExplanation with translated text and suggestions
         """
-        # Store original language for fallback detection
-        original_lang = lang
-        
-        # Handle 'auto' language detection
-        if lang == 'auto':
-            lang = self.language_detector.detect_system_language()
-            original_lang = lang  # Don't mark auto-detection as fallback
-        
-        # Check if language is supported before normalization
-        fallback_used = False
-        if not self.language_detector.is_language_supported(lang):
-            # Mark that we're using fallback
-            fallback_used = True
-        
-        # Normalize the language code (this may also trigger fallback)
-        normalized_lang = self.language_detector.normalize_language_code(lang)
-        
-        # If normalization changed the language to fallback, mark it
-        if not fallback_used and normalized_lang != lang.lower().split('_')[0].split('-')[0]:
-            if not self.language_detector.is_language_supported(lang.lower().split('_')[0].split('-')[0]):
-                fallback_used = True
-        
-        lang = normalized_lang
+        requested_lang = language if language is not None else lang
+        fallback_lang = self.language_detector.normalize_language_code(
+            default or self.language_detector.DEFAULT_LANGUAGE
+        )
+
+        if requested_lang == "auto":
+            lang = self.language_detector.detect_system_language(default=fallback_lang)
+            fallback_used = lang != fallback_lang and not self.language_detector.is_language_supported(lang)
+        else:
+            normalized_requested = self.language_detector.normalize_language_code(
+                requested_lang,
+                fallback=fallback_lang
+            )
+            requested_base = (
+                requested_lang.lower().split("_")[0].split("-")[0]
+                if isinstance(requested_lang, str) and requested_lang
+                else ""
+            )
+            fallback_used = (
+                normalized_requested == fallback_lang
+                and requested_base != fallback_lang
+            )
+            lang = normalized_requested
         
         # Get error type
         error_type = type(error).__name__
@@ -196,7 +199,9 @@ class ErrorTranslator:
 # Convenience function for one-off translations
 def translate_error(
     error: Exception,
-    lang: str = 'ru'
+    lang: str = 'ru',
+    default: Optional[str] = None,
+    language: Optional[str] = None,
 ) -> ErrorExplanation:
     """
     Translate an error without creating a translator instance.
@@ -206,9 +211,11 @@ def translate_error(
     Args:
         error: The exception to explain
         lang: Language code ('en', 'ru', or 'auto' for detection)
+        default: Fallback language code
+        language: Alias for lang (for signature compatibility)
     
     Returns:
         ErrorExplanation with translated text and suggestions
     """
     translator = ErrorTranslator()
-    return translator.explain_error(error, lang)
+    return translator.explain_error(error, lang=lang, default=default, language=language)

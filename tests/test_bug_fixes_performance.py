@@ -126,10 +126,7 @@ class TestRegressionPrevention:
         # safe_get
         assert safe_get({"key": "value"}, "key") == "value"
         assert safe_get({"key": "value"}, "missing", "default") == "default"
-        # safe_get now raises SafeUtilityError for None (improved behavior)
-        from fishertools.errors.exceptions import SafeUtilityError
-        with pytest.raises(SafeUtilityError):
-            safe_get(None, "key", "default")
+        assert safe_get(None, "key", "default") == "default"
         
         # safe_divide
         assert safe_divide(10, 2) == 5.0
@@ -316,10 +313,10 @@ class TestCrossPlatformCompatibility:
         """Test that unicode works across platforms."""
         # Test with various unicode characters
         unicode_strings = [
-            "Hello, мир!",  # Russian
-            "你好世界",  # Chinese
-            "مرحبا بالعالم",  # Arabic
-            "🚀 🎉 ✨"  # Emojis
+            "Hello, РјРёСЂ!",  # Russian
+            "дЅ еҐЅдё–з•Њ",  # Chinese
+            "Щ…Ш±Ш­ШЁШ§ ШЁШ§Щ„Ш№Ш§Щ„Щ…",  # Arabic
+            "рџљЂ рџЋ‰ вњЁ"  # Emojis
         ]
         
         for s in unicode_strings:

@@ -25,7 +25,7 @@ class LanguageDetector:
     DEFAULT_LANGUAGE = 'ru'  # Maintain backward compatibility
     FALLBACK_LANGUAGE = 'en'
     
-    def detect_system_language(self) -> str:
+    def detect_system_language(self, default: Optional[str] = None) -> str:
         """
         Detect the system language using locale settings.
         
@@ -33,9 +33,14 @@ class LanguageDetector:
         locale settings. If detection fails or the language is not supported,
         it returns the default language.
         
+        Args:
+            default: Fallback language if detection fails or unsupported.
+                If None, uses DEFAULT_LANGUAGE.
+
         Returns:
             Language code (e.g., 'en', 'ru')
         """
+        fallback = self.normalize_language_code(default) if default else self.DEFAULT_LANGUAGE
         try:
             # locale.getdefaultlocale() is deprecated (Python 3.15+),
             # so we prefer getlocale() and keep a conservative fallback.
@@ -51,18 +56,18 @@ class LanguageDetector:
             
             if lang_code:
                 # Normalize and check if supported
-                normalized = self.normalize_language_code(lang_code)
+                normalized = self.normalize_language_code(lang_code, fallback=fallback)
                 if self.is_language_supported(normalized):
                     return normalized
             
             # If detection failed or unsupported, return default
-            return self.DEFAULT_LANGUAGE
+            return fallback
             
         except (ValueError, TypeError, locale.Error):
             # If any error occurs during detection, return default
-            return self.DEFAULT_LANGUAGE
-    
-    def is_language_supported(self, lang_code: str) -> bool:
+            return fallback
+
+    def is_language_supported(self, lang_code: Optional[str]) -> bool:
         """
         Check if a language is supported.
         
@@ -72,9 +77,15 @@ class LanguageDetector:
         Returns:
             True if the language is supported, False otherwise
         """
+        if not isinstance(lang_code, str):
+            return False
         return lang_code.lower() in self.SUPPORTED_LANGUAGES
-    
-    def normalize_language_code(self, lang_code: str) -> str:
+
+    def normalize_language_code(
+        self,
+        lang_code: Optional[str],
+        fallback: Optional[str] = None
+    ) -> str:
         """
         Normalize a language code to a standard format.
         
@@ -87,25 +98,41 @@ class LanguageDetector:
         Returns:
             Normalized language code (e.g., 'en', 'ru')
         """
+        resolved_fallback = (
+            fallback
+            if fallback in self.SUPPORTED_LANGUAGES
+            else self.DEFAULT_LANGUAGE
+        )
         if not lang_code:
-            return self.DEFAULT_LANGUAGE
+            return resolved_fallback
         
         # Extract the base language code (first two letters)
         base_code = lang_code.lower().split('_')[0].split('-')[0]
         
         # Return the base code if supported, otherwise return fallback
-        return base_code if self.is_language_supported(base_code) else self.FALLBACK_LANGUAGE
+        return base_code if self.is_language_supported(base_code) else resolved_fallback
 
 
 # Convenience function for one-off language detection
-def detect_language() -> str:
+def detect_language(
+    lang_code: Optional[str] = None,
+    default: str = LanguageDetector.DEFAULT_LANGUAGE
+) -> str:
     """
     Detect the system language without creating a detector instance.
     
     This is a convenience function for one-off language detection.
     
+    Args:
+        lang_code: Optional explicit locale/language code to normalize.
+            If omitted, detects from system locale.
+        default: Fallback language if detection/normalization fails.
+
     Returns:
         Language code (e.g., 'en', 'ru')
     """
     detector = LanguageDetector()
-    return detector.detect_system_language()
+    normalized_default = detector.normalize_language_code(default)
+    if lang_code is not None:
+        return detector.normalize_language_code(lang_code, fallback=normalized_default)
+    return detector.detect_system_language(default=normalized_default)
