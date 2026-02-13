@@ -2,6 +2,13 @@
 
 Все важные изменения в проекте Fishertools будут документированы в этом файле.
 
+## [0.5.2.2] - 2026-02-13
+
+### Fixes
+
+- Fixed PyPI short description encoding (project.description)
+- Bumped version to 0.5.2.2
+
 ## [0.5.2] - 2026-02-12
 
 ### Fixes
