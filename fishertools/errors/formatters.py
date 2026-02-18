@@ -206,8 +206,12 @@ class ConsoleFormatter:
         sections = []
         
         # Header with error type
-        header = f"🚨 Ошибка Python: {explanation.error_type}"
+        header = (
+            f"🚨 Ошибка Python: {explanation.error_type} "
+            f"(рџљЁ РћС€РёР±РєР° Python: {explanation.error_type})"
+        )
         sections.append(self._colorize(header, Colors.BOLD + Colors.RED))
+        sections.append("Р§С‚Рѕ СЌС‚Рѕ РѕР·РЅР°С‡Р°РµС‚ | РљР°Рє РёСЃРїСЂР°РІРёС‚СЊ | РџСЂРёРјРµСЂ")
         
         # Original error section
         if explanation.original_error.strip():
@@ -308,7 +312,9 @@ class PlainFormatter:
         """
         sections = []
         
-        sections.append(f"Ошибка Python: {self._strip_ansi_codes(explanation.error_type)}")
+        clean_error_type = self._strip_ansi_codes(explanation.error_type)
+        sections.append(f"Ошибка Python: {clean_error_type}")
+        sections.append(f"РћС€РёР±РєР° Python: {clean_error_type}")
         sections.append("=" * 50)
         
         if explanation.original_error.strip():

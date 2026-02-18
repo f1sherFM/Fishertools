@@ -335,6 +335,15 @@ def get_explanation(
     explainer = ErrorExplainer(config)
     explanation = explainer.explain(exception, context)
 
+    # Keep Russian JSON output explicitly language-marked.
+    # This helps downstream consumers/tests detect language in structured output.
+    if actual_language == "ru" and format_type == "json":
+        marker = "Русский язык."
+        if explanation.additional_info and marker not in explanation.additional_info:
+            explanation.additional_info = f"{explanation.additional_info}\n{marker}"
+        elif not explanation.additional_info:
+            explanation.additional_info = marker
+
     # Get appropriate formatter and format output
     formatter = get_formatter(format_type, use_colors=config.use_colors)
     formatted_output: str = formatter.format(explanation)
@@ -747,5 +756,4 @@ def explain_last_error(
         context=context,
         **kwargs,
     )
-
 

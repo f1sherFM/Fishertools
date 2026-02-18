@@ -222,7 +222,7 @@ class ProgressSystem:
             with open(self.storage_path, 'w', encoding='utf-8') as f:
                 json.dump(all_progress, f, indent=2)
                 
-        except (OSError, json.JSONEncodeError) as e:
+        except (OSError, TypeError, ValueError):
             # Silently fail - progress tracking shouldn't break the system
             pass
     

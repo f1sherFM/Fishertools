@@ -127,6 +127,15 @@ class SimpleLogger:
         """
         with self._lock:  # Thread-safe file writing
             try:
+                reserved_names = {
+                    "CON", "PRN", "AUX", "NUL",
+                    "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+                    "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+                }
+                stem_upper = Path(self.file_path).name.split(".")[0].upper()
+                if stem_upper in reserved_names:
+                    raise ValueError(f"Invalid log file path: {self.file_path}")
+
                 # Create parent directories if they don't exist
                 parent_dir = os.path.dirname(self.file_path)
                 if parent_dir:

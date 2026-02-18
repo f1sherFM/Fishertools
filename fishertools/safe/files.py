@@ -841,6 +841,8 @@ def ensure_dir(path: Union[str, Path]) -> Path:
         return path_obj
     except PermissionError as e:
         raise PermissionError(f"Permission denied creating directory: {path}") from e
+    except UnicodeError as e:
+        raise OSError(f"Failed to create directory: {path}") from e
     except OSError as e:
         raise OSError(f"Failed to create directory: {path}") from e
 
@@ -942,70 +944,12 @@ def read_last_lines(
         raise FileNotFoundError(f"File not found: {file_path}")
     
     try:
-        with open(file_path_obj, 'rb') as f:
-            # Get file size
-            f.seek(0, 2)  # Seek to end
-            file_size = f.tell()
-            
-            # If file is empty, return empty list
-            if file_size == 0:
-                return []
-            
-            # Buffer for reading from end
-            buffer_size = 8192  # 8KB buffer
-            lines = []
-            position = file_size
-            
-            # Read file from end in chunks
-            while position > 0 and len(lines) < n:
-                # Calculate how much to read
-                read_size = min(buffer_size, position)
-                position -= read_size
-                
-                # Seek and read
-                f.seek(position)
-                chunk = f.read(read_size)
-                
-                # Decode chunk
-                try:
-                    text = chunk.decode('utf-8')
-                except UnicodeDecodeError:
-                    # Try with latin-1 as fallback
-                    text = chunk.decode('latin-1', errors='replace')
-                
-                # Split by newlines and process
-                chunk_lines = text.split('\n')
-                
-                # If we're not at the start of file, the first line is incomplete
-                if position > 0:
-                    # Keep the incomplete line for next iteration
-                    incomplete_line = chunk_lines[0]
-                    chunk_lines = chunk_lines[1:]
-                else:
-                    # At start of file, all lines are complete
-                    incomplete_line = None
-                
-                # Add lines in reverse order (we're reading backwards)
-                for line in reversed(chunk_lines):
-                    if line or lines:  # Skip empty lines at the end
-                        lines.insert(0, line)
-                        if len(lines) >= n:
-                            break
-                
-                # If we're at the start and have incomplete line, add it
-                if position == 0 and incomplete_line:
-                    lines.insert(0, incomplete_line)
-            
-            # Clean up: remove empty lines at the end and limit to n
-            result = []
-            for line in lines:
-                # Strip newline characters
-                cleaned = line.rstrip('\r\n')
-                result.append(cleaned)
-            
-            # Return only the last n lines
-            return result[-n:] if len(result) > n else result
-    
+        with open(file_path_obj, 'r', encoding='utf-8', errors='replace') as f:
+            all_lines = [line.rstrip('\r\n') for line in f]
+        if n <= 0:
+            return []
+        return all_lines[-n:]
+
     except PermissionError as e:
         raise PermissionError(f"Permission denied reading file: {file_path}") from e
     except OSError as e:

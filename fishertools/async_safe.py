@@ -45,7 +45,7 @@ async def async_safe_read_file(
             print(f"Config: {content}")
     """
     try:
-        return await asyncio.to_thread(_read_file_sync, file_path, encoding)
+        return _read_file_sync(file_path, encoding)
     except Exception:
         return default
 
@@ -72,7 +72,7 @@ async def async_safe_write_file(
             print("File written successfully")
     """
     try:
-        await asyncio.to_thread(_write_file_sync, file_path, content, encoding)
+        _write_file_sync(file_path, content, encoding)
         return True
     except Exception:
         return False
@@ -93,7 +93,7 @@ async def async_safe_file_exists(file_path: str) -> bool:
             content = await async_safe_read_file("data.txt")
     """
     try:
-        return await asyncio.to_thread(os.path.exists, file_path)
+        return os.path.exists(file_path)
     except Exception:
         return False
 
@@ -114,7 +114,7 @@ async def async_safe_get_file_size(file_path: str, default: int = 0) -> int:
         print(f"File size: {size} bytes")
     """
     try:
-        return await asyncio.to_thread(os.path.getsize, file_path)
+        return os.path.getsize(file_path)
     except Exception:
         return default
 
@@ -139,7 +139,7 @@ async def async_safe_list_files(
             print(file)
     """
     try:
-        return await asyncio.to_thread(_list_files_sync, directory, pattern)
+        return _list_files_sync(directory, pattern)
     except Exception:
         return []
 

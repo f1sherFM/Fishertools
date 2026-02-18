@@ -57,8 +57,9 @@ class ErrorTranslator:
             ErrorExplanation with translated text and suggestions
         """
         requested_lang = language if language is not None else lang
+        # For unsupported/invalid language requests, product fallback is English.
         fallback_lang = self.language_detector.normalize_language_code(
-            default or self.language_detector.DEFAULT_LANGUAGE
+            default or self.language_detector.FALLBACK_LANGUAGE
         )
 
         if requested_lang == "auto":

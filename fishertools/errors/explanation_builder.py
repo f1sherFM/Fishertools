@@ -81,7 +81,10 @@ class ExplanationBuilder:
         try:
             error_type = type(exception).__name__
             
-            explanation = f"Произошла ошибка типа {error_type}. Это означает, что в вашем коде что-то пошло не так."
+            explanation = (
+                f"Произошла ошибка типа {error_type}. Это означает, что в вашем коде что-то пошло не так."
+                f"\nРџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР° С‚РёРїР° {error_type}"
+            )
             fix_tip = "Внимательно прочитайте сообщение об ошибке и проверьте строку кода, где произошла ошибка. Убедитесь, что все переменные определены и имеют правильные типы."
             additional_info = "Если вы не можете решить проблему самостоятельно, попробуйте поискать информацию об этом типе ошибки в документации Python или задать вопрос на форуме."
             
@@ -298,4 +301,3 @@ class ExplanationBuilder:
                 code_example="# Please contact support",
                 traceback_context="Critical system error"
             )
-

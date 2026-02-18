@@ -133,12 +133,11 @@ class AsyncSimpleLogger:
         """
         async with self._lock:  # Async-safe file writing
             try:
-                # Create parent directories if they don't exist
+                # Create parent directories if they don't exist.
+                # Avoid asyncio.to_thread here because some runtimes may block on thread offloading.
                 parent_dir = os.path.dirname(self.file_path)
                 if parent_dir:
-                    await asyncio.to_thread(
-                        Path(parent_dir).mkdir, parents=True, exist_ok=True
-                    )
+                    Path(parent_dir).mkdir(parents=True, exist_ok=True)
                 
                 # Get current timestamp
                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -146,8 +145,8 @@ class AsyncSimpleLogger:
                 # Format log message
                 log_entry = f"[{timestamp}] [{level}] {message}\n"
                 
-                # Append to log file with UTF-8 encoding (non-blocking)
-                await asyncio.to_thread(self._write_to_file, log_entry)
+                # Append to log file with UTF-8 encoding.
+                self._write_to_file(log_entry)
             except IOError as e:
                 raise IOError(f"Failed to write to {self.file_path}: {e}")
 
