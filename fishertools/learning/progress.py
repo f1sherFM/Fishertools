@@ -4,9 +4,12 @@ Progress tracking system for learning activities.
 
 import json
 import os
+import logging
 from typing import List, Optional, Dict
 from datetime import datetime
 from .models import LearningProgress, DifficultyLevel
+
+logger = logging.getLogger(__name__)
 
 
 class ProgressSystem:
@@ -196,8 +199,10 @@ class ProgressSystem:
             return
         
         try:
-            # Ensure storage directory exists
-            os.makedirs(os.path.dirname(self.storage_path), exist_ok=True)
+            # Ensure storage directory exists when path includes directory.
+            storage_dir = os.path.dirname(self.storage_path)
+            if storage_dir:
+                os.makedirs(storage_dir, exist_ok=True)
             
             # Load existing data
             all_progress = {}
@@ -222,9 +227,14 @@ class ProgressSystem:
             with open(self.storage_path, 'w', encoding='utf-8') as f:
                 json.dump(all_progress, f, indent=2)
                 
-        except (OSError, TypeError, ValueError):
-            # Silently fail - progress tracking shouldn't break the system
-            pass
+        except (OSError, TypeError, ValueError, json.JSONDecodeError) as e:
+            # Graceful UX: persistence failures should not break learning flow.
+            logger.warning(
+                "Progress persistence fallback activated: user_id=%s path=%s error=%s",
+                user_id,
+                self.storage_path,
+                e,
+            )
     
     def load_progress(self, user_id: str) -> Optional[LearningProgress]:
         """
@@ -263,8 +273,14 @@ class ProgressSystem:
             self._progress_data[user_id] = progress
             return progress
             
-        except (OSError, json.JSONDecodeError, KeyError, ValueError):
+        except (OSError, json.JSONDecodeError, KeyError, ValueError) as e:
             # Return None if loading fails
+            logger.warning(
+                "Progress load fallback activated: user_id=%s path=%s error=%s",
+                user_id,
+                self.storage_path,
+                e,
+            )
             return None
     
     def _check_achievements(self, progress: LearningProgress, completed_topic: str) -> None:

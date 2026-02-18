@@ -7,11 +7,14 @@ configuration with file persistence and validation.
 
 import json
 import os
+import logging
 from pathlib import Path
 from typing import Optional, Dict, Any, Union
 from dataclasses import asdict
 
 from .models import NetworkConfig, VisualizationConfig, I18nConfig, ValidationResult, ConfigError, ErrorSeverity
+
+logger = logging.getLogger(__name__)
 
 
 class SettingsManager:
@@ -50,7 +53,11 @@ class SettingsManager:
             self.config_dir.mkdir(parents=True, exist_ok=True)
         except Exception as e:
             # If we can't create the directory, we'll use in-memory defaults
-            pass
+            logger.warning(
+                "Settings directory fallback activated: dir=%s error=%s",
+                self.config_dir,
+                e,
+            )
     
     def load_settings(self) -> bool:
         """
@@ -79,6 +86,11 @@ class SettingsManager:
             
         except Exception as e:
             # On error, use defaults
+            logger.warning(
+                "Settings load fallback activated: path=%s error=%s",
+                self.config_file,
+                e,
+            )
             self._network_config = NetworkConfig()
             self._visualization_config = VisualizationConfig()
             self._i18n_config = I18nConfig()
@@ -117,6 +129,11 @@ class SettingsManager:
             return True
             
         except Exception as e:
+            logger.warning(
+                "Settings save fallback activated: path=%s error=%s",
+                self.config_file,
+                e,
+            )
             return False
     
     def _load_network_config(self, data: Dict[str, Any]) -> NetworkConfig:

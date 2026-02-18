@@ -5,9 +5,12 @@ Configuration manager for the learning system.
 from typing import Optional, Dict, Any
 import json
 import os
+import logging
 from dataclasses import asdict
 from .models import LearningConfig, ValidationResult, RecoveryAction, ConfigError
 from .parser import ConfigurationParser
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigurationManager:
@@ -153,9 +156,18 @@ class ConfigurationManager:
                 return self._dict_to_config(config_data)
             else:
                 # Return hardcoded defaults if file doesn't exist
+                logger.debug(
+                    "Default config file missing, using in-memory defaults: path=%s",
+                    self.default_config_path,
+                )
                 return LearningConfig()
-        except Exception:
+        except Exception as e:
             # Return hardcoded defaults if parsing fails
+            logger.warning(
+                "Default config fallback activated: path=%s error=%s",
+                self.default_config_path,
+                e,
+            )
             return LearningConfig()
     
     def merge_configs(self, base_config: LearningConfig, override_config: Dict[str, Any]) -> LearningConfig:
