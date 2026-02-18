@@ -63,8 +63,32 @@ class SimpleLogger:
         Parameters:
             file_path (str): Path to the log file.
         """
-        self.file_path = file_path
+        self.file_path = self._validate_log_path(file_path)
         self._lock = threading.Lock()  # Thread-safe logging
+
+    def _validate_log_path(self, file_path):
+        if not isinstance(file_path, (str, os.PathLike)):
+            raise TypeError("file_path must be a string or path-like object")
+
+        normalized = os.fspath(file_path)
+        if not normalized or not str(normalized).strip():
+            raise ValueError("Log file path cannot be empty")
+        if "\x00" in normalized:
+            raise ValueError("Log file path contains null byte")
+
+        reserved_names = {
+            "CON", "PRN", "AUX", "NUL",
+            "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+            "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+        }
+        stem_upper = Path(normalized).name.split(".")[0].upper()
+        if stem_upper in reserved_names:
+            raise ValueError(f"Invalid log file path: {normalized}")
+
+        if os.path.isdir(normalized):
+            raise IsADirectoryError(f"Log path points to a directory: {normalized}")
+
+        return normalized
 
     def info(self, message):
         """
@@ -127,15 +151,6 @@ class SimpleLogger:
         """
         with self._lock:  # Thread-safe file writing
             try:
-                reserved_names = {
-                    "CON", "PRN", "AUX", "NUL",
-                    "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
-                    "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
-                }
-                stem_upper = Path(self.file_path).name.split(".")[0].upper()
-                if stem_upper in reserved_names:
-                    raise ValueError(f"Invalid log file path: {self.file_path}")
-
                 # Create parent directories if they don't exist
                 parent_dir = os.path.dirname(self.file_path)
                 if parent_dir:
@@ -150,5 +165,7 @@ class SimpleLogger:
                 # Append to log file with UTF-8 encoding
                 with open(self.file_path, 'a', encoding='utf-8') as f:
                     f.write(log_entry)
+            except (ValueError, TypeError, IsADirectoryError):
+                raise
             except IOError as e:
                 raise IOError(f"Failed to write to {self.file_path}: {e}")

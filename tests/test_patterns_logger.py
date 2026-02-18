@@ -435,13 +435,25 @@ class TestSimpleLoggerErrorHandling:
     
     def test_raises_ioerror_for_invalid_path(self):
         """Test that SimpleLogger raises an error for invalid paths."""
-        # Use a path that will fail during file operations
-        # On Windows, we can use a reserved device name
-        invalid_path = "CON"  # Reserved device name on Windows
-        logger = SimpleLogger(invalid_path)
-        
-        with pytest.raises((IOError, OSError, ValueError)):
-            logger.info("Test message")
+        invalid_path = "CON"  # Reserved device name on Windows family
+        with pytest.raises(ValueError):
+            SimpleLogger(invalid_path)
+
+    def test_raises_valueerror_for_empty_path(self):
+        """Logger should reject empty path eagerly."""
+        with pytest.raises(ValueError):
+            SimpleLogger("")
+
+    def test_raises_valueerror_for_null_byte_path(self):
+        """Logger should reject paths containing null bytes."""
+        with pytest.raises(ValueError):
+            SimpleLogger("bad\x00path.log")
+
+    def test_raises_isadir_for_directory_target(self):
+        """Logger should reject directory targets."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with pytest.raises(IsADirectoryError):
+                SimpleLogger(tmpdir)
     
     def test_raises_ioerror_for_permission_denied(self):
         """Test that SimpleLogger raises IOError for permission denied."""
@@ -462,4 +474,3 @@ class TestSimpleLoggerErrorHandling:
             finally:
                 # Restore permissions for cleanup
                 os.chmod(log_path, 0o644)
-

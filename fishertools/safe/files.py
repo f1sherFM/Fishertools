@@ -139,32 +139,44 @@ def safe_read_file(filepath: Union[str, Path], encoding: str = 'utf-8', default:
         >>> safe_read_file("несуществующий.txt", default="файл не найден")
         'файл не найден'
     """
+    from ..api_mode import is_strict_mode
     from ..errors.exceptions import SafeUtilityError
     
     # Validate path security
     try:
         filepath = _validate_safe_path(filepath, "safe_read_file")
     except SafeUtilityError:
+        if is_strict_mode():
+            raise
         return default
     
     if not isinstance(encoding, str):
+        if is_strict_mode():
+            raise SafeUtilityError(
+                f"Кодировка должна быть строкой, получен {type(encoding).__name__}",
+                utility_name="safe_read_file",
+            )
         return default
 
-    if not isinstance(encoding, str):
-        raise SafeUtilityError(f"Кодировка должна быть строкой, получен {type(encoding).__name__}", 
-                             utility_name="safe_read_file")
-    
     try:
         with open(filepath, 'r', encoding=encoding) as file:
             return file.read()
     except FileNotFoundError:
+        if is_strict_mode():
+            raise
         return default
     except PermissionError:
+        if is_strict_mode():
+            raise
         return default
     except UnicodeDecodeError:
+        if is_strict_mode():
+            raise
         return default
     except OSError:
         # Covers other OS-related errors
+        if is_strict_mode():
+            raise
         return default
 
 
@@ -198,6 +210,7 @@ def safe_write_file(filepath: Union[str, Path], content: str, encoding: str = 'u
         >>> safe_write_file("/invalid/path/file.txt", "content", create_dirs=False)
         False
     """
+    from ..api_mode import is_strict_mode
     from ..errors.exceptions import SafeUtilityError
     
     # Validate path security
@@ -220,6 +233,8 @@ def safe_write_file(filepath: Union[str, Path], content: str, encoding: str = 'u
             file.write(content)
         return True
     except (PermissionError, OSError, UnicodeEncodeError):
+        if is_strict_mode():
+            raise
         return False
 
 
@@ -244,12 +259,17 @@ def safe_file_exists(filepath: Union[str, Path]) -> bool:
         >>> safe_file_exists("несуществующий.txt")
         False
     """
+    from ..api_mode import is_strict_mode
     from ..errors.exceptions import SafeUtilityError
     
     if filepath is None:
+        if not is_strict_mode():
+            return False
         raise SafeUtilityError("Путь к файлу не может быть None", utility_name="safe_file_exists")
     
     if not isinstance(filepath, (str, Path)):
+        if not is_strict_mode():
+            return False
         raise SafeUtilityError(f"Путь к файлу должен быть строкой или Path объектом, получен {type(filepath).__name__}", 
                              utility_name="safe_file_exists")
     
@@ -836,9 +856,16 @@ def ensure_dir(path: Union[str, Path]) -> Path:
         PosixPath('./nested/dir/structure')
     """
     try:
+        raw_path = os.fspath(path)
+        if any(0xD800 <= ord(ch) <= 0xDFFF for ch in str(raw_path)):
+            raise OSError(f"Invalid Unicode path: {path!r}")
         path_obj = Path(path)
+        if not str(path_obj):
+            raise OSError("Directory path cannot be empty")
         path_obj.mkdir(parents=True, exist_ok=True)
         return path_obj
+    except (TypeError, ValueError) as e:
+        raise OSError(f"Invalid directory path: {path!r}") from e
     except PermissionError as e:
         raise PermissionError(f"Permission denied creating directory: {path}") from e
     except UnicodeError as e:
@@ -937,7 +964,13 @@ def read_last_lines(
         ['last line']
     """
     # Convert to Path object
-    file_path_obj = Path(file_path)
+    try:
+        raw_path = os.fspath(file_path)
+        if any(0xD800 <= ord(ch) <= 0xDFFF for ch in str(raw_path)):
+            raise OSError(f"Invalid Unicode path: {file_path!r}")
+        file_path_obj = Path(file_path)
+    except (TypeError, ValueError, UnicodeError) as e:
+        raise OSError(f"Invalid file path: {file_path!r}") from e
     
     # Check if file exists
     if not file_path_obj.exists():

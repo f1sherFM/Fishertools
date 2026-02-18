@@ -424,6 +424,13 @@ class TestEnsureDir:
             assert isinstance(result, Path)
             assert result == test_dir
 
+    def test_ensure_dir_invalid_surrogate_path_raises_oserror(self):
+        """Invalid surrogate-containing directory names should raise OSError."""
+        from fishertools.safe.files import ensure_dir
+
+        with pytest.raises(OSError):
+            ensure_dir("\udcff_invalid_dir")
+
 
 class TestGetFileHash:
     """Unit tests for get_file_hash function."""
@@ -672,6 +679,27 @@ class TestReadLastLines:
         
         with pytest.raises(FileNotFoundError, match="File not found"):
             read_last_lines("nonexistent_file_12345.txt")
+
+    def test_read_last_lines_preserves_empty_lines(self):
+        """Empty lines near EOF should be preserved as empty strings."""
+        from fishertools.safe.files import read_last_lines
+
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, encoding='utf-8') as f:
+            f.write("line 1\n\nline 3\n\n")
+            temp_path = f.name
+
+        try:
+            result = read_last_lines(temp_path, n=4)
+            assert result == ["line 1", "", "line 3", ""]
+        finally:
+            os.unlink(temp_path)
+
+    def test_read_last_lines_invalid_surrogate_path_raises_oserror(self):
+        """Invalid surrogate-containing paths should fail with OSError."""
+        from fishertools.safe.files import read_last_lines
+
+        with pytest.raises(OSError):
+            read_last_lines("\udcff_invalid_path.txt")
     
     def test_read_last_lines_accepts_string_path(self):
         """Test that read_last_lines accepts string paths."""

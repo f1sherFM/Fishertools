@@ -154,6 +154,16 @@ content = safe_read_file("file.txt")
 content = safe_read_file("file.txt", encoding='latin-1')
 ```
 
+### Invalid Unicode / Surrogate Paths
+
+Some OS/filesystem combinations reject invalid Unicode path values (for example,
+isolated surrogate code points). For these cases:
+
+- `ensure_dir()` raises `OSError`
+- `read_last_lines()` raises `OSError`
+
+This behavior is intentional and consistent with Python filesystem error handling.
+
 ---
 
 ## Python Version Compatibility

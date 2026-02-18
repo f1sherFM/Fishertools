@@ -14,6 +14,7 @@ Fishertools - РёРЅСЃС‚СЂСѓРјРµРЅС‚С‹, РєРѕС‚Рѕ
 from __future__ import annotations
 
 from ._version import __version__
+from .api_mode import set_api_mode, get_api_mode, api_mode
 
 __author__ = "f1sherFM"
 
@@ -149,6 +150,7 @@ from .i18n import (
 __all__ = [
     # Version information
     "get_version_info",
+    "set_api_mode", "get_api_mode", "api_mode",
     
     # Primary API - the main function users should import
     "explain_error",
@@ -209,5 +211,4 @@ __all__ = [
     "ErrorTranslator", "LanguageDetector",
     "ErrorExplanation",
 ]
-
 

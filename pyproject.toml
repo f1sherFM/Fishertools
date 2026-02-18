@@ -47,6 +47,9 @@ Homepage = "https://github.com/f1sherFM/My_1st_library_python"
 Repository = "https://github.com/f1sherFM/My_1st_library_python"
 Issues = "https://github.com/f1sherFM/My_1st_library_python/issues"
 
+[project.scripts]
+fishertools = "fishertools.cli:main"
+
 # Package data configuration
 [tool.setuptools]
 include-package-data = true
@@ -101,5 +104,4 @@ warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
 strict_equality = true
-
 

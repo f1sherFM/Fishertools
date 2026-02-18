@@ -79,6 +79,17 @@ print(explanation["when_to_use"])
 print(explanation["example"])
 ```
 
+## Unified Learning CLI
+
+Fishertools also provides a unified learning CLI entrypoint:
+
+```bash
+fishertools learn topic variables
+fishertools learn explain list
+fishertools learn quiz variables --level beginner
+fishertools learn repl
+```
+
 ## What's Next?
 
 - Explore [Features](features.md) to see all capabilities
