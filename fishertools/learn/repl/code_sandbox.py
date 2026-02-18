@@ -5,12 +5,17 @@ This module provides a restricted execution environment that prevents access to
 dangerous operations like file I/O, imports, and other restricted functions.
 """
 
-import io
-import sys
-import time
+import ast
 import builtins
-from contextlib import redirect_stdout, redirect_stderr
-from typing import Tuple, Dict, Any
+import json
+import subprocess
+import sys
+from typing import Any, Dict, Optional, Tuple
+
+try:
+    import resource
+except ImportError:  # pragma: no cover - not available on some platforms
+    resource = None
 
 
 class CodeSandbox:
@@ -62,17 +67,35 @@ class CodeSandbox:
         "spwd", "crypt", "termios", "tty", "pty", "fcntl", "pipes",
         "posixfile", "resource", "nis", "syslog", "grp", "pwd",
     }
+
+    BLOCKED_ATTRIBUTE_NAMES = {
+        "__class__", "__mro__", "__subclasses__", "__globals__",
+        "__getattribute__", "__dict__", "__base__", "__bases__",
+        "__code__", "__closure__", "__func__", "__self__", "__module__",
+    }
+
+    BLOCKED_NAMES = {
+        "__builtins__", "__import__", "__loader__", "__spec__",
+        "globals", "locals", "vars", "getattr", "setattr", "delattr", "dir",
+    }
     
-    def __init__(self, timeout: float = 5.0, max_steps: int = 200_000):
+    def __init__(
+        self,
+        timeout: float = 5.0,
+        max_steps: int = 200_000,
+        max_memory_mb: int = 128,
+    ):
         """
         Initialize the code sandbox.
         
         Args:
             timeout: Maximum execution time in seconds (default: 5.0)
             max_steps: Max executed source lines before forced stop
+            max_memory_mb: Memory cap for child process in MB (best effort)
         """
         self.timeout = timeout
         self.max_steps = max_steps
+        self.max_memory_mb = max_memory_mb
         self.execution_count = 0
     
     def execute(self, code: str, timeout: float = None) -> Tuple[bool, str]:
@@ -105,54 +128,50 @@ class CodeSandbox:
         if not isinstance(timeout, (int, float)) or timeout <= 0:
             return False, "Timeout must be a positive number"
 
-        # Create restricted globals
-        restricted_globals = self._create_restricted_globals()
-        
-        # Capture output
-        output_buffer = io.StringIO()
-        error_buffer = io.StringIO()
+        payload = {
+            "code": code,
+            "timeout": float(timeout),
+            "max_steps": int(self.max_steps),
+            "allowed_builtins": sorted(self.ALLOWED_BUILTINS),
+        }
+
+        preexec_fn = None
+        if resource is not None:
+            max_bytes = int(self.max_memory_mb) * 1024 * 1024
+
+            def set_limits() -> None:
+                for limit_name in ("RLIMIT_AS", "RLIMIT_DATA"):
+                    if hasattr(resource, limit_name):
+                        limit = getattr(resource, limit_name)
+                        try:
+                            resource.setrlimit(limit, (max_bytes, max_bytes))
+                        except (OSError, ValueError):
+                            continue
+
+            preexec_fn = set_limits
 
         try:
-            compiled_code = compile(code, "<sandbox>", "exec")
-
-            start_time = time.perf_counter()
-            executed_steps = 0
-
-            def tracer(frame, event, arg):
-                nonlocal executed_steps
-                if frame.f_code.co_filename == "<sandbox>" and event == "line":
-                    executed_steps += 1
-                    if executed_steps > self.max_steps:
-                        raise TimeoutError("Code execution exceeded step limit")
-                    if time.perf_counter() - start_time > float(timeout):
-                        raise TimeoutError("Code execution timed out")
-                return tracer
-
-            old_trace = sys.gettrace()
-            # Execute code with output redirection
-            with redirect_stdout(output_buffer), redirect_stderr(error_buffer):
-                sys.settrace(tracer)
-                try:
-                    exec(compiled_code, restricted_globals, restricted_globals)
-                finally:
-                    sys.settrace(old_trace)
-            
-            output = output_buffer.getvalue()
-            return True, output
-        
-        except SyntaxError as e:
-            error_msg = f"Syntax Error: {e.msg}"
-            if e.lineno:
-                error_msg += f" (line {e.lineno})"
-            return False, error_msg
-        
-        except TimeoutError:
+            proc = subprocess.run(
+                [sys.executable, "-c", _SANDBOX_CHILD_RUNNER],
+                input=json.dumps(payload),
+                text=True,
+                capture_output=True,
+                timeout=float(timeout) + 0.5,
+                preexec_fn=preexec_fn,
+            )
+        except subprocess.TimeoutExpired:
             return False, "Code execution timed out. Try simpler code."
-        
-        except Exception as e:
-            error_type = type(e).__name__
-            error_msg = str(e)
-            return False, f"{error_type}: {error_msg}"
+        except Exception:
+            return False, "Sandbox execution failed unexpectedly"
+
+        stdout = proc.stdout.strip()
+        if not stdout:
+            return False, "Sandbox execution failed unexpectedly"
+        try:
+            result = json.loads(stdout)
+            return bool(result.get("success")), str(result.get("output", ""))
+        except Exception:
+            return False, "Sandbox execution failed unexpectedly"
     
     def _validate_code(self, code: str) -> str:
         """
@@ -167,28 +186,45 @@ class CodeSandbox:
         if not code or not code.strip():
             return "Code cannot be empty"
         
-        # Check for dangerous imports
-        dangerous_keywords = ["import ", "from ", "__import__"]
-        code_lower = code.lower()
-        
-        for keyword in dangerous_keywords:
-            if keyword in code_lower:
+        try:
+            tree = ast.parse(code, mode="exec")
+        except SyntaxError as e:
+            error_msg = f"Syntax Error: {e.msg}"
+            if e.lineno:
+                error_msg += f" (line {e.lineno})"
+            return error_msg
+
+        return self._validate_ast(tree)
+
+    def _validate_ast(self, tree: ast.AST) -> str:
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
                 return "Imports are not allowed in the sandbox"
-        
-        # Check for file operations
-        file_keywords = ["open(", "read(", "write(", "file("]
-        for keyword in file_keywords:
-            if keyword in code_lower:
-                return "File operations are not allowed in the sandbox"
-        
-        # Check for dangerous functions
-        dangerous_funcs = ["exec(", "eval(", "compile(", "globals(", "locals("]
-        for func in dangerous_funcs:
-            if func in code_lower:
-                return f"The function '{func[:-1]}' is not allowed in the sandbox"
-        
+
+            if isinstance(node, ast.Attribute):
+                if node.attr.startswith("__") or node.attr in self.BLOCKED_ATTRIBUTE_NAMES:
+                    return f"Attribute '{node.attr}' is not allowed in the sandbox"
+
+            if isinstance(node, ast.Name) and node.id in self.BLOCKED_NAMES:
+                return f"The name '{node.id}' is not allowed in the sandbox"
+
+            if isinstance(node, ast.Call):
+                blocked_call = self._extract_called_name(node.func)
+                if blocked_call:
+                    return f"The function '{blocked_call}' is not allowed in the sandbox"
         return ""
-    
+
+    def _extract_called_name(self, func: ast.AST) -> Optional[str]:
+        if isinstance(func, ast.Name):
+            if func.id in self.BLOCKED_BUILTINS or func.id in self.BLOCKED_NAMES:
+                return func.id
+            return None
+
+        if isinstance(func, ast.Attribute):
+            if func.attr.startswith("__") or func.attr in self.BLOCKED_ATTRIBUTE_NAMES:
+                return func.attr
+        return None
+
     def _create_restricted_globals(self) -> Dict[str, Any]:
         """
         Create a restricted globals dictionary for code execution.
@@ -196,25 +232,29 @@ class CodeSandbox:
         Returns:
             Dictionary with safe built-in functions and common modules
         """
+        return self._create_restricted_globals_static()
+
+    @classmethod
+    def _create_restricted_globals_static(cls) -> Dict[str, Any]:
         # Start with safe built-ins
         safe_builtins = {
             name: getattr(builtins, name)
-            for name in self.ALLOWED_BUILTINS
+            for name in cls.ALLOWED_BUILTINS
             if hasattr(builtins, name)
         }
-        
+
         # Add safe modules
         import math
         safe_modules = {
             "math": math,
         }
-        
+
         # Combine into globals
         restricted_globals = {
             "__builtins__": safe_builtins,
             **safe_modules,
         }
-        
+
         return restricted_globals
     
     def get_available_builtins(self) -> list:
@@ -243,3 +283,69 @@ class CodeSandbox:
             Sorted list of blocked module names
         """
         return sorted(self.BLOCKED_MODULES)
+
+
+_SANDBOX_CHILD_RUNNER = r"""
+import io
+import json
+import sys
+import time
+import builtins
+from contextlib import redirect_stdout, redirect_stderr
+
+payload = json.loads(sys.stdin.read())
+code = payload["code"]
+timeout = float(payload["timeout"])
+max_steps = int(payload["max_steps"])
+allowed_builtins = payload["allowed_builtins"]
+
+safe_builtins = {
+    name: getattr(builtins, name)
+    for name in allowed_builtins
+    if hasattr(builtins, name)
+}
+
+import math
+restricted_globals = {
+    "__builtins__": safe_builtins,
+    "math": math,
+}
+
+output_buffer = io.StringIO()
+error_buffer = io.StringIO()
+
+try:
+    compiled_code = compile(code, "<sandbox>", "exec")
+    start_time = time.perf_counter()
+    executed_steps = 0
+
+    def tracer(frame, event, arg):
+        global executed_steps
+        if frame.f_code.co_filename == "<sandbox>" and event == "line":
+            executed_steps += 1
+            if executed_steps > max_steps:
+                raise TimeoutError("Code execution exceeded step limit")
+            if time.perf_counter() - start_time > timeout:
+                raise TimeoutError("Code execution timed out")
+        return tracer
+
+    with redirect_stdout(output_buffer), redirect_stderr(error_buffer):
+        old_trace = sys.gettrace()
+        sys.settrace(tracer)
+        try:
+            exec(compiled_code, restricted_globals, restricted_globals)
+        finally:
+            sys.settrace(old_trace)
+    print(json.dumps({"success": True, "output": output_buffer.getvalue()}))
+except SyntaxError as e:
+    msg = f"Syntax Error: {e.msg}"
+    if e.lineno:
+        msg += f" (line {e.lineno})"
+    print(json.dumps({"success": False, "output": msg}))
+except TimeoutError:
+    print(json.dumps({"success": False, "output": "Code execution timed out. Try simpler code."}))
+except MemoryError:
+    print(json.dumps({"success": False, "output": "Code execution exceeded memory limit."}))
+except Exception as e:
+    print(json.dumps({"success": False, "output": f"{type(e).__name__}: {e}"}))
+"""

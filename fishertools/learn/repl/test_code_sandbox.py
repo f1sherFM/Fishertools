@@ -154,6 +154,29 @@ class TestCodeSandboxRestrictions:
         assert success is False
         assert "not allowed" in output.lower()
 
+    def test_allow_words_that_only_contain_import_substring(self):
+        """AST validation should not reject harmless identifiers by substring."""
+        sandbox = CodeSandbox()
+        success, output = sandbox.execute("important_value = 10\nprint(important_value)")
+        assert success is True
+        assert "10" in output
+
+    def test_block_dangerous_attribute_chain_subclasses(self):
+        """Escape chain via __class__/__mro__/__subclasses__ should be blocked."""
+        sandbox = CodeSandbox()
+        code = "print((1).__class__.__mro__[1].__subclasses__())"
+        success, output = sandbox.execute(code)
+        assert success is False
+        assert "__class__" in output or "__mro__" in output or "__subclasses__" in output
+
+    def test_block_function_globals_attribute(self):
+        """Function __globals__ access should be blocked."""
+        sandbox = CodeSandbox()
+        code = "f = lambda: 1\nprint(f.__globals__)"
+        success, output = sandbox.execute(code)
+        assert success is False
+        assert "__globals__" in output
+
 
 class TestCodeSandboxMath:
     """Test math operations in the sandbox."""
