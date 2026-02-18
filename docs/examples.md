@@ -408,4 +408,10 @@ simple_menu({
 
 ---
 
+## Example 9: Plugin Hooks
+
+For extension points (custom formatter/pattern/i18n provider), see:
+
+- `examples/plugin_hooks_example.py`
+
 Return to [Documentation Index](index.md)

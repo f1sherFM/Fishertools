@@ -13,7 +13,12 @@ Main components:
 from __future__ import annotations
 
 from .models import ErrorExplanation
-from .error_translator import ErrorTranslator, translate_error
+from .error_translator import (
+    ErrorTranslator,
+    translate_error,
+    register_translation_provider,
+    get_translation_providers,
+)
 from .language_detector import LanguageDetector, detect_language
 
 __all__ = [
@@ -24,6 +29,8 @@ __all__ = [
     # Convenience functions
     "translate_error",
     "detect_language",
+    "register_translation_provider",
+    "get_translation_providers",
     
     # Data models
     "ErrorExplanation",

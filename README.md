@@ -6,12 +6,12 @@ Fishertools helps you handle common failures, validate inputs, work with files s
 
 ## Version
 
-Current version: `0.5.2.2`
+Current version: `0.5.2`
 
 ## Install
 
 ```bash
-pip install fishertools==0.5.2.2
+pip install fishertools==0.5.2
 ```
 
 For local development:
@@ -138,9 +138,9 @@ Run linter:
 ruff check .
 ```
 
-## Release 0.5.2.2
+## Release 0.5.2
 
-- Package version set to `0.5.2.2`
+- Package version set to `0.5.2`
 - README rewritten for clarity
 - Version references aligned across code and tests
 

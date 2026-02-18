@@ -6,7 +6,7 @@ output with color support and structured formatting.
 """
 
 import sys
-from typing import Dict, Any
+from typing import Any, Dict, Type
 from .models import ErrorExplanation
 
 
@@ -358,7 +358,28 @@ class JsonFormatter:
         return explanation.to_json()
 
 
-def get_formatter(format_type: str, **kwargs) -> Any:
+_FORMATTER_REGISTRY: Dict[str, Type[Any]] = {
+    "console": ConsoleFormatter,
+    "plain": PlainFormatter,
+    "json": JsonFormatter,
+}
+
+
+def register_formatter(name: str, formatter_cls: Type[Any]) -> None:
+    """Register a custom formatter class for get_formatter()."""
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError("Formatter name must be a non-empty string")
+    if not callable(formatter_cls):
+        raise TypeError("formatter_cls must be callable")
+    _FORMATTER_REGISTRY[name.strip().lower()] = formatter_cls
+
+
+def get_registered_formatters() -> Dict[str, Type[Any]]:
+    """Return a copy of the current formatter registry."""
+    return dict(_FORMATTER_REGISTRY)
+
+
+def get_formatter(format_type: str, **kwargs: Any) -> Any:
     """
     Factory function to get appropriate formatter.
     
@@ -374,22 +395,19 @@ def get_formatter(format_type: str, **kwargs) -> Any:
     """
     from .exceptions import FormattingError
     
-    formatters = {
-        'console': ConsoleFormatter,
-        'plain': PlainFormatter,
-        'json': JsonFormatter
-    }
+    formatters = get_registered_formatters()
     
-    if format_type not in formatters:
+    format_key = format_type.strip().lower()
+    if format_key not in formatters:
         raise FormattingError(f"Неподдерживаемый тип форматтера: {format_type}. "
                             f"Поддерживаемые типы: {list(formatters.keys())}", 
                             formatter_type=format_type)
     
     try:
-        formatter_class = formatters[format_type]
+        formatter_class = formatters[format_key]
         
         # Only pass kwargs that the formatter accepts
-        if format_type == 'console':
+        if format_key == 'console':
             return formatter_class(use_colors=kwargs.get('use_colors', True))
         else:
             return formatter_class()

@@ -18,6 +18,7 @@ import os
 import threading
 from datetime import datetime
 from pathlib import Path
+from typing import Union
 
 
 class SimpleLogger:
@@ -56,7 +57,7 @@ class SimpleLogger:
         - Parent directories are created automatically
     """
 
-    def __init__(self, file_path):
+    def __init__(self, file_path: Union[str, os.PathLike[str]]) -> None:
         """
         Initialize SimpleLogger with a file path.
 
@@ -66,7 +67,7 @@ class SimpleLogger:
         self.file_path = self._validate_log_path(file_path)
         self._lock = threading.Lock()  # Thread-safe logging
 
-    def _validate_log_path(self, file_path):
+    def _validate_log_path(self, file_path: Union[str, os.PathLike[str]]) -> str:
         if not isinstance(file_path, (str, os.PathLike)):
             raise TypeError("file_path must be a string or path-like object")
 
@@ -90,7 +91,7 @@ class SimpleLogger:
 
         return normalized
 
-    def info(self, message):
+    def info(self, message: str) -> None:
         """
         Log an info-level message.
 
@@ -105,7 +106,7 @@ class SimpleLogger:
         """
         self._log("INFO", message)
 
-    def warning(self, message):
+    def warning(self, message: str) -> None:
         """
         Log a warning-level message.
 
@@ -120,7 +121,7 @@ class SimpleLogger:
         """
         self._log("WARNING", message)
 
-    def error(self, message):
+    def error(self, message: str) -> None:
         """
         Log an error-level message.
 
@@ -135,7 +136,7 @@ class SimpleLogger:
         """
         self._log("ERROR", message)
 
-    def _log(self, level, message):
+    def _log(self, level: str, message: str) -> None:
         """
         Internal method to write a log message (thread-safe).
 

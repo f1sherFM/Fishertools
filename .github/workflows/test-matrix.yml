@@ -90,3 +90,25 @@ jobs:
           pip install -e .[dev,config]
       - name: Run performance smoke tests
         run: pytest -q tests/test_performance_smoke.py -vv
+
+  typing:
+    name: Typing baseline
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev,config]
+      - name: Run mypy baseline
+        run: |
+          mypy --follow-imports=silent \
+            fishertools/api_mode.py \
+            fishertools/cli.py \
+            fishertools/patterns/logger.py \
+            fishertools/errors/formatters.py \
+            fishertools/errors/pattern_loader.py \
+            fishertools/i18n/error_translator.py

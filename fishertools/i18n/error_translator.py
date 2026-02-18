@@ -9,10 +9,25 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Callable, Dict, List, Optional
 
 from .models import ErrorExplanation
 from .language_detector import LanguageDetector
+
+TranslationProvider = Callable[[], Dict[str, Dict]]
+_TRANSLATION_PROVIDERS: list[TranslationProvider] = []
+
+
+def register_translation_provider(provider: TranslationProvider) -> None:
+    """Register external translation provider."""
+    if not callable(provider):
+        raise TypeError("provider must be callable")
+    _TRANSLATION_PROVIDERS.append(provider)
+
+
+def get_translation_providers() -> list[TranslationProvider]:
+    """Return all registered translation providers."""
+    return list(_TRANSLATION_PROVIDERS)
 
 
 class ErrorTranslator:
@@ -27,7 +42,7 @@ class ErrorTranslator:
         language_detector: Language detector for automatic language selection
     """
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the error translator."""
         self.language_detector = LanguageDetector()
         self._translations: Dict[str, Dict] = {}
@@ -115,11 +130,13 @@ class ErrorTranslator:
         # Try to get specific error type template
         error_data = lang_translations.get(error_type)
         if error_data:
-            return error_data.get('explanation', '')
+            explanation = error_data.get("explanation", "")
+            return str(explanation)
         
         # Fall back to generic template
         generic_data = lang_translations.get('generic', {})
-        return generic_data.get('explanation', 'An error occurred: {error_type}')
+        explanation = generic_data.get("explanation", "An error occurred: {error_type}")
+        return str(explanation)
     
     def _format_error_explanation(
         self,
@@ -172,8 +189,17 @@ class ErrorTranslator:
                     self._translations[lang] = {}
             else:
                 self._translations[lang] = {}
+
+        # Merge custom provider translations on top of defaults.
+        for provider in get_translation_providers():
+            provided = provider()
+            for lang, data in provided.items():
+                if lang not in self._translations:
+                    self._translations[lang] = {}
+                if isinstance(data, dict):
+                    self._translations[lang].update(data)
     
-    def _get_suggestions(self, error_type: str, language: str) -> list:
+    def _get_suggestions(self, error_type: str, language: str) -> List[str]:
         """
         Get fix suggestions for a specific error type.
         
@@ -190,11 +216,17 @@ class ErrorTranslator:
         # Try to get specific error type suggestions
         error_data = lang_translations.get(error_type)
         if error_data and 'suggestions' in error_data:
-            return error_data['suggestions']
+            suggestions = error_data["suggestions"]
+            if isinstance(suggestions, list):
+                return [str(item) for item in suggestions]
+            return []
         
         # Fall back to generic suggestions
         generic_data = lang_translations.get('generic', {})
-        return generic_data.get('suggestions', [])
+        suggestions = generic_data.get("suggestions", [])
+        if isinstance(suggestions, list):
+            return [str(item) for item in suggestions]
+        return []
 
 
 # Convenience function for one-off translations

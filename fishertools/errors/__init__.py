@@ -7,7 +7,15 @@ for beginners learning Python.
 
 from .explainer import ErrorExplainer, explain_error, explain_last_error, get_explanation
 from .patterns import ErrorPattern
-from .formatters import ConsoleFormatter, PlainFormatter, JsonFormatter, get_formatter
+from .formatters import (
+    ConsoleFormatter,
+    PlainFormatter,
+    JsonFormatter,
+    get_formatter,
+    register_formatter,
+    get_registered_formatters,
+)
+from .pattern_loader import register_pattern_provider, get_pattern_providers
 from .models import ErrorExplanation, ExplainerConfig, ExceptionExplanation
 from .exceptions import (
     FishertoolsError, ExplanationError, FormattingError, 
@@ -30,6 +38,8 @@ from .educational_wrapper import (
 __all__ = [
     "ErrorExplainer", "explain_error", "explain_last_error", "get_explanation", "ErrorPattern", 
     "ConsoleFormatter", "PlainFormatter", "JsonFormatter", "get_formatter",
+    "register_formatter", "get_registered_formatters",
+    "register_pattern_provider", "get_pattern_providers",
     "ErrorExplanation", "ExceptionExplanation", "ExplainerConfig",
     "FishertoolsError", "ExplanationError", "FormattingError", 
     "ConfigurationError", "PatternError", "SafeUtilityError",

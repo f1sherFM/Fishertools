@@ -1,0 +1,22 @@
+# Release Flow
+
+Single source of truth for version is:
+
+- `fishertools/_version.py` (`__version__`)
+
+`pyproject.toml` reads package version dynamically from this attribute.
+
+## Steps
+
+1. Update `fishertools/_version.py` to the next semantic version (`MAJOR.MINOR.PATCH`).
+2. Run checks:
+   - `pytest -q`
+   - `mypy fishertools/api_mode.py fishertools/cli.py fishertools/patterns/logger.py fishertools/errors/formatters.py fishertools/errors/pattern_loader.py fishertools/i18n/error_translator.py`
+3. Update release notes/changelog.
+4. Create tag and GitHub release.
+5. Publish package artifacts.
+
+## Guardrails
+
+- Tests enforce semver format for `fishertools.__version__`.
+- Tests enforce pyproject dynamic version mapping consistency.

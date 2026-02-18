@@ -10,6 +10,8 @@ Welcome to the Fishertools documentation! This guide will help you get started w
 - [API Reference](api-reference.md) - Complete API documentation with all functions and classes
 - [Examples](examples.md) - Practical examples from basic to advanced usage
 - [Limitations](limitations.md) - Known limitations and performance considerations
+- [API Guarantees](api-guarantees.md) - Stability guarantees, fallback matrix, migration notes
+- [Release Flow](release-flow.md) - Versioning and release source of truth
 - [Contributing](contributing.md) - How to contribute to the project
 
 ## Quick Access Table

@@ -8,10 +8,25 @@ separating concerns from the main ErrorExplainer class.
 from __future__ import annotations
 
 import functools
-from typing import List, Optional
+from typing import Callable, List, Optional
 from .models import ErrorPattern
 from .patterns import load_default_patterns
 from .exceptions import ExplanationError
+
+PatternProvider = Callable[[], List[ErrorPattern]]
+_PATTERN_PROVIDERS: List[PatternProvider] = []
+
+
+def register_pattern_provider(provider: PatternProvider) -> None:
+    """Register a custom error pattern provider."""
+    if not callable(provider):
+        raise TypeError("provider must be callable")
+    _PATTERN_PROVIDERS.append(provider)
+
+
+def get_pattern_providers() -> List[PatternProvider]:
+    """Return registered pattern providers."""
+    return list(_PATTERN_PROVIDERS)
 
 
 class PatternLoader:
@@ -24,7 +39,7 @@ class PatternLoader:
     - Provide pattern access
     """
     
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize pattern loader."""
         self._patterns_cache: List[ErrorPattern] = []
         self._loaded = False
@@ -47,7 +62,13 @@ class PatternLoader:
             return self._patterns_cache
         
         try:
-            self._patterns_cache = load_default_patterns()
+            patterns = load_default_patterns()
+            for provider in get_pattern_providers():
+                provided = provider()
+                if provided:
+                    patterns.extend(provided)
+
+            self._patterns_cache = patterns
             self._loaded = True
             return self._patterns_cache
         except Exception as e:
@@ -138,4 +159,3 @@ class PatternMatcher:
             # Best-effort behavior mirrors find_match() to keep API stable.
             return []
         return matches
-

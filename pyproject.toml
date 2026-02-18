@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fishertools"
-version = "0.5.2.2"
+dynamic = ["version"]
 description = "Practical tools for writing safer, clearer Python code."
 readme = "README.md"
 license = {text = "MIT"}
@@ -54,6 +54,9 @@ fishertools = "fishertools.cli:main"
 [tool.setuptools]
 include-package-data = true
 
+[tool.setuptools.dynamic]
+version = {attr = "fishertools._version.__version__"}
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["fishertools*"]
@@ -91,7 +94,7 @@ ignore = [
 "__init__.py" = ["F401"]
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.9"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -104,4 +107,3 @@ warn_unused_ignores = true
 warn_no_return = true
 warn_unreachable = true
 strict_equality = true
-
