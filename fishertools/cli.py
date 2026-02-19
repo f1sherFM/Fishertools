@@ -6,7 +6,7 @@ import json
 
 import click
 
-from fishertools.learn import explain, get_topic, search_topics
+from fishertools.learn import explain, get_topic, list_topics, search_topics
 from fishertools.learn.repl.engine import REPLEngine
 from fishertools.learning.models import DifficultyLevel
 from fishertools.learning.tutorial import TutorialEngine
@@ -17,9 +17,27 @@ def main() -> None:
     """Fishertools CLI."""
 
 
-@main.group()
+@main.group(
+    help=(
+        "Learning flows: list, topic, quiz, explain, repl.\n\n"
+        "Examples:\n"
+        "  fishertools learn list\n"
+        "  fishertools learn topic variables\n"
+        "  fishertools learn explain list\n"
+        "  fishertools learn quiz variables --level beginner\n"
+        "  fishertools learn repl\n"
+    )
+)
 def learn() -> None:
-    """Learning flows: topic, quiz, explain, repl."""
+    """Learning flows: list, topic, quiz, explain, repl."""
+
+
+@learn.command("list")
+def learn_list() -> None:
+    """List available learning topics."""
+    topics = list_topics()
+    for topic in topics:
+        click.echo(topic)
 
 
 @learn.command("topic")

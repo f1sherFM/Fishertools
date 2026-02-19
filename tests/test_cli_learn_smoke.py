@@ -6,6 +6,22 @@ from fishertools import cli
 
 
 class TestLearnCliSmoke:
+    def test_learn_help_contains_examples(self):
+        runner = CliRunner()
+        result = runner.invoke(cli.main, ["learn", "--help"])
+
+        assert result.exit_code == 0
+        assert "fishertools learn list" in result.output
+        assert "fishertools learn topic variables" in result.output
+
+    def test_list_command(self):
+        runner = CliRunner()
+        result = runner.invoke(cli.main, ["learn", "list"])
+
+        assert result.exit_code == 0
+        # Should print at least one topic line
+        assert result.output.strip()
+
     def test_topic_command(self):
         runner = CliRunner()
         result = runner.invoke(cli.main, ["learn", "topic", "variables"])
