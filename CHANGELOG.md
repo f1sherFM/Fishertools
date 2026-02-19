@@ -2,6 +2,28 @@
 
 Все важные изменения в проекте Fishertools будут документированы в этом файле.
 
+## [0.5.3] - 2026-02-19
+
+### Added
+
+- Unified learning CLI improvements:
+  - `fishertools learn list`
+  - richer `fishertools learn --help` examples
+- API behavior modes docs and guarantees docs
+- Plugin hooks for custom formatters, error patterns, and i18n providers
+- Release flow documentation and version consistency guard tests
+- CI typing baseline (mypy) job
+
+### Changed
+
+- Single source of truth for package version (`fishertools/_version.py`)
+- Improved file/path and logger edge-case handling
+
+### Tests
+
+- Added CLI smoke, plugin hook, performance smoke, and release consistency tests
+- Added security and diagnostics-focused regression suites
+
 ## [0.5.2.2] - 2026-02-13
 
 ### Fixes
@@ -692,4 +714,3 @@
 - Ограничение доступа к опасным операциям (file I/O, imports)
 - Таймаут выполнения кода (5 секунд по умолчанию)
 - Валидация кода перед выполнением
-
