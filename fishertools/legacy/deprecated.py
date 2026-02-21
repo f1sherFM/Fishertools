@@ -6,172 +6,77 @@ mission of making Python more convenient and safer for beginners. All functions
 maintain identical behavior to the original implementation.
 """
 
-import json
-import os
 import time
-import re
 import hashlib
-import random
-import string
 import functools
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Callable
+from typing import Any, Dict, List, Callable
 
+from .. import helpers as _helpers
+from .. import utils as _utils
 
 # File and directory utilities - helpful for beginners
-def read_json(filepath: str) -> Dict[str, Any]:
-    """Читает JSON файл и возвращает словарь"""
-    with open(filepath, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-
-def write_json(data: Dict[str, Any], filepath: str, indent: int = 2) -> None:
-    """Записывает данные в JSON файл"""
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=indent)
-
-
-def ensure_dir(path: str) -> None:
-    """Создает директорию если она не существует"""
-    Path(path).mkdir(parents=True, exist_ok=True)
-
-
-def get_file_size(filepath: str) -> int:
-    """Возвращает размер файла в байтах"""
-    return os.path.getsize(filepath)
-
-
-def list_files(directory: str, extension: Optional[str] = None) -> List[str]:
-    """Возвращает список файлов в директории с опциональной фильтрацией по расширению"""
-    path = Path(directory)
-    if extension:
-        pattern = f"*.{extension.lstrip('.')}"
-        return [str(f) for f in path.glob(pattern)]
-    return [str(f) for f in path.iterdir() if f.is_file()]
-
-
-def timestamp() -> str:
-    """Возвращает текущую временную метку в читаемом формате"""
-    return time.strftime("%Y-%m-%d %H:%M:%S")
-
-
-def flatten_dict(d: Dict[str, Any], parent_key: str = '', sep: str = '.') -> Dict[str, Any]:
-    """Превращает вложенный словарь в плоский"""
-    items = []
-    for k, v in d.items():
-        new_key = f"{parent_key}{sep}{k}" if parent_key else k
-        if isinstance(v, dict):
-            items.extend(flatten_dict(v, new_key, sep=sep).items())
-        else:
-            items.append((new_key, v))
-    return dict(items)
+read_json = _utils.read_json
+write_json = _utils.write_json
+ensure_dir = _utils.ensure_dir
+get_file_size = _utils.get_file_size
+list_files = _utils.list_files
+timestamp = _utils.timestamp
+flatten_dict = _utils.flatten_dict
 
 
 # String utilities - common beginner needs
 def validate_email(email: str) -> bool:
     """Проверяет корректность email адреса"""
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return bool(re.match(pattern, email))
+    return bool(_helpers._EMAIL_PATTERN.match(email))
 
 
 def clean_string(text: str) -> str:
     """Очищает строку от лишних пробелов и символов"""
     # Убираем лишние пробелы
-    text = re.sub(r'\s+', ' ', text.strip())
+    text = _helpers._WHITESPACE_PATTERN.sub(' ', text.strip())
     # Убираем специальные символы (оставляем только буквы, цифры, пробелы и основную пунктуацию)
-    text = re.sub(r'[^\w\s.,!?-]', '', text)
+    text = _helpers._SPECIAL_CHARS_PATTERN.sub('', text)
     return text
 
 
 # Data utilities - safe operations for beginners
 def chunk_list(lst: List[Any], chunk_size: int) -> List[List[Any]]:
     """Разбивает список на части заданного размера"""
+    if chunk_size > 0:
+        return _helpers.chunk_list(lst, chunk_size)
+    # Сохраняем legacy-поведение:
+    # chunk_size == 0 -> ValueError от range()
+    # chunk_size < 0 -> []
     return [lst[i:i + chunk_size] for i in range(0, len(lst), chunk_size)]
 
 
 def merge_dicts(*dicts: Dict[str, Any]) -> Dict[str, Any]:
     """Объединяет несколько словарей в один"""
-    result = {}
-    for d in dicts:
-        result.update(d)
-    return result
+    return _helpers.merge_dicts(*dicts)
 
 
 # Security utilities - helpful for beginners
 def generate_password(length: int = 12, include_symbols: bool = True) -> str:
     """Генерирует случайный пароль"""
-    chars = string.ascii_letters + string.digits
-    if include_symbols:
-        chars += "!@#$%^&*"
-    
-    return ''.join(random.choice(chars) for _ in range(length))
+    # Legacy: length <= 0 возвращает пустую строку вместо ValueError
+    if length <= 0:
+        return ""
+    return _helpers.generate_password(length, include_symbols)
 
 
 def hash_string(text: str, algorithm: str = 'sha256') -> str:
     """Хеширует строку указанным алгоритмом"""
-    hash_obj = hashlib.new(algorithm)
-    hash_obj.update(text.encode('utf-8'))
-    return hash_obj.hexdigest()
+    try:
+        return _helpers.hash_string(text, algorithm)
+    except ValueError:
+        # Сохраняем legacy-тип исключения и сообщение от hashlib.new(...)
+        hashlib.new(algorithm)
+        raise
 
 
 # Helper classes - simplified for beginners
-class QuickConfig:
-    """Простой класс для работы с конфигурацией"""
-    
-    def __init__(self, config_dict: Optional[Dict[str, Any]] = None):
-        self._config = config_dict or {}
-    
-    def get(self, key: str, default: Any = None) -> Any:
-        """Получить значение по ключу с поддержкой точечной нотации"""
-        keys = key.split('.')
-        value = self._config
-        
-        for k in keys:
-            if isinstance(value, dict) and k in value:
-                value = value[k]
-            else:
-                return default
-        
-        return value
-    
-    def set(self, key: str, value: Any) -> None:
-        """Установить значение по ключу с поддержкой точечной нотации"""
-        keys = key.split('.')
-        config = self._config
-        
-        for k in keys[:-1]:
-            if k not in config:
-                config[k] = {}
-            config = config[k]
-        
-        config[keys[-1]] = value
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Вернуть конфигурацию как словарь"""
-        return self._config.copy()
-
-
-class SimpleLogger:
-    """Простой логгер для быстрой отладки"""
-    
-    def __init__(self, name: str = "MyDevTools"):
-        self.name = name
-    
-    def info(self, message: str) -> None:
-        """Информационное сообщение"""
-        print(f"[{self.name}] INFO: {message}")
-    
-    def warning(self, message: str) -> None:
-        """Предупреждение"""
-        print(f"[{self.name}] WARNING: {message}")
-    
-    def error(self, message: str) -> None:
-        """Ошибка"""
-        print(f"[{self.name}] ERROR: {message}")
-    
-    def debug(self, message: str) -> None:
-        """Отладочное сообщение"""
-        print(f"[{self.name}] DEBUG: {message}")
+QuickConfig = _helpers.QuickConfig
+SimpleLogger = _helpers.SimpleLogger
 
 
 # Educational decorators - help beginners understand code behavior

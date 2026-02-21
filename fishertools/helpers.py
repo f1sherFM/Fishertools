@@ -18,35 +18,40 @@ _EMAIL_PATTERN = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 
 class QuickConfig:
     """Простой класс для работы с конфигурацией"""
-    
+
+    @staticmethod
+    def _split_key_path(key: str) -> List[str]:
+        """Разбить ключ точечной нотации на сегменты."""
+        return key.split('.')
+
     def __init__(self, config_dict: Optional[Dict[str, Any]] = None) -> None:
         self._config: Dict[str, Any] = config_dict or {}
-    
+
     def get(self, key: str, default: Any = None) -> Any:
         """Получить значение по ключу с поддержкой точечной нотации"""
-        keys = key.split('.')
+        keys = self._split_key_path(key)
         value: Any = self._config
-        
+
         for k in keys:
             if isinstance(value, dict) and k in value:
                 value = value[k]
             else:
                 return default
-        
+
         return value
-    
+
     def set(self, key: str, value: Any) -> None:
         """Установить значение по ключу с поддержкой точечной нотации"""
-        keys = key.split('.')
+        keys = self._split_key_path(key)
         config: Dict[str, Any] = self._config
-        
+
         for k in keys[:-1]:
             if k not in config:
                 config[k] = {}
             config = config[k]
-        
+
         config[keys[-1]] = value
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Вернуть конфигурацию как словарь"""
         return self._config.copy()
@@ -179,25 +184,29 @@ def merge_dicts(*dicts: Dict[str, Any]) -> Dict[str, Any]:
 
 class SimpleLogger:
     """Простой логгер для быстрой отладки"""
-    
+
     def __init__(self, name: str = "MyDevTools") -> None:
         self.name = name
-    
+
+    def _log(self, level: str, message: str) -> None:
+        """Единая точка форматирования сообщений лога."""
+        print(f"[{self.name}] {level}: {message}")
+
     def info(self, message: str) -> None:
         """Информационное сообщение"""
-        print(f"[{self.name}] INFO: {message}")
-    
+        self._log("INFO", message)
+
     def warning(self, message: str) -> None:
         """Предупреждение"""
-        print(f"[{self.name}] WARNING: {message}")
-    
+        self._log("WARNING", message)
+
     def error(self, message: str) -> None:
         """Ошибка"""
-        print(f"[{self.name}] ERROR: {message}")
-    
+        self._log("ERROR", message)
+
     def debug(self, message: str) -> None:
         """Отладочное сообщение"""
-        print(f"[{self.name}] DEBUG: {message}")
+        self._log("DEBUG", message)
 
 
 # Создаем глобальный экземпляр логгера
