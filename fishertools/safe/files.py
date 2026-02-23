@@ -309,13 +309,6 @@ def safe_get_file_size(filepath: Union[str, Path], default: int = 0) -> int:
     if not isinstance(filepath, (str, Path)):
         return default
 
-    if filepath is None:
-        raise SafeUtilityError("Путь к файлу не может быть None", utility_name="safe_get_file_size")
-    
-    if not isinstance(filepath, (str, Path)):
-        raise SafeUtilityError(f"Путь к файлу должен быть строкой или Path объектом, получен {type(filepath).__name__}", 
-                             utility_name="safe_get_file_size")
-    
     try:
         return Path(filepath).stat().st_size
     except (OSError, FileNotFoundError):
@@ -359,17 +352,6 @@ def safe_list_files(directory: Union[str, Path], pattern: str = "*", default: Op
     if not isinstance(pattern, str):
         return default
     
-    if directory is None:
-        raise SafeUtilityError("Путь к директории не может быть None", utility_name="safe_list_files")
-    
-    if not isinstance(directory, (str, Path)):
-        raise SafeUtilityError(f"Путь к директории должен быть строкой или Path объектом, получен {type(directory).__name__}", 
-                             utility_name="safe_list_files")
-    
-    if not isinstance(pattern, str):
-        raise SafeUtilityError(f"Паттерн должен быть строкой, получен {type(pattern).__name__}", 
-                             utility_name="safe_list_files")
-    
     try:
         directory_path = Path(directory)
         if not directory_path.exists() or not directory_path.is_dir():
@@ -412,12 +394,6 @@ def safe_read_json(
     if not isinstance(encoding, str):
         return default
 
-    if not isinstance(encoding, str):
-        raise SafeUtilityError(
-            f"Encoding must be a string, got {type(encoding).__name__}",
-            utility_name="safe_read_json"
-        )
-    
     try:
         with open(filepath, "r", encoding=encoding) as file:
             content = file.read()
@@ -525,12 +501,6 @@ def safe_read_yaml(
     if not isinstance(encoding, str):
         return default
 
-    if not isinstance(encoding, str):
-        raise SafeUtilityError(
-            f"Encoding must be a string, got {type(encoding).__name__}",
-            utility_name="safe_read_yaml"
-        )
-    
     if not _YAML_AVAILABLE:
         return default
     
@@ -633,12 +603,6 @@ def safe_read_toml(
     if not isinstance(encoding, str):
         return default
 
-    if not isinstance(encoding, str):
-        raise SafeUtilityError(
-            f"Encoding must be a string, got {type(encoding).__name__}",
-            utility_name="safe_read_toml"
-        )
-    
     if not _TOML_AVAILABLE or _toml_reader is None:
         return default
     
