@@ -5,6 +5,7 @@ This module contains formatters for different output types including console
 output with color support and structured formatting.
 """
 
+import os
 import sys
 from typing import Any, Dict, Type
 from .models import ErrorExplanation
@@ -65,7 +66,6 @@ class ConsoleFormatter:
             return False
         
         # Check for common environment variables that indicate color support
-        import os
         term = os.environ.get('TERM', '').lower()
         colorterm = os.environ.get('COLORTERM', '').lower()
         
@@ -76,7 +76,7 @@ class ConsoleFormatter:
             return True
         
         # Windows Command Prompt and PowerShell support colors in newer versions
-        if sys.platform == 'win32':
+        if os.name == 'nt':
             return True
         
         return False
@@ -371,7 +371,7 @@ class JsonFormatter:
         Returns:
             JSON formatted string
         """
-        return explanation.to_json()
+        return str(explanation.to_json())
 
 
 _FORMATTER_REGISTRY: Dict[str, Type[Any]] = {

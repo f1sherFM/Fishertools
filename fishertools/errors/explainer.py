@@ -14,7 +14,7 @@ Enhancements (v0.5.2+):
 - Support for 'auto' language detection
 """
 
-from typing import Any, Dict, Literal, Optional, overload
+from typing import Any, Dict, Optional
 import sys
 import re
 
@@ -29,7 +29,7 @@ from .models import ErrorExplanation, ExceptionExplanation, ExplainerConfig
 from .pattern_loader import PatternLoader, PatternMatcher
 
 
-def _validate_context(context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+def _validate_context(context: Any) -> Dict[str, Any]:
     """
     Validate and normalize context dictionary.
 
@@ -365,39 +365,6 @@ def get_explanation(
     return formatted_output
 
 
-@overload
-def explain_error(
-    exception: Exception,
-    language: str = "ru",
-    format_type: str = "console",
-    return_text: Literal[True] = True,
-    context: Optional[Dict[str, Any]] = None,
-    **kwargs: Any,
-) -> str: ...
-
-
-@overload
-def explain_error(
-    exception: Exception,
-    language: str = "ru",
-    format_type: str = "console",
-    return_text: Literal[False] = False,
-    context: Optional[Dict[str, Any]] = None,
-    **kwargs: Any,
-) -> None: ...
-
-
-@overload
-def explain_error(
-    exception: Exception,
-    language: str = "ru",
-    format_type: str = "console",
-    return_text: bool = False,
-    context: Optional[Dict[str, Any]] = None,
-    **kwargs: Any,
-) -> Optional[str]: ...
-
-
 def explain_error(
     exception: Exception,
     language: str = "ru",
@@ -690,36 +657,6 @@ def explain_error(
         else:
             print(error_msg)
             return None
-
-
-@overload
-def explain_last_error(
-    language: str = "ru",
-    format_type: str = "console",
-    return_text: Literal[True] = True,
-    context: Optional[Dict[str, Any]] = None,
-    **kwargs: Any,
-) -> str: ...
-
-
-@overload
-def explain_last_error(
-    language: str = "ru",
-    format_type: str = "console",
-    return_text: Literal[False] = False,
-    context: Optional[Dict[str, Any]] = None,
-    **kwargs: Any,
-) -> None: ...
-
-
-@overload
-def explain_last_error(
-    language: str = "ru",
-    format_type: str = "console",
-    return_text: bool = False,
-    context: Optional[Dict[str, Any]] = None,
-    **kwargs: Any,
-) -> Optional[str]: ...
 
 
 def explain_last_error(
