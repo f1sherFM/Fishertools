@@ -10,40 +10,10 @@ from __future__ import annotations
 import os
 import shutil
 import time
-from dataclasses import dataclass
 from typing import Any, Callable
 
+from .models import DownloadProgress, DownloadResponse
 from .safe_requests import SafeHTTPClient
-
-
-@dataclass
-class DownloadProgress:
-    """Progress information for file downloads"""
-
-    bytes_downloaded: int
-    total_bytes: int | None
-    percentage: float | None
-    speed_bps: float | None  # bytes per second
-
-    def __str__(self) -> str:
-        """Human-readable progress string"""
-        if self.percentage is not None:
-            return f"{self.percentage:.1f}% ({self.bytes_downloaded}/{self.total_bytes} bytes)"
-        return f"{self.bytes_downloaded} bytes downloaded"
-
-
-@dataclass
-class DownloadResponse:
-    """Structured response for download operations"""
-
-    success: bool
-    file_path: str | None = None
-    error: str | None = None
-    bytes_downloaded: int = 0
-
-    def __bool__(self) -> bool:
-        """Allow using response in boolean context"""
-        return self.success
 
 
 class SafeFileDownloader:
