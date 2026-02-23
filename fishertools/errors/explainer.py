@@ -65,8 +65,22 @@ def _validate_context(context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     validated = context.copy()
 
     if "operation" in validated:
-        if validated["operation"] not in valid_operations:
+        operation = validated["operation"]
+        if isinstance(operation, str):
+            normalized_operation = operation.strip().lower()
+            validated["operation"] = (
+                normalized_operation if normalized_operation in valid_operations else "unknown"
+            )
+        else:
             validated["operation"] = "unknown"
+
+    # Standardize diagnostic collections for deterministic formatting/output.
+    if "available_keys" in validated:
+        available_keys = validated["available_keys"]
+        if isinstance(available_keys, set):
+            validated["available_keys"] = sorted(available_keys, key=lambda item: str(item))
+        elif isinstance(available_keys, tuple):
+            validated["available_keys"] = list(available_keys)
 
     return validated
 

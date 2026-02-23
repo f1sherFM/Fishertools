@@ -299,10 +299,11 @@ class TestValidateContextFunction:
             'list_access', 'dict_access', 'division', 'concatenation',
             'type_conversion', 'attribute_access', 'import', 'function_call'
         }
-        if operation not in valid_operations:
+        normalized_operation = operation.strip().lower()
+        if normalized_operation not in valid_operations:
             assert result['operation'] == 'unknown'
         else:
-            assert result['operation'] == operation
+            assert result['operation'] == normalized_operation
     
     def test_validate_context_handles_none(self):
         """Test that _validate_context handles None input."""

@@ -8,7 +8,7 @@ Feature: fishertools-v0.5.2
 """
 
 import pytest
-from fishertools.errors.explainer import explain_error
+from fishertools.errors.explainer import _validate_context, explain_error
 
 
 class TestIndexErrorWithContext:
@@ -410,5 +410,24 @@ class TestInvalidContextHandling:
         # Should work
         assert isinstance(result, str)
         assert len(result) > 0
+
+    def test_operation_is_normalized_with_whitespace_and_case(self):
+        """Context operation should be normalized for stable diagnostics."""
+        context = {"operation": "  LIST_ACCESS  "}
+        normalized = _validate_context(context)
+        assert normalized["operation"] == "list_access"
+
+    def test_non_string_operation_becomes_unknown(self):
+        """Non-string operation values should normalize to 'unknown'."""
+        normalized = _validate_context({"operation": 123})
+        assert normalized["operation"] == "unknown"
+
+    def test_available_keys_collection_is_standardized_for_diagnostics(self):
+        """Diagnostic key collections should be normalized to deterministic lists."""
+        normalized_set = _validate_context({"available_keys": {"b", "a"}})
+        assert normalized_set["available_keys"] == ["a", "b"]
+
+        normalized_tuple = _validate_context({"available_keys": ("x", "y")})
+        assert normalized_tuple["available_keys"] == ["x", "y"]
 
 
