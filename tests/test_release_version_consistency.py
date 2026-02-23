@@ -6,7 +6,7 @@ import fishertools
 
 
 def test_version_semver_format():
-    assert re.fullmatch(r"\d+\.\d+\.\d+", fishertools.__version__)
+    assert re.fullmatch(r"\d+\.\d+\.\d+(?:\.\d+)?", fishertools.__version__)
 
 
 def test_pyproject_uses_dynamic_version_from_single_source():

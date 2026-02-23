@@ -333,8 +333,8 @@ class TestVersionInformation:
         import fishertools
         import re
         
-        # Check semantic versioning format (X.Y.Z)
-        version_pattern = r'^\d+\.\d+\.\d+$'
+        # Accept release hotfix suffix format too: X.Y.Z or X.Y.Z.W
+        version_pattern = r'^\d+\.\d+\.\d+(?:\.\d+)?$'
         assert re.match(version_pattern, fishertools.__version__), \
             f"Version {fishertools.__version__} doesn't follow semantic versioning"
     
@@ -342,8 +342,8 @@ class TestVersionInformation:
         """Test that version matches the current package release."""
         import fishertools
         
-        assert fishertools.__version__ == '0.5.5', \
-            f"Expected version 0.5.5, got {fishertools.__version__}"
+        assert fishertools.__version__ == '0.5.5.1', \
+            f"Expected version 0.5.5.1, got {fishertools.__version__}"
     
     def test_get_version_info_function_exists(self):
         """Test that get_version_info function exists."""
@@ -410,5 +410,4 @@ class TestVersionInformation:
         assert hasattr(fishertools, '__author__')
         assert isinstance(fishertools.__author__, str)
         assert len(fishertools.__author__) > 0
-
 
