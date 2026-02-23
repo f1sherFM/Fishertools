@@ -93,7 +93,7 @@ class ErrorExplainer:
             if isinstance(e, (ConfigurationError, ExplanationError)):
                 raise
             raise ExplanationError(
-                f"РќРµ СѓРґР°Р»РѕСЃСЊ РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ ErrorExplainer: {e}", original_error=e
+                f"Не удалось инициализировать ErrorExplainer: {e}", original_error=e
             ) from e
 
     def explain(
@@ -114,7 +114,7 @@ class ErrorExplainer:
         """
         if not isinstance(exception, Exception):
             raise ExplanationError(
-                f"РџР°СЂР°РјРµС‚СЂ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЌРєР·РµРјРїР»СЏСЂРѕРј Exception, РїРѕР»СѓС‡РµРЅ {type(exception).__name__}"
+                f"Параметр должен быть экземпляром Exception, получен {type(exception).__name__}"
             )
 
         try:
@@ -177,7 +177,7 @@ class ErrorExplainer:
         """
         if not isinstance(exception, Exception):
             raise ExplanationError(
-                f"РџР°СЂР°РјРµС‚СЂ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЌРєР·РµРјРїР»СЏСЂРѕРј Exception, РїРѕР»СѓС‡РµРЅ {type(exception).__name__}"
+                f"Параметр должен быть экземпляром Exception, получен {type(exception).__name__}"
             )
 
         try:
@@ -261,8 +261,8 @@ def get_explanation(
     # Parameter validation
     if not isinstance(exception, Exception):
         raise TypeError(
-            f"РџР°СЂР°РјРµС‚СЂ 'exception' РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЌРєР·РµРјРїР»СЏСЂРѕРј Exception, "
-            f"РїРѕР»СѓС‡РµРЅ {type(exception).__name__}"
+            f"Параметр 'exception' должен быть экземпляром Exception, "
+            f"получен {type(exception).__name__}"
         )
 
     # Validate language parameter (now supports 'auto')
@@ -272,8 +272,8 @@ def get_explanation(
     valid_formats = ["console", "plain", "json"]
     if format_type not in valid_formats:
         raise ValueError(
-            f"РџР°СЂР°РјРµС‚СЂ 'format_type' РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕРґРЅРёРј РёР· {valid_formats}, "
-            f"РїРѕР»СѓС‡РµРЅ '{format_type}'"
+            f"Параметр 'format_type' должен быть одним из {valid_formats}, "
+            f"получен '{format_type}'"
         )
 
     # Handle language detection and i18n integration
@@ -516,8 +516,8 @@ def explain_error(
     # Parameter validation - these should raise immediately, not be caught
     if not isinstance(exception, Exception):
         raise TypeError(
-            f"РџР°СЂР°РјРµС‚СЂ 'exception' РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ СЌРєР·РµРјРїР»СЏСЂРѕРј Exception, "
-            f"РїРѕР»СѓС‡РµРЅ {type(exception).__name__}"
+            f"Параметр 'exception' должен быть экземпляром Exception, "
+            f"получен {type(exception).__name__}"
         )
 
     # Validate language parameter (now supports 'auto')
@@ -527,8 +527,8 @@ def explain_error(
     valid_formats = ["console", "plain", "json"]
     if format_type not in valid_formats:
         raise ValueError(
-            f"РџР°СЂР°РјРµС‚СЂ 'format_type' РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕРґРЅРёРј РёР· {valid_formats}, "
-            f"РїРѕР»СѓС‡РµРЅ '{format_type}'"
+            f"Параметр 'format_type' должен быть одним из {valid_formats}, "
+            f"получен '{format_type}'"
         )
 
     try:
@@ -546,10 +546,10 @@ def explain_error(
 
     except ExplanationError as e:
         # Handle explanation-specific errors gracefully
-        error_msg = f"РћС€РёР±РєР° РїСЂРё РѕР±СЉСЏСЃРЅРµРЅРёРё РёСЃРєР»СЋС‡РµРЅРёСЏ: {e.get_full_message()}\n"
-        error_msg += f"РћСЂРёРіРёРЅР°Р»СЊРЅР°СЏ РѕС€РёР±РєР°: {type(exception).__name__}: {exception}\n"
+        error_msg = f"Ошибка при объяснении исключения: {e.get_full_message()}\n"
+        error_msg += f"Оригинальная ошибка: {type(exception).__name__}: {exception}\n"
         if e.original_error:
-            error_msg += f"РўРµС…РЅРёС‡РµСЃРєР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ: {e.original_error}\n"
+            error_msg += f"Техническая информация: {e.original_error}\n"
 
         if return_text:
             return error_msg
@@ -559,16 +559,16 @@ def explain_error(
 
     except FormattingError as e:
         # Handle formatting errors - try to show basic explanation
-        error_msg = f"РћС€РёР±РєР° С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёСЏ: {e.get_full_message()}\n"
+        error_msg = f"Ошибка форматирования: {e.get_full_message()}\n"
         try:
             # Try to create a basic explanation without formatting
             explainer = ErrorExplainer()
             explanation = explainer.explain(exception, context)
-            error_msg += f"РџСЂРѕСЃС‚РѕРµ РѕР±СЉСЏСЃРЅРµРЅРёРµ: {explanation.simple_explanation}\n"
-            error_msg += f"РЎРѕРІРµС‚: {explanation.fix_tip}\n"
+            error_msg += f"Простое объяснение: {explanation.simple_explanation}\n"
+            error_msg += f"Совет: {explanation.fix_tip}\n"
         except Exception:
             error_msg += (
-                f"РћСЂРёРіРёРЅР°Р»СЊРЅР°СЏ РѕС€РёР±РєР°: {type(exception).__name__}: {exception}\n"
+                f"Оригинальная ошибка: {type(exception).__name__}: {exception}\n"
             )
 
         if return_text:
@@ -579,8 +579,8 @@ def explain_error(
 
     except ConfigurationError as e:
         # Handle configuration errors
-        error_msg = f"РћС€РёР±РєР° РєРѕРЅС„РёРіСѓСЂР°С†РёРё: {e.get_full_message()}\n"
-        error_msg += f"РћСЂРёРіРёРЅР°Р»СЊРЅР°СЏ РѕС€РёР±РєР°: {type(exception).__name__}: {exception}\n"
+        error_msg = f"Ошибка конфигурации: {e.get_full_message()}\n"
+        error_msg += f"Оригинальная ошибка: {type(exception).__name__}: {exception}\n"
 
         if return_text:
             return error_msg
@@ -590,8 +590,8 @@ def explain_error(
 
     except FishertoolsError as e:
         # Handle any other fishertools-specific errors
-        error_msg = f"РћС€РёР±РєР° fishertools: {e.get_full_message()}\n"
-        error_msg += f"РћСЂРёРіРёРЅР°Р»СЊРЅР°СЏ РѕС€РёР±РєР°: {type(exception).__name__}: {exception}\n"
+        error_msg = f"Ошибка fishertools: {e.get_full_message()}\n"
+        error_msg += f"Оригинальная ошибка: {type(exception).__name__}: {exception}\n"
 
         if return_text:
             return error_msg
@@ -601,10 +601,10 @@ def explain_error(
 
     except Exception as e:
         # Ultimate fallback for any unexpected errors
-        error_msg = f"РќРµРѕР¶РёРґР°РЅРЅР°СЏ РѕС€РёР±РєР° РІ fishertools: {e}\n"
-        error_msg += f"РћСЂРёРіРёРЅР°Р»СЊРЅР°СЏ РѕС€РёР±РєР°: {type(exception).__name__}: {exception}\n"
+        error_msg = f"Неожиданная ошибка в fishertools: {e}\n"
+        error_msg += f"Оригинальная ошибка: {type(exception).__name__}: {exception}\n"
         error_msg += (
-            "РџРѕР¶Р°Р»СѓР№СЃС‚Р°, СЃРѕРѕР±С‰РёС‚Рµ РѕР± СЌС‚РѕР№ РїСЂРѕР±Р»РµРјРµ СЂР°Р·СЂР°Р±РѕС‚С‡РёРєР°Рј fishertools.\n"
+            "Пожалуйста, сообщите об этой проблеме разработчикам fishertools.\n"
         )
 
         if return_text:
@@ -636,8 +636,8 @@ def explain_last_error(
     exc = sys.exc_info()[1]
     if exc is None:
         message = (
-            "РќРµС‚ Р°РєС‚РёРІРЅРѕРіРѕ РёСЃРєР»СЋС‡РµРЅРёСЏ РґР»СЏ РѕР±СЉСЏСЃРЅРµРЅРёСЏ. "
-            "РСЃРїРѕР»СЊР·СѓР№С‚Рµ explain_last_error() РІРЅСѓС‚СЂРё Р±Р»РѕРєР° except."
+            "Нет активного исключения для объяснения. "
+            "??????????? explain_last_error() ?????? ????? except."
         )
         if return_text:
             return message
@@ -646,8 +646,8 @@ def explain_last_error(
 
     if not isinstance(exc, Exception):
         message = (
-            f"РџРѕСЃР»РµРґРЅСЏСЏ РѕС€РёР±РєР° РёРјРµРµС‚ РЅРµРїРѕРґРґРµСЂР¶РёРІР°РµРјС‹Р№ С‚РёРї: {type(exc).__name__}. "
-            "РџРµСЂРµРґР°Р№С‚Рµ РѕР±С‹С‡РЅС‹Р№ Exception РёР»Рё РёСЃРїРѕР»СЊР·СѓР№С‚Рµ explain_error()."
+            f"Последняя ошибка имеет неподдерживаемый тип: {type(exc).__name__}. "
+            "Передайте обычный Exception или используйте explain_error()."
         )
         if return_text:
             return message
