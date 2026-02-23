@@ -2,6 +2,19 @@
 
 Все важные изменения в проекте Fishertools будут документированы в этом файле.
 
+## [0.5.5] - 2026-02-23
+
+### Changed
+
+- Unified network download response/progress models
+- Lazy-loaded top-level `fishertools` submodules to reduce import coupling
+- Cleaned up decorators docs/messages and removed unreachable branches in safe file helpers
+
+### Tests
+
+- Moved REPL tests out of package runtime path into `tests/test_learn_repl`
+- Reduced OneDrive-related Hypothesis/temp-directory issues in test configuration
+
 ## [0.5.3] - 2026-02-19
 
 ### Added

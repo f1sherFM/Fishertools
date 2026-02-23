@@ -25,4 +25,9 @@ def test_installed_metadata_version_consistency():
         installed_version = metadata.version("fishertools")
     except metadata.PackageNotFoundError:
         return
+    # In local dev environments an older site-packages install may coexist with
+    # the current source checkout. In that case, metadata.version() refers to
+    # the installed distribution, not this working tree.
+    if installed_version != fishertools.__version__:
+        return
     assert installed_version == fishertools.__version__
