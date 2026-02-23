@@ -1,17 +1,18 @@
 """
-Fishertools - РёРЅСЃС‚СЂСѓРјРµРЅС‚С‹, РєРѕС‚РѕСЂС‹Рµ РґРµР»Р°СЋС‚ Python СѓРґРѕР±РЅРµРµ Рё Р±РµР·РѕРїР°СЃРЅРµРµ РґР»СЏ РЅРѕРІРёС‡РєРѕРІ
+Fishertools - practical tools for writing safer, clearer Python code.
 
-РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ:
-    explain_error() - РѕР±СЉСЏСЃРЅСЏРµС‚ РѕС€РёР±РєРё Python РІ РїРѕРЅСЏС‚РЅС‹С… СЃР»РѕРІР°С…
+Main function:
+    explain_error() - explains Python exceptions in beginner-friendly terms.
 
-РњРѕРґСѓР»Рё:
-    errors - СЃРёСЃС‚РµРјР° РѕР±СЉСЏСЃРЅРµРЅРёСЏ РѕС€РёР±РѕРє
-    safe - Р±РµР·РѕРїР°СЃРЅС‹Рµ СѓС‚РёР»РёС‚С‹ РґР»СЏ РЅРѕРІРёС‡РєРѕРІ
-    learn - РѕР±СѓС‡Р°СЋС‰РёРµ РёРЅСЃС‚СЂСѓРјРµРЅС‚С‹
-    legacy - С„СѓРЅРєС†РёРё РґР»СЏ РѕР±СЂР°С‚РЅРѕР№ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё
+Modules:
+    errors - exception explanation system
+    safe - safer utility helpers
+    learn - educational helpers and examples
+    legacy - backward compatibility utilities
 """
-
 from __future__ import annotations
+
+import importlib
 
 from ._version import __version__
 from .api_mode import set_api_mode, get_api_mode, api_mode
@@ -96,37 +97,29 @@ from .input_utils import (
     ask_yes_no, ask_int_range, ask_float_range, ask_regex
 )
 
-# Legacy imports for backward compatibility
-from . import utils
-from . import decorators  
-from . import helpers
+_LAZY_SUBMODULES = {
+    # Legacy imports for backward compatibility
+    "utils", "decorators", "helpers",
+    # Module imports for advanced users
+    "errors", "safe", "learn", "legacy", "input_utils",
+    # Async modules
+    "async_logger", "async_safe",
+    # Enhancement modules
+    "learning", "documentation", "examples", "config", "integration",
+    # Phase 1 modules
+    "visualization", "validation", "debug",
+    # Network/i18n
+    "network", "i18n",
+}
 
-# Module imports for advanced users who want to access specific modules
-from . import errors
-from . import safe
-from . import learn
-from . import legacy
-from . import input_utils
 
-# Async modules for async/await support
-from . import async_logger
-from . import async_safe
-
-# New enhancement modules (fishertools-enhancements)
-from . import learning
-from . import documentation
-from . import examples
-from . import config
-from . import integration
-
-# Phase 1 modules (v0.5.2+)
-from . import visualization
-from . import validation
-from . import debug
-
-# Enhancement modules for safe network operations and i18n (v0.4.7+)
-from . import network
-from . import i18n
+def __getattr__(name: str):
+    """Lazily import heavy submodules while preserving the public API."""
+    if name in _LAZY_SUBMODULES:
+        module = importlib.import_module(f".{name}", __name__)
+        globals()[name] = module
+        return module
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 # Network operations - convenience functions
 from .network import (
@@ -211,4 +204,5 @@ __all__ = [
     "ErrorTranslator", "LanguageDetector",
     "ErrorExplanation",
 ]
+
 
