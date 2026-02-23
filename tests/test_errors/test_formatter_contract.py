@@ -58,3 +58,23 @@ def test_json_output_contract_keys():
     }
     assert required.issubset(parsed.keys())
     assert parsed["error_type"] == "ZeroDivisionError"
+
+
+def test_plain_output_normalizes_additional_info_diagnostics_whitespace():
+    explanation = _sample_explanation()
+    explanation.additional_info = "line1  \r\nline2\t \rline3  "
+
+    out = get_formatter("plain").format(explanation)
+
+    assert "line1\nline2\nline3" in out
+    assert "line1  \r" not in out
+
+
+def test_console_output_normalizes_additional_info_diagnostics_whitespace():
+    explanation = _sample_explanation()
+    explanation.additional_info = "diag A  \r\ndiag B   "
+
+    out = get_formatter("console", use_colors=False).format(explanation)
+
+    assert "diag A diag B" in " ".join(out.split())
+    assert "diag A  \r" not in out

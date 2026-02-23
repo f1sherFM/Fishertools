@@ -192,6 +192,12 @@ class ConsoleFormatter:
             break_long_words=False,
             break_on_hyphens=False,
         )
+
+    def _normalize_diagnostic_text(self, text: str) -> str:
+        """Normalize diagnostics text for deterministic console/plain rendering."""
+        normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+        normalized = "\n".join(line.rstrip() for line in normalized.split("\n"))
+        return normalized.strip()
     
     def format(self, explanation: ErrorExplanation) -> str:
         """
@@ -239,7 +245,9 @@ class ConsoleFormatter:
         # Additional info section
         if explanation.additional_info and explanation.additional_info.strip():
             sections.append(self._format_section_header("Дополнительная информация"))
-            info_text = self._wrap_text(explanation.additional_info)
+            info_text = self._wrap_text(
+                self._normalize_diagnostic_text(explanation.additional_info)
+            )
             info_formatted = self._colorize(info_text, Colors.CYAN)
             sections.append(f"  {info_formatted}")
         
@@ -299,6 +307,12 @@ class PlainFormatter:
         # Remove all ANSI sequences
         text = ansi_escape.sub('', text)
         return text
+
+    def _normalize_diagnostic_text(self, text: str) -> str:
+        """Normalize diagnostics text for deterministic plain output."""
+        normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+        normalized = "\n".join(line.rstrip() for line in normalized.split("\n"))
+        return normalized.strip()
     
     def format(self, explanation: ErrorExplanation) -> str:
         """
@@ -332,7 +346,9 @@ class PlainFormatter:
             sections.append(f"\nПример:\n{clean_code}")
         
         if explanation.additional_info and explanation.additional_info.strip():
-            clean_info = self._strip_ansi_codes(explanation.additional_info)
+            clean_info = self._normalize_diagnostic_text(
+                self._strip_ansi_codes(explanation.additional_info)
+            )
             sections.append(f"\nДополнительная информация:\n{clean_info}")
         
         return '\n'.join(sections)
