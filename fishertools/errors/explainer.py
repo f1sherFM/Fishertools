@@ -14,9 +14,8 @@ Enhancements (v0.5.2+):
 - Support for 'auto' language detection
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 import sys
-import re
 
 from .exceptions import (
     ConfigurationError,
@@ -26,6 +25,7 @@ from .exceptions import (
 )
 from .explanation_builder import ExplanationBuilder
 from .models import ErrorExplanation, ExceptionExplanation, ExplainerConfig
+from .normalization import normalize_context, normalize_language
 from .pattern_loader import PatternLoader, PatternMatcher
 
 
@@ -43,46 +43,7 @@ def _validate_context(context: Any) -> Dict[str, Any]:
         Mypy may report line 38 as unreachable - this is a false positive
         due to early returns in the validation logic.
     """
-    if context is None:
-        return {}
-
-    if not isinstance(context, dict):
-        return {}
-
-    # Normalize operation names
-    valid_operations = {
-        "list_access",
-        "dict_access",
-        "division",
-        "concatenation",
-        "type_conversion",
-        "attribute_access",
-        "import",
-        "function_call",
-    }
-
-    # Create a copy to avoid modifying the original
-    validated = context.copy()
-
-    if "operation" in validated:
-        operation = validated["operation"]
-        if isinstance(operation, str):
-            normalized_operation = operation.strip().lower()
-            validated["operation"] = (
-                normalized_operation if normalized_operation in valid_operations else "unknown"
-            )
-        else:
-            validated["operation"] = "unknown"
-
-    # Standardize diagnostic collections for deterministic formatting/output.
-    if "available_keys" in validated:
-        available_keys = validated["available_keys"]
-        if isinstance(available_keys, set):
-            validated["available_keys"] = sorted(available_keys, key=lambda item: str(item))
-        elif isinstance(available_keys, tuple):
-            validated["available_keys"] = list(available_keys)
-
-    return validated
+    return normalize_context(context)
 
 
 def _normalize_language(language: Any) -> str:
@@ -92,23 +53,7 @@ def _normalize_language(language: Any) -> str:
     Accepts 'ru', 'en', 'auto'. For unsupported two/three-letter codes,
     falls back to English. Raises ValueError for other invalid inputs.
     """
-    valid_languages = ["ru", "en", "auto"]
-    if not isinstance(language, str):
-        raise ValueError(
-            f"РџР°СЂР°РјРµС‚СЂ 'language' РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕРґРЅРёРј РёР· {valid_languages}, "
-            f"РїРѕР»СѓС‡РµРЅ '{language}'"
-        )
-
-    if language in valid_languages:
-        return language
-
-    if re.fullmatch(r"[A-Za-z]{2,3}", language):
-        return "en"
-
-    raise ValueError(
-        f"РџР°СЂР°РјРµС‚СЂ 'language' РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕРґРЅРёРј РёР· {valid_languages}, "
-        f"РїРѕР»СѓС‡РµРЅ '{language}'"
-    )
+    return normalize_language(language)
 
 
 class ErrorExplainer:
@@ -180,19 +125,25 @@ class ErrorExplainer:
             pattern = self.pattern_matcher.find_match(exception)
 
             if pattern:
-                return self.explanation_builder.create_from_pattern(
+                return cast(
+                    ErrorExplanation,
+                    self.explanation_builder.create_from_pattern(
                     exception, pattern, validated_context
+                    ),
                 )
             else:
-                return self.explanation_builder.create_fallback(
-                    exception, validated_context
+                return cast(
+                    ErrorExplanation,
+                    self.explanation_builder.create_fallback(exception, validated_context),
                 )
 
         except Exception as e:
             if isinstance(e, ExplanationError):
                 raise
             # Graceful degradation
-            return self.explanation_builder.create_emergency(exception, e)
+            return cast(
+                ErrorExplanation, self.explanation_builder.create_emergency(exception, e)
+            )
 
     def explain_structured(
         self, exception: Exception, context: Optional[Dict[str, Any]] = None
@@ -234,15 +185,19 @@ class ErrorExplainer:
             error_explanation = self.explain(exception, context)
 
             # Convert to structured format
-            return self.explanation_builder.create_structured_from_basic(
-                error_explanation
+            return cast(
+                ExceptionExplanation,
+                self.explanation_builder.create_structured_from_basic(error_explanation),
             )
 
         except Exception as e:
             if isinstance(e, ExplanationError):
                 raise
             # Graceful degradation
-            return self.explanation_builder.create_emergency_structured(exception, e)
+            return cast(
+                ExceptionExplanation,
+                self.explanation_builder.create_emergency_structured(exception, e),
+            )
 
 
 def get_explanation(

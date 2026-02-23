@@ -5,10 +5,13 @@ This module contains formatters for different output types including console
 output with color support and structured formatting.
 """
 
+import json
 import os
 import sys
 from typing import Any, Dict, Type
+from .exceptions import FormattingError
 from .models import ErrorExplanation
+from .normalization import normalize_diagnostic_text
 
 
 class Colors:
@@ -193,12 +196,6 @@ class ConsoleFormatter:
             break_on_hyphens=False,
         )
 
-    def _normalize_diagnostic_text(self, text: str) -> str:
-        """Normalize diagnostics text for deterministic console/plain rendering."""
-        normalized = text.replace("\r\n", "\n").replace("\r", "\n")
-        normalized = "\n".join(line.rstrip() for line in normalized.split("\n"))
-        return normalized.strip()
-    
     def format(self, explanation: ErrorExplanation) -> str:
         """
         Format error explanation for console output with structured sections.
@@ -246,7 +243,7 @@ class ConsoleFormatter:
         if explanation.additional_info and explanation.additional_info.strip():
             sections.append(self._format_section_header("Дополнительная информация"))
             info_text = self._wrap_text(
-                self._normalize_diagnostic_text(explanation.additional_info)
+                normalize_diagnostic_text(explanation.additional_info)
             )
             info_formatted = self._colorize(info_text, Colors.CYAN)
             sections.append(f"  {info_formatted}")
@@ -308,12 +305,6 @@ class PlainFormatter:
         text = ansi_escape.sub('', text)
         return text
 
-    def _normalize_diagnostic_text(self, text: str) -> str:
-        """Normalize diagnostics text for deterministic plain output."""
-        normalized = text.replace("\r\n", "\n").replace("\r", "\n")
-        normalized = "\n".join(line.rstrip() for line in normalized.split("\n"))
-        return normalized.strip()
-    
     def format(self, explanation: ErrorExplanation) -> str:
         """
         Format error explanation as plain text.
@@ -346,7 +337,7 @@ class PlainFormatter:
             sections.append(f"\nПример:\n{clean_code}")
         
         if explanation.additional_info and explanation.additional_info.strip():
-            clean_info = self._normalize_diagnostic_text(
+            clean_info = normalize_diagnostic_text(
                 self._strip_ansi_codes(explanation.additional_info)
             )
             sections.append(f"\nДополнительная информация:\n{clean_info}")
@@ -371,7 +362,18 @@ class JsonFormatter:
         Returns:
             JSON formatted string
         """
-        return str(explanation.to_json())
+        try:
+            payload = explanation.to_dict()
+            additional_info = payload.get("additional_info")
+            if isinstance(additional_info, str):
+                payload["additional_info"] = normalize_diagnostic_text(additional_info)
+            return json.dumps(payload, ensure_ascii=False, indent=2)
+        except Exception as e:
+            raise FormattingError(
+                f"Не удалось преобразовать объяснение в JSON: {e}",
+                formatter_type="json",
+                original_error=e,
+            )
 
 
 _FORMATTER_REGISTRY: Dict[str, Type[Any]] = {

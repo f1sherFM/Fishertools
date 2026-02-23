@@ -78,3 +78,13 @@ def test_console_output_normalizes_additional_info_diagnostics_whitespace():
 
     assert "diag A diag B" in " ".join(out.split())
     assert "diag A  \r" not in out
+
+
+def test_json_output_normalizes_additional_info_diagnostics_whitespace():
+    explanation = _sample_explanation()
+    explanation.additional_info = "line1  \r\nline2\t \rline3  "
+
+    out = get_formatter("json").format(explanation)
+    parsed = json.loads(out)
+
+    assert parsed["additional_info"] == "line1\nline2\nline3"

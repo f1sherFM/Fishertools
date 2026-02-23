@@ -21,7 +21,7 @@ class ErrorPattern:
     example: str              # Code example
     common_causes: List[str]  # Common causes of this error
     
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the pattern after initialization."""
         from .exceptions import PatternError
         
@@ -103,7 +103,7 @@ class ErrorExplanation:
     code_example: str
     additional_info: Optional[str] = None
     
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the explanation after initialization."""
         from .exceptions import ExplanationError
         
@@ -172,7 +172,7 @@ class ExplainerConfig:
     use_colors: bool = True
     max_explanation_length: int = 200
     
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the configuration after initialization."""
         from .exceptions import ConfigurationError
         
@@ -244,7 +244,7 @@ class ExceptionExplanation:
     code_example: str
     traceback_context: Optional[str] = None
     
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate the explanation after initialization."""
         from .exceptions import ExplanationError
         

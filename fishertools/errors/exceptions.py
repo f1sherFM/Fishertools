@@ -5,6 +5,8 @@ This module defines the exception hierarchy for fishertools, providing
 specific error types for different failure scenarios.
 """
 
+from typing import Optional
+
 
 class FishertoolsError(Exception):
     """
@@ -15,7 +17,7 @@ class FishertoolsError(Exception):
     errors with a single except clause.
     """
     
-    def __init__(self, message: str, original_error: Exception = None):
+    def __init__(self, message: str, original_error: Optional[Exception] = None):
         """
         Initialize the fishertools error.
         
@@ -52,7 +54,12 @@ class ExplanationError(FishertoolsError):
     pattern matching failures or internal processing errors.
     """
     
-    def __init__(self, message: str, exception_type: str = None, original_error: Exception = None):
+    def __init__(
+        self,
+        message: str,
+        exception_type: Optional[str] = None,
+        original_error: Optional[Exception] = None,
+    ):
         """
         Initialize the explanation error.
         
@@ -81,7 +88,12 @@ class FormattingError(FishertoolsError):
     or output generation issues.
     """
     
-    def __init__(self, message: str, formatter_type: str = None, original_error: Exception = None):
+    def __init__(
+        self,
+        message: str,
+        formatter_type: Optional[str] = None,
+        original_error: Optional[Exception] = None,
+    ):
         """
         Initialize the formatting error.
         
@@ -109,7 +121,13 @@ class ConfigurationError(FishertoolsError):
     objects contain invalid values that prevent proper system operation.
     """
     
-    def __init__(self, message: str, config_field: str = None, config_value: str = None, original_error: Exception = None):
+    def __init__(
+        self,
+        message: str,
+        config_field: Optional[str] = None,
+        config_value: Optional[str] = None,
+        original_error: Optional[Exception] = None,
+    ):
         """
         Initialize the configuration error.
         
@@ -142,7 +160,12 @@ class PatternError(FishertoolsError):
     or pattern matching failures.
     """
     
-    def __init__(self, message: str, pattern_type: str = None, original_error: Exception = None):
+    def __init__(
+        self,
+        message: str,
+        pattern_type: Optional[str] = None,
+        original_error: Optional[Exception] = None,
+    ):
         """
         Initialize the pattern error.
         
@@ -171,7 +194,12 @@ class SafeUtilityError(FishertoolsError):
     invalid inputs or system-level failures.
     """
     
-    def __init__(self, message: str, utility_name: str = None, original_error: Exception = None):
+    def __init__(
+        self,
+        message: str,
+        utility_name: Optional[str] = None,
+        original_error: Optional[Exception] = None,
+    ):
         """
         Initialize the safe utility error.
         
