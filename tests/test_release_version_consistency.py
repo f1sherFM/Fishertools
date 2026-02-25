@@ -3,6 +3,7 @@ from pathlib import Path
 from importlib import metadata
 
 import fishertools
+import pytest
 
 
 def test_version_semver_format():
@@ -29,5 +30,20 @@ def test_installed_metadata_version_consistency():
     # the current source checkout. In that case, metadata.version() refers to
     # the installed distribution, not this working tree.
     if installed_version != fishertools.__version__:
-        return
+        pytest.skip(
+            "Installed package metadata is stale relative to source tree. "
+            "Reinstall the package to re-enable this strict check."
+        )
     assert installed_version == fishertools.__version__
+
+
+def test_readme_version_and_install_command_match_package_version():
+    content = Path("README.md").read_text(encoding="utf-8")
+
+    current_match = re.search(r"Current version:\s*`([^`]+)`", content)
+    install_match = re.search(r"pip install fishertools==([^\s`]+)", content)
+
+    assert current_match, "README.md must contain 'Current version: `...`'"
+    assert install_match, "README.md must contain 'pip install fishertools==<version>'"
+    assert current_match.group(1) == fishertools.__version__
+    assert install_match.group(1) == fishertools.__version__

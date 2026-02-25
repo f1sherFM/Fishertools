@@ -18,6 +18,8 @@ jobs:
         run: python scripts/check_text_encoding.py --root .
       - name: Validate explicit encoding in release-critical file I/O
         run: python scripts/check_explicit_encoding.py
+      - name: Check HEAD version consistency (README ↔ package)
+        run: python scripts/check_release_version_consistency.py
 
   core:
     name: Core suite

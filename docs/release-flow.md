@@ -52,3 +52,23 @@ Policy:
 - text-mode `open()` calls must specify `encoding=...`
 - binary modes (`rb`, `wb`, etc.) are allowed without `encoding=`
 - this is a targeted guard, not a repository-wide rule yet
+
+## Version Consistency Guard (Issue #28)
+
+Run for `HEAD` (README vs package version):
+
+```bash
+python scripts/check_release_version_consistency.py
+```
+
+Run for release tag validation (tag vs package version):
+
+```bash
+python scripts/check_release_version_consistency.py --git-tag vX.Y.Z
+```
+
+Policy:
+
+- `README.md` "Current version" must match `fishertools/_version.py`
+- `README.md` install command version must match `fishertools/_version.py`
+- release tag may be `vX.Y.Z` or `X.Y.Z`, but normalized value must match package version
