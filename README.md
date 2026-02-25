@@ -138,11 +138,18 @@ Run linter:
 ruff check .
 ```
 
+Run release encoding guard (UTF-8 + mojibake heuristics):
+
+```bash
+python scripts/check_text_encoding.py --root .
+```
+
 ## Release 0.5.5.1
 
 - Package version set to `0.5.5.1`
 - README rewritten for clarity
 - Version references aligned across code and tests
+- Added CI release encoding guard for UTF-8 validation and mojibake markers (Epic `#21`, issue `#26`)
 
 ## License
 

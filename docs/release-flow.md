@@ -20,3 +20,19 @@ Single source of truth for version is:
 
 - Tests enforce semver format for `fishertools.__version__`.
 - Tests enforce pyproject dynamic version mapping consistency.
+
+## Encoding Guard (Issue #26)
+
+Before publishing, run:
+
+```bash
+python scripts/check_text_encoding.py --root .
+```
+
+What it checks:
+
+- text files decode as UTF-8
+- binary artifacts are skipped via extension allowlist
+- common mojibake markers are detected (for example latin-1-style marker pairs and high-signal mojibake chars)
+
+Note: the checker contains a temporary path allowlist for known legacy mojibake files already present in the repository. New files with the same issue should fail CI.

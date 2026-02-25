@@ -6,6 +6,17 @@ on:
   pull_request:
 
 jobs:
+  release-encoding-guard:
+    name: Release encoding guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate UTF-8 and mojibake markers in repository text files
+        run: python scripts/check_text_encoding.py --root .
+
   core:
     name: Core suite
     runs-on: ubuntu-latest
