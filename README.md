@@ -45,6 +45,7 @@ except Exception as e:
 - [Features](docs/features.md)
 - [Installation](docs/installation.md)
 - [API Reference](docs/api-reference.md)
+- [Import Baseline (import fishertools)](docs/import-baseline.md)
 - [Examples](docs/examples.md)
 - [Limitations](docs/limitations.md)
 - [Contributing](docs/contributing.md)
@@ -149,6 +150,7 @@ python scripts/check_text_encoding.py --root .
 - Package version set to `0.5.5.1`
 - README rewritten for clarity
 - Version references aligned across code and tests
+- Import baseline doc and diagnostic smoke test for `import fishertools` added (Epic `#22`, issue `#30`)
 - Added CI release encoding guard for UTF-8 validation and mojibake markers (Epic `#21`, issue `#26`)
 
 ## License
