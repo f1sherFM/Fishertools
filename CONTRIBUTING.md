@@ -56,6 +56,15 @@ make clean
 - [ ] Код отформатирован (`make format`)
 - [ ] Нет ошибок линтера (`make lint`)
 - [ ] Примеры работают (`make demo`)
+- [ ] Для релизных/документационных изменений проверены правила кодировок и версии (см. `docs/release-flow.md`)
+
+### Проверки релизных артефактов (при изменении релизных файлов/README)
+
+```bash
+python scripts/check_text_encoding.py --root .
+python scripts/check_explicit_encoding.py
+python scripts/check_release_version_consistency.py
+```
 
 ## 📋 Процесс внесения изменений
 

@@ -120,6 +120,18 @@ pytest --cov=fishertools
 pytest -k "property"
 ```
 
+### Release Hardening Checks (when touching README/release scripts/workflows)
+
+Run these checks before opening a PR if your change affects release artifacts, version strings, or docs encoding:
+
+```bash
+python scripts/check_text_encoding.py --root .
+python scripts/check_explicit_encoding.py
+python scripts/check_release_version_consistency.py
+```
+
+See `docs/release-flow.md` for the full release encoding/version policy and common failure examples (mojibake, version drift, tag mismatch).
+
 ### Writing Tests
 
 Write both unit tests and property-based tests:
