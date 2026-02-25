@@ -16,6 +16,8 @@ jobs:
           python-version: "3.11"
       - name: Validate UTF-8 and mojibake markers in repository text files
         run: python scripts/check_text_encoding.py --root .
+      - name: Validate explicit encoding in release-critical file I/O
+        run: python scripts/check_explicit_encoding.py
 
   core:
     name: Core suite

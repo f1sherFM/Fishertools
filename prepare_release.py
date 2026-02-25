@@ -24,14 +24,14 @@ def check_version_consistency():
     print("\n🔍 Checking version consistency...")
     
     # Read setup.py
-    with open("setup.py") as f:
+    with open("setup.py", encoding="utf-8") as f:
         setup_content = f.read()
         import re
         setup_match = re.search(r'version="([^"]+)"', setup_content)
         setup_version = setup_match.group(1) if setup_match else None
     
     # Read pyproject.toml
-    with open("pyproject.toml") as f:
+    with open("pyproject.toml", encoding="utf-8") as f:
         pyproject_content = f.read()
         pyproject_match = re.search(r'version = "([^"]+)"', pyproject_content)
         pyproject_version = pyproject_match.group(1) if pyproject_match else None

@@ -36,3 +36,19 @@ What it checks:
 - common mojibake markers are detected (for example latin-1-style marker pairs and high-signal mojibake chars)
 
 Note: the checker contains a temporary path allowlist for known legacy mojibake files already present in the repository. New files with the same issue should fail CI.
+
+## Explicit `encoding=` Guard (Issue #27)
+
+Run:
+
+```bash
+python scripts/check_explicit_encoding.py
+```
+
+Scope (current): release-critical scripts/tests only.
+
+Policy:
+
+- text-mode `open()` calls must specify `encoding=...`
+- binary modes (`rb`, `wb`, etc.) are allowed without `encoding=`
+- this is a targeted guard, not a repository-wide rule yet

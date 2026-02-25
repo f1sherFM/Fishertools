@@ -145,13 +145,24 @@ Run release encoding guard (UTF-8 + mojibake heuristics):
 python scripts/check_text_encoding.py --root .
 ```
 
+<<<<<<< HEAD
 ## Release 0.5.5.1
+=======
+Run explicit `encoding=` guard for release-critical file I/O:
+
+```bash
+python scripts/check_explicit_encoding.py
+```
+
+## Release 0.5.3
+>>>>>>> 1afd0a2 (test(release): enforce explicit encoding in critical text file io)
 
 - Package version set to `0.5.5.1`
 - README rewritten for clarity
 - Version references aligned across code and tests
 - Import baseline doc and diagnostic smoke test for `import fishertools` added (Epic `#22`, issue `#30`)
 - Added CI release encoding guard for UTF-8 validation and mojibake markers (Epic `#21`, issue `#26`)
+- Added explicit `encoding=` check for release-critical text file I/O (Epic `#21`, issue `#27`)
 
 ## License
 
