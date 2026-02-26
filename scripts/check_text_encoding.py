@@ -37,6 +37,8 @@ SKIPPED_DIRECTORIES = {
     ".ruff_cache",
     ".venv",
     "venv",
+    "test_env",
+    "test_main_pypi",
     "dist",
     "build",
     "__pycache__",
