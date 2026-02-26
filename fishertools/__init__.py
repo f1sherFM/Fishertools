@@ -16,6 +16,7 @@ import importlib
 
 from ._version import __version__
 from .api_mode import set_api_mode, get_api_mode, api_mode
+from ._import_facade_contract import MINIMAL_EAGER_EXPORTS
 
 __author__ = "f1sherFM"
 
@@ -76,27 +77,6 @@ from .safe import (
     safe_open, find_file, project_root
 )
 
-# Visualization functions (existing + enhanced)
-from .visualization import (
-    visualize,  # Existing function
-    EnhancedVisualizer,  # New enhanced visualizer
-    AlgorithmVisualizer,  # New algorithm visualizer
-    VisualizationConfig,  # Configuration model
-    VisualizationResult,  # Result model
-)
-
-# Learning tools - educational functions
-from .learn import (
-    generate_example, show_best_practice, 
-    list_available_concepts, list_available_topics
-)
-
-# Input validation functions
-from .input_utils import (
-    ask_int, ask_float, ask_str, ask_choice,
-    ask_yes_no, ask_int_range, ask_float_range, ask_regex
-)
-
 _LAZY_SUBMODULES = {
     # Legacy imports for backward compatibility
     "utils", "decorators", "helpers",
@@ -112,33 +92,70 @@ _LAZY_SUBMODULES = {
     "network", "i18n",
 }
 
+_LAZY_SYMBOL_SOURCES = {
+    # Safe helpers that are non-core for onboarding.
+    "safe_max": ("safe", "safe_max"),
+    "safe_min": ("safe", "safe_min"),
+    "safe_sum": ("safe", "safe_sum"),
+    "safe_get_file_size": ("safe", "safe_get_file_size"),
+    "safe_list_files": ("safe", "safe_list_files"),
+    "safe_read_json": ("safe", "safe_read_json"),
+    "safe_write_json": ("safe", "safe_write_json"),
+    "safe_read_yaml": ("safe", "safe_read_yaml"),
+    "safe_write_yaml": ("safe", "safe_write_yaml"),
+    "safe_read_toml": ("safe", "safe_read_toml"),
+    "safe_write_toml": ("safe", "safe_write_toml"),
+    "find_file": ("safe", "find_file"),
+    "project_root": ("safe", "project_root"),
+    # Visualization
+    "visualize": ("visualization", "visualize"),
+    "EnhancedVisualizer": ("visualization", "EnhancedVisualizer"),
+    "AlgorithmVisualizer": ("visualization", "AlgorithmVisualizer"),
+    "VisualizationConfig": ("visualization", "VisualizationConfig"),
+    "VisualizationResult": ("visualization", "VisualizationResult"),
+    # Learning tools
+    "generate_example": ("learn", "generate_example"),
+    "show_best_practice": ("learn", "show_best_practice"),
+    "list_available_concepts": ("learn", "list_available_concepts"),
+    "list_available_topics": ("learn", "list_available_topics"),
+    # Input utilities
+    "ask_int": ("input_utils", "ask_int"),
+    "ask_float": ("input_utils", "ask_float"),
+    "ask_str": ("input_utils", "ask_str"),
+    "ask_choice": ("input_utils", "ask_choice"),
+    "ask_yes_no": ("input_utils", "ask_yes_no"),
+    "ask_int_range": ("input_utils", "ask_int_range"),
+    "ask_float_range": ("input_utils", "ask_float_range"),
+    "ask_regex": ("input_utils", "ask_regex"),
+    # Network convenience
+    "safe_request": ("network", "safe_request"),
+    "safe_download": ("network", "safe_download"),
+    "SafeHTTPClient": ("network", "SafeHTTPClient"),
+    "SafeFileDownloader": ("network", "SafeFileDownloader"),
+    "NetworkResponse": ("network", "NetworkResponse"),
+    "DownloadResponse": ("network", "DownloadResponse"),
+    # i18n convenience
+    "translate_error": ("i18n", "translate_error"),
+    "detect_language": ("i18n", "detect_language"),
+    "ErrorTranslator": ("i18n", "ErrorTranslator"),
+    "LanguageDetector": ("i18n", "LanguageDetector"),
+    "ErrorExplanation": ("i18n", "ErrorExplanation"),
+}
+
 
 def __getattr__(name: str):
-    """Lazily import heavy submodules while preserving the public API."""
+    """Lazily import selected submodules/symbols while preserving the public API."""
+    if name in _LAZY_SYMBOL_SOURCES and name not in MINIMAL_EAGER_EXPORTS:
+        module_name, attr_name = _LAZY_SYMBOL_SOURCES[name]
+        module = importlib.import_module(f".{module_name}", __name__)
+        value = getattr(module, attr_name)
+        globals()[name] = value
+        return value
     if name in _LAZY_SUBMODULES:
         module = importlib.import_module(f".{name}", __name__)
         globals()[name] = module
         return module
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-# Network operations - convenience functions
-from .network import (
-    safe_request,  # Safe HTTP requests
-    safe_download,  # Safe file downloads
-    SafeHTTPClient,  # HTTP client class
-    SafeFileDownloader,  # File downloader class
-    NetworkResponse,  # Response model
-    DownloadResponse,  # Download response model
-)
-
-# Internationalization - multilingual support
-from .i18n import (
-    translate_error,  # Translate error messages
-    detect_language,  # Detect system language
-    ErrorTranslator,  # Error translator class
-    LanguageDetector,  # Language detector class
-    ErrorExplanation,  # Error explanation model
-)
 
 __all__ = [
     # Version information
@@ -204,5 +221,4 @@ __all__ = [
     "ErrorTranslator", "LanguageDetector",
     "ErrorExplanation",
 ]
-
 

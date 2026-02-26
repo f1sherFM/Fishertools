@@ -47,6 +47,7 @@ except Exception as e:
 - [API Reference](docs/api-reference.md)
 - [Import Baseline (import fishertools)](docs/import-baseline.md)
 - [Import Facade Eager Design](docs/import-facade-eager-design.md)
+- [Import Lazy Top-Level Dispatch](docs/import-lazy-top-level-dispatch.md)
 - [Examples](docs/examples.md)
 - [Limitations](docs/limitations.md)
 - [Contributing](docs/contributing.md)
@@ -169,6 +170,7 @@ python scripts/check_release_version_consistency.py --git-tag vX.Y.Z
 - Added explicit `encoding=` check for release-critical text file I/O (Epic `#21`, issue `#27`)
 - Added release version consistency checks for README/package and release tag validation (Epic `#21`, issue `#28`)
 - Added minimal eager facade design contract for top-level imports (Epic `#22`, issue `#31`)
+- Added lazy top-level symbol dispatch for selected facade exports (Epic `#22`, issue `#32`)
 
 ## License
 

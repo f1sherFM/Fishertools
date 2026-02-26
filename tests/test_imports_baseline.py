@@ -6,7 +6,6 @@ import sys
 import time
 from pathlib import Path
 
-
 def _collect_init_import_map() -> list[dict[str, object]]:
     """Parse top-level relative imports from fishertools/__init__.py for diagnostics."""
     source = Path("fishertools/__init__.py").read_text(encoding="utf-8")
@@ -41,17 +40,22 @@ class TestImportsBaseline:
         assert isinstance(fishertools.__all__, list)
         assert len(fishertools.__all__) > 0
 
-        # These modules are eagerly imported today and form the current baseline
-        # for the epic's follow-up tasks (#31/#32).
-        expected_eager_modules = {
+        # Core eager baseline remains imported immediately after the #32 partial
+        # lazy-top-level migration.
+        expected_core_eager_modules = {
             "fishertools.errors",
             "fishertools.safe",
+        }
+        assert expected_core_eager_modules.issubset(loaded_fishertools_modules)
+
+        # Selected modules are now expected to be lazy-loaded on attribute access.
+        expected_lazy_modules = {
             "fishertools.learn",
             "fishertools.visualization",
             "fishertools.network",
             "fishertools.i18n",
         }
-        assert expected_eager_modules.issubset(loaded_fishertools_modules)
+        assert expected_lazy_modules.isdisjoint(loaded_fishertools_modules)
 
         # Timing is recorded only as diagnostics; the assertion just guards against
         # broken measurement values while keeping the test stable across CI machines.
@@ -62,17 +66,23 @@ class TestImportsBaseline:
         import_map = _collect_init_import_map()
         modules = {entry["module"] for entry in import_map}
 
-        expected_groups = {
+        expected_eager_import_groups = {
             "_version",
             "api_mode",
+            "_import_facade_contract",
             "errors",
             "safe",
-            "visualization",
-            "learn",
-            "input_utils",
-            "network",
-            "i18n",
         }
 
-        assert expected_groups.issubset(modules)
+        assert expected_eager_import_groups.issubset(modules)
 
+        # These groups moved from eager imports to lazy symbol dispatch in #32.
+        migrated_to_lazy_symbol_dispatch = {"visualization", "learn", "input_utils", "network", "i18n"}
+        assert migrated_to_lazy_symbol_dispatch.isdisjoint(modules)
+
+    def test_minimal_eager_exports_are_accessible_after_import(self):
+        from fishertools._import_facade_contract import MINIMAL_EAGER_EXPORTS
+
+        fishertools = importlib.import_module("fishertools")
+        for name in MINIMAL_EAGER_EXPORTS:
+            assert hasattr(fishertools, name), f"{name} should be available after import fishertools"
