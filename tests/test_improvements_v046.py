@@ -75,7 +75,7 @@ class TestSimpleLoggerThreadSafety:
         """Test that SimpleLogger has a lock attribute."""
         logger = SimpleLogger("test.log")
         assert hasattr(logger, '_lock')
-        assert isinstance(logger._lock, threading.Lock)
+        assert isinstance(logger._lock, type(threading.Lock()))
 
 
 class TestPatternLoaderCaching:

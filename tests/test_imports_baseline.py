@@ -4,6 +4,7 @@ import ast
 import importlib
 import sys
 import time
+from contextlib import contextmanager
 from pathlib import Path
 
 def _collect_init_import_map() -> list[dict[str, object]]:
@@ -24,42 +25,62 @@ def _collect_init_import_map() -> list[dict[str, object]]:
     return import_map
 
 
+@contextmanager
+def _isolated_fishertools_modules():
+    original_modules = {
+        name: module
+        for name, module in sys.modules.items()
+        if name == "fishertools" or name.startswith("fishertools.")
+    }
+
+    try:
+        for name in list(original_modules):
+            sys.modules.pop(name, None)
+        yield
+    finally:
+        for name in list(sys.modules):
+            if name == "fishertools" or name.startswith("fishertools."):
+                sys.modules.pop(name, None)
+        sys.modules.update(original_modules)
+
+
 class TestImportsBaseline:
     def test_import_fishertools_smoke_and_diagnostics(self):
         """Keep a diagnostic baseline for import surface without fragile timing thresholds."""
-        before_modules = set(sys.modules)
+        with _isolated_fishertools_modules():
+            before_modules = set(sys.modules)
 
-        started_at = time.perf_counter()
-        fishertools = importlib.import_module("fishertools")
-        elapsed_ms = (time.perf_counter() - started_at) * 1000
+            started_at = time.perf_counter()
+            fishertools = importlib.import_module("fishertools")
+            elapsed_ms = (time.perf_counter() - started_at) * 1000
 
-        loaded_modules = set(sys.modules) - before_modules
-        loaded_fishertools_modules = {m for m in loaded_modules if m.startswith("fishertools")}
+            loaded_modules = set(sys.modules) - before_modules
+            loaded_fishertools_modules = {m for m in loaded_modules if m.startswith("fishertools")}
 
-        assert hasattr(fishertools, "__all__")
-        assert isinstance(fishertools.__all__, list)
-        assert len(fishertools.__all__) > 0
+            assert hasattr(fishertools, "__all__")
+            assert isinstance(fishertools.__all__, list)
+            assert len(fishertools.__all__) > 0
 
-        # Core eager baseline remains imported immediately after the #32 partial
-        # lazy-top-level migration.
-        expected_core_eager_modules = {
-            "fishertools.errors",
-            "fishertools.safe",
-        }
-        assert expected_core_eager_modules.issubset(loaded_fishertools_modules)
+            # Core eager baseline remains imported immediately after the #32 partial
+            # lazy-top-level migration.
+            expected_core_eager_modules = {
+                "fishertools.errors",
+                "fishertools.safe",
+            }
+            assert expected_core_eager_modules.issubset(loaded_fishertools_modules)
 
-        # Selected modules are now expected to be lazy-loaded on attribute access.
-        expected_lazy_modules = {
-            "fishertools.learn",
-            "fishertools.visualization",
-            "fishertools.network",
-            "fishertools.i18n",
-        }
-        assert expected_lazy_modules.isdisjoint(loaded_fishertools_modules)
+            # Selected modules are now expected to be lazy-loaded on attribute access.
+            expected_lazy_modules = {
+                "fishertools.learn",
+                "fishertools.visualization",
+                "fishertools.network",
+                "fishertools.i18n",
+            }
+            assert expected_lazy_modules.isdisjoint(loaded_fishertools_modules)
 
-        # Timing is recorded only as diagnostics; the assertion just guards against
-        # broken measurement values while keeping the test stable across CI machines.
-        assert elapsed_ms >= 0
+            # Timing is recorded only as diagnostics; the assertion just guards against
+            # broken measurement values while keeping the test stable across CI machines.
+            assert elapsed_ms >= 0
 
     def test_init_import_map_contains_expected_eager_groups(self):
         """Detect accidental drift in top-level eager import declarations."""

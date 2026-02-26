@@ -5,6 +5,8 @@ Pytest configuration and fixtures for fishertools tests.
 import os
 import tempfile
 import importlib.util
+import inspect
+import asyncio
 from pathlib import Path
 
 import pytest
@@ -12,7 +14,8 @@ from hypothesis import settings, Verbosity
 
 
 pytest_plugins = []
-if importlib.util.find_spec("pytest_asyncio") is not None:
+HAS_PYTEST_ASYNCIO = importlib.util.find_spec("pytest_asyncio") is not None
+if HAS_PYTEST_ASYNCIO:
     pytest_plugins.append("pytest_asyncio")
 
 
@@ -36,6 +39,24 @@ def pytest_configure() -> None:
     os.environ["TEMP"] = tmp_path
     os.environ["TMP"] = tmp_path
     tempfile.tempdir = tmp_path
+
+
+def pytest_pyfunc_call(pyfuncitem):
+    """Fallback async test runner when pytest-asyncio is unavailable in some CI jobs."""
+    if HAS_PYTEST_ASYNCIO:
+        return None
+
+    test_func = pyfuncitem.obj
+    if not inspect.iscoroutinefunction(test_func):
+        return None
+
+    marker = pyfuncitem.get_closest_marker("asyncio")
+    if marker is None:
+        return None
+
+    funcargs = {name: pyfuncitem.funcargs[name] for name in pyfuncitem._fixtureinfo.argnames}
+    asyncio.run(test_func(**funcargs))
+    return True
 
 
 @pytest.fixture
