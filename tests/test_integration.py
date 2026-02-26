@@ -34,10 +34,10 @@ class TestMainAPIIntegration:
         output = output_buffer.getvalue()
         
         # Verify output contains expected sections
-        assert "РћС€РёР±РєР° Python: ValueError" in output
-        assert "Р§С‚Рѕ СЌС‚Рѕ РѕР·РЅР°С‡Р°РµС‚" in output
-        assert "РљР°Рє РёСЃРїСЂР°РІРёС‚СЊ" in output
-        assert "РџСЂРёРјРµСЂ" in output
+        assert "Ошибка Python: ValueError" in output
+        assert "Что это означает" in output
+        assert "Как исправить" in output
+        assert "Пример" in output
         assert "invalid literal for int()" in output
     
     def test_explain_error_with_different_formats(self):
@@ -49,15 +49,15 @@ class TestMainAPIIntegration:
         with redirect_stdout(output_buffer):
             explain_error(test_exception, format_type='console')
         console_output = output_buffer.getvalue()
-        assert "рџљЁ РћС€РёР±РєР° Python:" in console_output
+        assert "🚨 Ошибка Python:" in console_output
         
         # Test plain format
         output_buffer = io.StringIO()
         with redirect_stdout(output_buffer):
             explain_error(test_exception, format_type='plain')
         plain_output = output_buffer.getvalue()
-        assert "РћС€РёР±РєР° Python:" in plain_output
-        assert "рџљЁ" not in plain_output  # No emojis in plain format
+        assert "Ошибка Python:" in plain_output
+        assert "🚨" not in plain_output  # No emojis in plain format
         
         # Test JSON format
         output_buffer = io.StringIO()
@@ -98,7 +98,7 @@ class TestMainAPIIntegration:
             explain_error(test_exception, show_original_error=False)
         output = output_buffer.getvalue()
         # Should still contain explanation but format might differ
-        assert "Р§С‚Рѕ СЌС‚Рѕ РѕР·РЅР°С‡Р°РµС‚" in output
+        assert "Что это означает" in output
 
 
 class TestComponentIntegration:
@@ -127,10 +127,10 @@ class TestComponentIntegration:
         assert '"error_type": "KeyError"' in json_output
         
         # Console should have formatting
-        assert "рџљЁ" in console_output or "в•ђв•ђв•ђ" in console_output
+        assert "🚨" in console_output or "═══" in console_output
         
         # Plain should be simpler
-        assert "рџљЁ" not in plain_output
+        assert "🚨" not in plain_output
         
         # JSON should be valid JSON structure
         import json
@@ -170,7 +170,7 @@ class TestComponentIntegration:
         
         # Should get fallback explanation
         assert explanation.error_type == "CustomException"
-        assert "РџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР° С‚РёРїР° CustomException" in explanation.simple_explanation
+        assert "Произошла ошибка типа CustomException" in explanation.simple_explanation
         assert explanation.fix_tip is not None
         assert explanation.code_example is not None
 
