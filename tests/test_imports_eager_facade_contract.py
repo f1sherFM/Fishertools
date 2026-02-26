@@ -46,16 +46,23 @@ def test_import_facade_contract_groups_do_not_overlap():
 def test_contract_exports_exist_in_public_facade_all():
     fishertools = importlib.import_module("fishertools")
     public_exports = set(fishertools.__all__)
-    contract_exports = (
-        set(MINIMAL_EAGER_EXPORTS)
-        | set(LAZY_TOP_LEVEL_EXPORTS)
-        | set(SUBMODULE_FACADE_EXPORTS)
-    )
+    contract_exports = set(MINIMAL_EAGER_EXPORTS) | set(LAZY_TOP_LEVEL_EXPORTS)
 
     # ``__version__`` is a public module attribute but is not listed in __all__ today.
     contract_exports.discard("__version__")
 
     assert contract_exports.issubset(public_exports)
+
+
+def test_submodule_facade_exports_remain_accessible_but_not_required_in_all():
+    fishertools = importlib.import_module("fishertools")
+    public_exports = set(fishertools.__all__)
+
+    representative_submodules = {"safe", "errors", "network", "i18n", "utils"}
+    assert representative_submodules.issubset(SUBMODULE_FACADE_EXPORTS)
+    assert representative_submodules.isdisjoint(public_exports)
+    for name in representative_submodules:
+        assert hasattr(fishertools, name)
 
 
 def test_compatibility_plan_notes_are_present_for_issue_31():

@@ -122,9 +122,8 @@ SUBMODULE_FACADE_EXPORTS: frozenset[str] = frozenset(
 
 
 COMPATIBILITY_PLAN_NOTES: tuple[str, ...] = (
-    "Keep all current names in fishertools.__all__ during issue #31 (design-only step).",
+    "Issue #31 was a design-only step and did not change fishertools.__all__ at that time.",
     "Issue #32 may switch selected non-core top-level symbols to lazy dispatch without removing them.",
     "Submodule names remain stable facade exports for backward compatibility.",
-    "Any removal or __all__ contraction is out of scope and must go through API/public-contract issues.",
+    "Issue #36 contracts fishertools.__all__ to stable symbol exports while keeping submodule access via attributes.",
 )
-
