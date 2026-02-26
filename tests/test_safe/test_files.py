@@ -250,12 +250,23 @@ class TestProjectRoot:
             root2 = project_root(subdir)
             assert root1 == root2
     
-    def test_project_root_not_found(self):
+    def test_project_root_not_found(self, monkeypatch):
         """Test that RuntimeError is raised when project root cannot be found."""
         from fishertools.safe.files import project_root
-        
+
+        original_exists = Path.exists
+        marker_names = {"setup.py", "pyproject.toml", ".git", ".gitignore"}
+
+        def fake_exists(path_obj: Path) -> bool:
+            # Simulate a filesystem tree without project-root markers while
+            # keeping all other existence checks intact.
+            if path_obj.name in marker_names:
+                return False
+            return original_exists(path_obj)
+
+        monkeypatch.setattr(Path, "exists", fake_exists)
+
         with tempfile.TemporaryDirectory() as temp_dir:
-            # Create a temporary directory with no markers
             with pytest.raises(RuntimeError, match="Could not determine project root"):
                 project_root(temp_dir)
 
