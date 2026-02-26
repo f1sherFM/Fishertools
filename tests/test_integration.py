@@ -287,10 +287,11 @@ class TestBackwardCompatibility:
     
     def test_legacy_functions_accessible(self):
         """Test that legacy functions are accessible through fishertools."""
-        # Legacy modules should be in __all__
-        assert 'utils' in fishertools.__all__
-        assert 'decorators' in fishertools.__all__
-        assert 'helpers' in fishertools.__all__
+        # Legacy modules stay accessible for compatibility, but they are no longer
+        # exposed via ``__all__`` (star-import contract is now symbol-focused).
+        assert 'utils' not in fishertools.__all__
+        assert 'decorators' not in fishertools.__all__
+        assert 'helpers' not in fishertools.__all__
         
         # Should be accessible as attributes
         assert hasattr(fishertools, 'utils')

@@ -193,24 +193,6 @@ __all__ = [
     "generate_example", "show_best_practice", 
     "list_available_concepts", "list_available_topics",
     
-    # Legacy modules for backward compatibility
-    "utils", "decorators", "helpers",
-    
-    # New modules for advanced usage
-    "errors", "safe", "learn", "legacy", "input_utils",
-    
-    # Async modules for async/await support
-    "async_logger", "async_safe",
-    
-    # Enhancement modules (fishertools-enhancements)
-    "learning", "documentation", "examples", "config", "integration",
-    
-    # Phase 1 modules (v0.4.1+)
-    "visualization", "validation", "debug",
-    
-    # Enhancement modules for safe network operations and i18n (v0.4.7+)
-    "network", "i18n",
-    
     # Network operations - convenience functions
     "safe_request", "safe_download",
     "SafeHTTPClient", "SafeFileDownloader",
@@ -221,4 +203,3 @@ __all__ = [
     "ErrorTranslator", "LanguageDetector",
     "ErrorExplanation",
 ]
-
