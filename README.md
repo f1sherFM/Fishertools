@@ -49,6 +49,7 @@ except Exception as e:
 - [Import Facade Eager Design](docs/import-facade-eager-design.md)
 - [Import Lazy Top-Level Dispatch](docs/import-lazy-top-level-dispatch.md)
 - [Import `__all__` Policy](docs/import-all-policy.md)
+- [Import Lazy Error Handling](docs/import-lazy-error-handling.md)
 - [Examples](docs/examples.md)
 - [Limitations](docs/limitations.md)
 - [Contributing](docs/contributing.md)
@@ -173,6 +174,7 @@ python scripts/check_release_version_consistency.py --git-tag vX.Y.Z
 - Added minimal eager facade design contract for top-level imports (Epic `#22`, issue `#31`)
 - Added lazy top-level symbol dispatch for selected facade exports (Epic `#22`, issue `#32`)
 - Adopted compact `fishertools.__all__` policy (functions/classes only; module names excluded) (Epic `#24`, issue `#36`)
+- Added friendly lazy-import error diagnostics for submodules and selected top-level symbols (Epic `#24`, issue `#37`)
 
 ## License
 

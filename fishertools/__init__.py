@@ -143,16 +143,50 @@ _LAZY_SYMBOL_SOURCES = {
 }
 
 
+def _raise_lazy_import_error(
+    *,
+    requested_name: str,
+    module_name: str,
+    exc: ImportError,
+) -> None:
+    """Raise a user-facing ImportError for lazy import failures with context."""
+    package_module_name = f"{__name__}.{module_name}"
+
+    # Case 1: the lazy target module itself is missing from the package.
+    if isinstance(exc, ModuleNotFoundError) and exc.name == package_module_name:
+        raise ImportError(
+            f"Failed to load lazy fishertools module '{module_name}' for attribute "
+            f"'{requested_name}'. The submodule '{package_module_name}' is not available."
+        ) from exc
+
+    # Case 2: the lazy target exists, but an internal import failed (often optional dep).
+    missing_dependency = getattr(exc, "name", None)
+    dependency_hint = (
+        f" Missing dependency: '{missing_dependency}'." if missing_dependency else ""
+    )
+    raise ImportError(
+        f"Failed to load lazy fishertools attribute '{requested_name}' from "
+        f"'{package_module_name}'. This may be caused by a missing optional dependency "
+        f"or an import error inside the module.{dependency_hint}"
+    ) from exc
+
+
 def __getattr__(name: str):
     """Lazily import selected submodules/symbols while preserving the public API."""
     if name in _LAZY_SYMBOL_SOURCES and name not in MINIMAL_EAGER_EXPORTS:
         module_name, attr_name = _LAZY_SYMBOL_SOURCES[name]
-        module = importlib.import_module(f".{module_name}", __name__)
+        try:
+            module = importlib.import_module(f".{module_name}", __name__)
+        except ImportError as exc:
+            _raise_lazy_import_error(requested_name=name, module_name=module_name, exc=exc)
         value = getattr(module, attr_name)
         globals()[name] = value
         return value
     if name in _LAZY_SUBMODULES:
-        module = importlib.import_module(f".{name}", __name__)
+        try:
+            module = importlib.import_module(f".{name}", __name__)
+        except ImportError as exc:
+            _raise_lazy_import_error(requested_name=name, module_name=name, exc=exc)
         globals()[name] = module
         return module
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
