@@ -2,14 +2,18 @@
 Pytest configuration and fixtures for fishertools tests.
 """
 
-pytest_plugins = ("pytest_asyncio",)
-
 import os
 import tempfile
+import importlib.util
 from pathlib import Path
 
 import pytest
 from hypothesis import settings, Verbosity
+
+
+pytest_plugins = []
+if importlib.util.find_spec("pytest_asyncio") is not None:
+    pytest_plugins.append("pytest_asyncio")
 
 
 # Configure hypothesis for property-based testing
