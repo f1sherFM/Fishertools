@@ -2,6 +2,8 @@
 Pytest configuration and fixtures for fishertools tests.
 """
 
+pytest_plugins = ("pytest_asyncio",)
+
 import os
 import tempfile
 from pathlib import Path
