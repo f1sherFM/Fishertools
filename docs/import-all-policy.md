@@ -57,3 +57,11 @@ What does not change:
 - `#37` will improve lazy import error messages for module access paths
 - `#38` will add regression tests for `import *` and optional dependency scenarios using this policy
 
+## `import *` Contract (Current)
+
+`from fishertools import *` is supported as a compatibility path with a compact symbol-only export set:
+
+- includes stable function/class facade exports
+- excludes module names and submodule handles
+
+This behavior is covered by regression tests in `tests/test_imports_star_and_optional_deps.py`.

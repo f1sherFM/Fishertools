@@ -175,6 +175,7 @@ python scripts/check_release_version_consistency.py --git-tag vX.Y.Z
 - Added lazy top-level symbol dispatch for selected facade exports (Epic `#22`, issue `#32`)
 - Adopted compact `fishertools.__all__` policy (functions/classes only; module names excluded) (Epic `#24`, issue `#36`)
 - Added friendly lazy-import error diagnostics for submodules and selected top-level symbols (Epic `#24`, issue `#37`)
+- Added `import *` and optional-deps regression tests for import UX (Epic `#24`, issue `#38`)
 
 ## License
 
