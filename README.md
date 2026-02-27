@@ -6,12 +6,12 @@ Fishertools helps you handle common failures, validate inputs, work with files s
 
 ## Version
 
-Current version: `0.5.5.1`
+Current version: `0.6.0`
 
 ## Install
 
 ```bash
-pip install fishertools==0.5.5.1
+pip install fishertools==0.6.0
 ```
 
 For local development:
@@ -50,6 +50,9 @@ except Exception as e:
 - [Import Lazy Top-Level Dispatch](docs/import-lazy-top-level-dispatch.md)
 - [Import `__all__` Policy](docs/import-all-policy.md)
 - [Import Lazy Error Handling](docs/import-lazy-error-handling.md)
+- [Public API Stability Levels](docs/public-api-stability-levels.md)
+- [Public API Contract Manifest](docs/public-api-contract-manifest.md)
+- [Versioning Policy](docs/versioning-policy.md)
 - [Examples](docs/examples.md)
 - [Limitations](docs/limitations.md)
 - [Contributing](docs/contributing.md)
@@ -162,9 +165,9 @@ python scripts/check_release_version_consistency.py
 python scripts/check_release_version_consistency.py --git-tag vX.Y.Z
 ```
 
-## Release 0.5.5.1
+## Release 0.6.0
 
-- Package version set to `0.5.5.1`
+- Package version set to `0.6.0`
 - README rewritten for clarity
 - Version references aligned across code and tests
 - Import baseline doc and diagnostic smoke test for `import fishertools` added (Epic `#22`, issue `#30`)
@@ -176,6 +179,9 @@ python scripts/check_release_version_consistency.py --git-tag vX.Y.Z
 - Adopted compact `fishertools.__all__` policy (functions/classes only; module names excluded) (Epic `#24`, issue `#36`)
 - Added friendly lazy-import error diagnostics for submodules and selected top-level symbols (Epic `#24`, issue `#37`)
 - Added `import *` and optional-deps regression tests for import UX (Epic `#24`, issue `#38`)
+- Added public API stability levels and contract manifest backed by compatibility tests (Epic `#23`, issues `#33/#34/#35`)
+- Updated get_version_info to avoid stale historical enhancement keys and added regression checks (Epic `#25`, issues `#39/#40`)
+- Added formal hotfix/version synchronization policy docs (Epic `#25`, issue `#41`)
 
 ## License
 
