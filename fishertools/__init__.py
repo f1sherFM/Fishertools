@@ -47,13 +47,12 @@ def get_version_info() -> dict:
             "algorithm_visualization",  # New in v0.4.7
         ],
         "enhancements": {
-            "v0.4.7": [
-                "Safe HTTP request operations with timeout handling",
-                "Safe file download with progress tracking",
-                "Enhanced visualization with colors and export",
-                "Algorithm visualization (sorting, searching)",
-                "Multilingual error explanations (Russian, English)",
-                "Configuration management system",
+            # Version-key is always aligned with current package version to avoid
+            # stale historical hardcoding in runtime metadata.
+            f"v{__version__}": [
+                "Hardened import facade contract (compact __all__, lazy symbol dispatch, friendly lazy-import errors)",
+                "Release guardrails for encoding/version consistency in CI",
+                "Public API stability levels and contract manifest coverage",
             ]
         }
     }

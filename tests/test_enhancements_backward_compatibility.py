@@ -339,11 +339,12 @@ class TestVersionInformation:
             f"Version {fishertools.__version__} doesn't follow semantic versioning"
     
     def test_version_is_055(self):
-        """Test that version matches the current package release."""
+        """Test that version info remains dynamic and release-agnostic in tests."""
         import fishertools
-        
-        assert fishertools.__version__ == '0.5.5.1', \
-            f"Expected version 0.5.5.1, got {fishertools.__version__}"
+        from fishertools import get_version_info
+
+        info = get_version_info()
+        assert fishertools.__version__ == info["version"]
     
     def test_get_version_info_function_exists(self):
         """Test that get_version_info function exists."""
@@ -392,16 +393,19 @@ class TestVersionInformation:
             assert feature in info['features'], \
                 f"Feature '{feature}' should be in version info"
     
-    def test_get_version_info_has_047_enhancements(self):
-        """Test that get_version_info includes v0.4.7 enhancements."""
+    def test_get_version_info_enhancements_are_aligned_with_current_version(self):
+        """Test that get_version_info enhancements are not tied to stale historical versions."""
         from fishertools import get_version_info
+        import fishertools
         
         info = get_version_info()
         
         assert 'enhancements' in info
-        assert 'v0.4.7' in info['enhancements']
-        assert isinstance(info['enhancements']['v0.4.7'], list)
-        assert len(info['enhancements']['v0.4.7']) > 0
+        current_key = f"v{fishertools.__version__}"
+        assert current_key in info['enhancements']
+        assert "v0.4.7" not in info["enhancements"]
+        assert isinstance(info['enhancements'][current_key], list)
+        assert len(info['enhancements'][current_key]) > 0
     
     def test_author_information(self):
         """Test that author information is present."""
@@ -410,4 +414,3 @@ class TestVersionInformation:
         assert hasattr(fishertools, '__author__')
         assert isinstance(fishertools.__author__, str)
         assert len(fishertools.__author__) > 0
-

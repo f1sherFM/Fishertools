@@ -123,3 +123,20 @@ Policy:
 - `README.md` "Current version" must match `fishertools/_version.py`
 - `README.md` install command version must match `fishertools/_version.py`
 - release tag may be `vX.Y.Z` or `X.Y.Z`, but normalized value must match package version
+
+## Hotfix Versioning Policy (Issue #41)
+
+For hotfix releases use a consistent strategy per release line:
+
+- `X.Y.Z.postN` for packaging/metadata-only post-releases
+- `X.Y.Z.N` for code-bearing hotfix continuation (project-supported format)
+
+Always synchronize:
+
+- release tag
+- `fishertools/_version.py::__version__`
+- README current/install versions
+
+Detailed policy and examples:
+
+- `docs/versioning-policy.md`
