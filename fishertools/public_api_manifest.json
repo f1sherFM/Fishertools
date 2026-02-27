@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "contract_version": "2026-02-27",
+  "stability_levels": {
+    "stable": {
+      "description": "Core top-level API with strongest compatibility guarantees.",
+      "compatibility": "No removals or breaking signature changes without explicit deprecation cycle."
+    },
+    "advanced": {
+      "description": "Extended top-level convenience API, often lazy-loaded.",
+      "compatibility": "Backward compatible by default; import timing may change with lazy/eager refactors."
+    },
+    "legacy": {
+      "description": "Legacy module exports preserved for backward compatibility.",
+      "compatibility": "Accessible for compatibility but excluded from star-import contract."
+    },
+    "module_only": {
+      "description": "Submodule-oriented access points on the facade.",
+      "compatibility": "Importable via explicit module access; not part of __all__ symbol contract."
+    }
+  },
+  "exports": {
+    "stable": [
+      "api_mode",
+      "explain_error",
+      "explain_last_error",
+      "get_api_mode",
+      "get_explanation",
+      "get_version_info",
+      "safe_divide",
+      "safe_file_exists",
+      "safe_get",
+      "safe_open",
+      "safe_read_file",
+      "safe_write_file",
+      "set_api_mode",
+      "ConfigurationError",
+      "ExceptionExplanation",
+      "ExplanationError",
+      "FishertoolsError",
+      "FormattingError",
+      "PatternError",
+      "SafeUtilityError"
+    ],
+    "advanced": [
+      "AlgorithmVisualizer",
+      "DownloadResponse",
+      "EnhancedVisualizer",
+      "ErrorExplanation",
+      "ErrorTranslator",
+      "LanguageDetector",
+      "NetworkResponse",
+      "SafeFileDownloader",
+      "SafeHTTPClient",
+      "VisualizationConfig",
+      "VisualizationResult",
+      "ask_choice",
+      "ask_float",
+      "ask_float_range",
+      "ask_int",
+      "ask_int_range",
+      "ask_regex",
+      "ask_str",
+      "ask_yes_no",
+      "detect_language",
+      "find_file",
+      "generate_example",
+      "list_available_concepts",
+      "list_available_topics",
+      "project_root",
+      "safe_download",
+      "safe_get_file_size",
+      "safe_list_files",
+      "safe_max",
+      "safe_min",
+      "safe_read_json",
+      "safe_read_toml",
+      "safe_read_yaml",
+      "safe_request",
+      "safe_sum",
+      "safe_write_json",
+      "safe_write_toml",
+      "safe_write_yaml",
+      "show_best_practice",
+      "translate_error",
+      "visualize"
+    ],
+    "legacy": [
+      "decorators",
+      "helpers",
+      "utils"
+    ],
+    "module_only": [
+      "async_logger",
+      "async_safe",
+      "config",
+      "debug",
+      "documentation",
+      "errors",
+      "examples",
+      "i18n",
+      "input_utils",
+      "integration",
+      "learn",
+      "learning",
+      "legacy",
+      "network",
+      "safe",
+      "validation",
+      "visualization"
+    ]
+  },
+  "rules": {
+    "new_top_level_export": [
+      "Decide stability level first (stable/advanced/legacy/module_only).",
+      "Update this manifest in the same change as code export changes.",
+      "Add or update contract/regression tests validating access and import UX.",
+      "Document compatibility implications in README and docs when behavior changes."
+    ],
+    "star_import_contract": "Only stable and advanced groups are eligible for __all__ membership."
+  }
+}

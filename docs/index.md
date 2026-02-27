@@ -11,7 +11,10 @@ Welcome to the Fishertools documentation! This guide will help you get started w
 - [Examples](examples.md) - Practical examples from basic to advanced usage
 - [Limitations](limitations.md) - Known limitations and performance considerations
 - [API Guarantees](api-guarantees.md) - Stability guarantees, fallback matrix, migration notes
+- [Public API Stability Levels](public-api-stability-levels.md) - Contract levels for top-level exports
+- [Public API Contract Manifest](public-api-contract-manifest.md) - Machine-readable source of truth for public exports
 - [Release Flow](release-flow.md) - Versioning and release source of truth
+- [Versioning Policy](versioning-policy.md) - Hotfix format rules and release artifact sync policy
 - [Contributing](contributing.md) - How to contribute to the project
 
 ## Quick Access Table

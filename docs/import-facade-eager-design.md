@@ -72,7 +72,7 @@ import fishertools.errors
 
 ## Compatibility Plan
 
-- Issue `#31` is design-only: no contraction of `fishertools.__all__`
+- Issue `#31` was design-only at the time; `fishertools.__all__` contraction is now governed by Epic `#24` policy docs
 - Issue `#32` may switch selected non-core top-level symbols to lazy dispatch
 - Submodule facade names remain backward-compatible exports
 - Any removal/reclassification with behavior change requires explicit API-compat communication
@@ -85,4 +85,3 @@ import fishertools.errors
 - eager/lazy/submodule groups do not overlap
 - contract names remain represented in `fishertools.__all__` (except `__version__`, which is public but not listed today)
 - compatibility notes are present for follow-up implementation work
-
