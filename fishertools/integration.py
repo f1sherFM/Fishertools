@@ -408,33 +408,23 @@ class FishertoolsIntegration:
         return status
 
 
-# Global integration instance for easy access
-_integration_instance: Optional[FishertoolsIntegration] = None
-
-
 def get_integration(config_path: Optional[str] = None, project_name: str = "fishertools") -> FishertoolsIntegration:
     """
-    Get or create the global fishertools integration instance.
+    Create a new integration instance.
     
     Args:
         config_path: Optional path to configuration file
         project_name: Name of the project
         
     Returns:
-        FishertoolsIntegration: The global integration instance
+        FishertoolsIntegration: A freshly created integration instance
     """
-    global _integration_instance
-    
-    if _integration_instance is None:
-        _integration_instance = FishertoolsIntegration(config_path, project_name)
-    
-    return _integration_instance
+    return FishertoolsIntegration(config_path, project_name)
 
 
 def reset_integration() -> None:
-    """Reset the global integration instance."""
-    global _integration_instance
-    _integration_instance = None
+    """Backward-compatible no-op retained for older callers."""
+    return None
 
 
 # Convenience functions for common operations

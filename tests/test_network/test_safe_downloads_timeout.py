@@ -195,4 +195,32 @@ class TestSafeDownloaderTimeoutBehavior:
         # Zero timeout may cause actual timeout or validation error
         assert response.error is not None
 
+    @patch('fishertools.network.safe_downloads.SafeHTTPClient')
+    def test_safe_download_rejects_payload_over_limit(self, mock_http_client_class):
+        """Known content-length above the configured cap should fail fast."""
+        mock_client = Mock()
+        mock_http_client_class.return_value = mock_client
+
+        mock_head_response = Mock()
+        mock_head_response.success = True
+        mock_head_response.headers = {'content-length': '4096'}
+
+        mock_client.safe_request.return_value = mock_head_response
+        mock_client.default_timeout = 10.0
+        mock_client.session = Mock()
+
+        downloader = SafeFileDownloader(max_download_bytes=1024)
+        downloader.http_client = mock_client
+
+        with patch('os.path.exists', return_value=False), patch('os.makedirs'):
+            response = downloader.safe_download(
+                url='https://example.com/file.txt',
+                local_path='test_file.txt',
+                timeout=10.0,
+            )
+
+        assert response.success is False
+        assert 'exceeds the configured limit' in response.error
+        mock_client.session.get.assert_not_called()
+
 

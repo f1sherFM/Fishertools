@@ -370,20 +370,20 @@ class TestSystemStatus:
         assert 'current_config' in status
         assert 'total_examples' in status
     
-    def test_global_integration_instance(self):
-        """Test global integration instance management."""
-        # Get global instance
-        global_integration = get_integration(project_name="global_test")
-        assert global_integration is not None
-        
-        # Should return same instance on subsequent calls
-        same_integration = get_integration()
-        assert same_integration is global_integration
-        
-        # Reset and get new instance
+    def test_get_integration_returns_fresh_instance(self):
+        """Test integration factory does not leak state across calls."""
+        first_integration = get_integration(project_name="global_test")
+        second_integration = get_integration()
+
+        assert first_integration is not None
+        assert second_integration is not None
+        assert second_integration is not first_integration
+        assert first_integration.project_name == "global_test"
+        assert second_integration.project_name == "fishertools"
+
         reset_integration()
         new_integration = get_integration(project_name="new_test")
-        assert new_integration is not global_integration
+        assert new_integration is not first_integration
     
     def test_convenience_functions(self):
         """Test convenience functions work properly."""

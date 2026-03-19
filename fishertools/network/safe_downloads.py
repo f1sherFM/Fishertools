@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import shutil
+import tempfile
 import time
 from typing import Any, Callable
 
@@ -40,17 +41,21 @@ class SafeFileDownloader:
         ...     print(f"Downloaded to: {response.file_path}")
     """
 
-    def __init__(self, chunk_size: int = 8192):
+    def __init__(self, chunk_size: int = 8192, max_download_bytes: int | None = 100 * 1024 * 1024):
         """
         Initialize the file downloader
 
         Args:
             chunk_size: Size of chunks to download at a time (in bytes)
+            max_download_bytes: Hard cap for downloaded bytes. None disables the cap.
         """
         if chunk_size <= 0:
             raise ValueError("Chunk size must be positive")
+        if max_download_bytes is not None and max_download_bytes <= 0:
+            raise ValueError("Maximum download size must be positive or None")
 
         self.chunk_size = chunk_size
+        self.max_download_bytes = max_download_bytes
         self.http_client = SafeHTTPClient()
 
     def safe_download(
@@ -207,6 +212,17 @@ class SafeFileDownloader:
             if content_length:
                 try:
                     total_bytes = int(content_length)
+                    if (
+                        self.max_download_bytes is not None
+                        and total_bytes > self.max_download_bytes
+                    ):
+                        return DownloadResponse(
+                            success=False,
+                            error=(
+                                f"Download too large: {total_bytes} bytes exceeds "
+                                f"the configured limit of {self.max_download_bytes} bytes"
+                            ),
+                        )
                     # Check disk space
                     if not self._check_disk_space(total_bytes, local_path):
                         return DownloadResponse(
@@ -222,6 +238,7 @@ class SafeFileDownloader:
         start_time = time.time()
 
         response = None
+        temp_path: str | None = None
         try:
             # Stream the download
             response = self.http_client.session.get(
@@ -229,11 +246,20 @@ class SafeFileDownloader:
             )
             response.raise_for_status()
 
+            temp_path = self._create_temp_path(local_path)
             with open(temp_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=self.chunk_size):
                     if chunk:  # Filter out keep-alive chunks
                         f.write(chunk)
                         bytes_downloaded += len(chunk)
+
+                        if (
+                            self.max_download_bytes is not None
+                            and bytes_downloaded > self.max_download_bytes
+                        ):
+                            raise OSError(
+                                "Download exceeded the configured size limit"
+                            )
 
                         # Call progress callback if provided
                         if progress_callback:
@@ -257,10 +283,8 @@ class SafeFileDownloader:
                             )
                             progress_callback(progress)
 
-            # Move temp file to final location
-            if os.path.exists(local_path):
-                os.remove(local_path)
-            shutil.move(temp_path, local_path)
+            # Atomically replace the target once the full payload is on disk.
+            os.replace(temp_path, local_path)
 
             return DownloadResponse(
                 success=True, file_path=local_path, bytes_downloaded=bytes_downloaded
@@ -268,7 +292,8 @@ class SafeFileDownloader:
 
         except Exception as e:
             # Clean up partial download
-            self._cleanup_partial_file(temp_path)
+            if temp_path is not None:
+                self._cleanup_partial_file(temp_path)
 
             # Convert exception to error response
             error_msg = self._format_download_error(e)
@@ -370,6 +395,18 @@ class SafeFileDownloader:
         except Exception:
             # Silently ignore cleanup errors
             pass
+
+    def _create_temp_path(self, local_path: str) -> str:
+        """Create a unique temp file path alongside the final destination."""
+        target_dir = os.path.dirname(local_path) or "."
+        target_name = os.path.basename(local_path)
+        fd, temp_path = tempfile.mkstemp(
+            prefix=f"{target_name}.",
+            suffix=".download",
+            dir=target_dir,
+        )
+        os.close(fd)
+        return temp_path
 
     def _format_download_error(self, exception: Exception) -> str:
         """

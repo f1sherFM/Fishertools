@@ -7,6 +7,7 @@ with proper timeout handling, error conversion, and structured responses.
 
 from __future__ import annotations
 
+import logging
 from typing import Any, Dict, Optional
 import requests
 from requests.exceptions import (
@@ -19,6 +20,8 @@ from requests.exceptions import (
 )
 
 from .models import NetworkRequest, NetworkResponse
+
+logger = logging.getLogger(__name__)
 
 
 class SafeHTTPClient:
@@ -136,7 +139,14 @@ class SafeHTTPClient:
                 headers=dict(response.headers)
             )
         
+        except RequestException as e:
+            return self._handle_request_errors(e)
         except Exception as e:
+            logger.exception(
+                "Unexpected safe_request failure: method=%s url=%s",
+                method,
+                url,
+            )
             return self._handle_request_errors(e)
     
     def _validate_request_params(

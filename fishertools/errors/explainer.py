@@ -15,6 +15,7 @@ Enhancements (v0.5.2+):
 """
 
 from typing import Any, Dict, Optional, cast
+import logging
 import sys
 
 from .exceptions import (
@@ -27,6 +28,8 @@ from .explanation_builder import ExplanationBuilder
 from .models import ErrorExplanation, ExceptionExplanation, ExplainerConfig
 from .normalization import normalize_context, normalize_language
 from .pattern_loader import PatternLoader, PatternMatcher
+
+logger = logging.getLogger(__name__)
 
 
 def _validate_context(context: Any) -> Dict[str, Any]:
@@ -286,6 +289,9 @@ def get_explanation(
             detector = LanguageDetector()
             actual_language = detector.detect_system_language()
         except Exception:
+            logger.exception(
+                "Automatic language detection failed; falling back to Russian"
+            )
             # Fall back to Russian if i18n module not available
             actual_language = "ru"
 
@@ -600,6 +606,10 @@ def explain_error(
             return None
 
     except Exception as e:
+        logger.exception(
+            "Unexpected explain_error failure for exception_type=%s",
+            type(exception).__name__,
+        )
         # Ultimate fallback for any unexpected errors
         error_msg = f"Неожиданная ошибка в fishertools: {e}\n"
         error_msg += f"Оригинальная ошибка: {type(exception).__name__}: {exception}\n"

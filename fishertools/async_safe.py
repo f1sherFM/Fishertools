@@ -18,9 +18,12 @@ Example:
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 from pathlib import Path
 from typing import Optional, List, Any
+
+logger = logging.getLogger(__name__)
 
 
 async def async_safe_read_file(
@@ -45,8 +48,9 @@ async def async_safe_read_file(
             print(f"Config: {content}")
     """
     try:
-        return _read_file_sync(file_path, encoding)
+        return await asyncio.to_thread(_read_file_sync, file_path, encoding)
     except Exception:
+        logger.exception("async_safe_read_file failed for path=%s", file_path)
         return default
 
 
@@ -72,9 +76,10 @@ async def async_safe_write_file(
             print("File written successfully")
     """
     try:
-        _write_file_sync(file_path, content, encoding)
+        await asyncio.to_thread(_write_file_sync, file_path, content, encoding)
         return True
     except Exception:
+        logger.exception("async_safe_write_file failed for path=%s", file_path)
         return False
 
 
@@ -93,8 +98,9 @@ async def async_safe_file_exists(file_path: str) -> bool:
             content = await async_safe_read_file("data.txt")
     """
     try:
-        return os.path.exists(file_path)
+        return await asyncio.to_thread(os.path.exists, file_path)
     except Exception:
+        logger.exception("async_safe_file_exists failed for path=%s", file_path)
         return False
 
 
@@ -114,8 +120,9 @@ async def async_safe_get_file_size(file_path: str, default: int = 0) -> int:
         print(f"File size: {size} bytes")
     """
     try:
-        return os.path.getsize(file_path)
+        return await asyncio.to_thread(os.path.getsize, file_path)
     except Exception:
+        logger.exception("async_safe_get_file_size failed for path=%s", file_path)
         return default
 
 
@@ -139,8 +146,13 @@ async def async_safe_list_files(
             print(file)
     """
     try:
-        return _list_files_sync(directory, pattern)
+        return await asyncio.to_thread(_list_files_sync, directory, pattern)
     except Exception:
+        logger.exception(
+            "async_safe_list_files failed for directory=%s pattern=%s",
+            directory,
+            pattern,
+        )
         return []
 
 

@@ -41,3 +41,22 @@ def test_settings_save_logs_warning_when_write_fails(caplog, tmp_path):
 
     assert saved is False
     assert "Settings save fallback activated" in caplog.text
+
+
+def test_settings_save_uses_atomic_replace(monkeypatch, tmp_path):
+    settings = SettingsManager(config_dir=str(tmp_path))
+    calls = []
+
+    real_replace = __import__("os").replace
+
+    def tracked_replace(src, dst):
+        calls.append((src, dst))
+        return real_replace(src, dst)
+
+    monkeypatch.setattr("fishertools.config.settings.os.replace", tracked_replace)
+
+    saved = settings.save_settings()
+
+    assert saved is True
+    assert len(calls) == 1
+    assert calls[0][1] == settings.config_file

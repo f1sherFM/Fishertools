@@ -8,6 +8,7 @@ configuration with file persistence and validation.
 import json
 import os
 import logging
+import tempfile
 from pathlib import Path
 from typing import Optional, Dict, Any, Union
 from dataclasses import asdict
@@ -86,7 +87,7 @@ class SettingsManager:
             
         except Exception as e:
             # On error, use defaults
-            logger.warning(
+            logger.exception(
                 "Settings load fallback activated: path=%s error=%s",
                 self.config_file,
                 e,
@@ -122,14 +123,29 @@ class SettingsManager:
             # Ensure directory exists
             self._ensure_config_dir()
             
-            # Write to file
-            with open(self.config_file, 'w', encoding='utf-8') as f:
-                json.dump(config_data, f, indent=2, ensure_ascii=False)
-            
+            temp_file_path: Optional[str] = None
+            try:
+                with tempfile.NamedTemporaryFile(
+                    "w",
+                    encoding="utf-8",
+                    dir=self.config_dir,
+                    prefix=f"{self.config_file.stem}.",
+                    suffix=".tmp",
+                    delete=False,
+                ) as f:
+                    temp_file_path = f.name
+                    json.dump(config_data, f, indent=2, ensure_ascii=False)
+                    f.flush()
+
+                os.replace(temp_file_path, self.config_file)
+            finally:
+                if temp_file_path and os.path.exists(temp_file_path):
+                    os.unlink(temp_file_path)
+
             return True
             
         except Exception as e:
-            logger.warning(
+            logger.exception(
                 "Settings save fallback activated: path=%s error=%s",
                 self.config_file,
                 e,
